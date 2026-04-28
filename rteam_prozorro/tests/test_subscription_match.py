@@ -122,8 +122,13 @@ class TestSubscriptionMatch(TransactionCase):
 
     def test_keyword_in_items_only(self):
         sub = self._make_subscription()
-        self.Keyword.create({"subscription_id": sub.id, "keyword": "верстат", "field": "items"})
+        # keyword "Лазер" is present in items[0].description but also appears in title
+        self.Keyword.create({"subscription_id": sub.id, "keyword": "Лазер", "field": "items"})
         self.assertTrue(sub._matches(make_tender()))
+        # keyword "верстат" is in title but NOT in items -> field=items must miss it
+        self.Keyword.search([("subscription_id", "=", sub.id)]).unlink()
+        self.Keyword.create({"subscription_id": sub.id, "keyword": "верстат", "field": "items"})
+        self.assertFalse(sub._matches(make_tender()))
 
     def test_method_type_filter(self):
         sub = self._make_subscription(procurement_method_types="belowThreshold")
