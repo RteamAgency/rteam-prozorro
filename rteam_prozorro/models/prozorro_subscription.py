@@ -155,3 +155,12 @@ class ProzorroSubscription(models.Model):
             "view_mode": "list,form",
             "domain": [("matched_subscription_ids", "in", self.id)],
         }
+
+    def action_sync_now(self):
+        """Run the global feed sync and return its UI notification.
+
+        The sync evaluates EVERY active subscription, not just `self`. Exposed
+        on the subscription form as a convenience so operators can trigger
+        a fresh pull while they are tuning rules.
+        """
+        return self.env["prozorro.tender"].action_sync_now()

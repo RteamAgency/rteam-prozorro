@@ -2,6 +2,15 @@
 
 All notable changes to `rteam_prozorro` are documented here.
 
+## [19.0.2.1.0] - 2026-04-28
+
+### Added
+- "Sync now" header button on Tender list and on Subscription form. Triggers `_cron_sync_feed()` synchronously and renders a toast with `pulled / matched` counts (or the error / no-active-subscription case). Restricted to Prozorro Manager so non-managers don't accidentally hammer the public API.
+- `_cron_sync_feed()` now returns a result dict (`pulled`, `matched`, `error`, `skipped`) so the manual UI path can render meaningful feedback. Cron callers ignore the return value.
+
+### Why
+Hourly cron is right for production but a 60-minute wait kills the dev / tuning loop. Operators tuning rules need a one-click way to trigger a fresh pull.
+
 ## [19.0.2.0.1] - 2026-04-28
 
 ### Fixed

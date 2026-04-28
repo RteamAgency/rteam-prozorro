@@ -44,6 +44,10 @@
         <field name="arch" type="xml">
             <form string="Subscription">
                 <header>
+                    <button name="action_sync_now" string="Sync now" type="object"
+                            class="btn-primary"
+                            invisible="not id"
+                            groups="rteam_prozorro.group_prozorro_manager"/>
                     <button name="action_view_matched_tenders" string="Matched tenders" type="object" class="btn-secondary"/>
                 </header>
                 <sheet>

@@ -4,7 +4,7 @@ import urllib.error
 import urllib.request
 from datetime import datetime, timedelta
 
-from odoo import api, fields, models
+from odoo import _, api, fields, models
 
 _logger = logging.getLogger(__name__)
 
@@ -147,6 +147,7 @@ class ProzorroTender(models.Model):
 
     @api.model
     def _cron_sync_feed(self):
+        """Cron entry point. Always returns a result dict for the manual UI button to render."""
         Cursor = self.env["prozorro.sync.cursor"]
         Subscription = self.env["prozorro.subscription"]
         cursor = Cursor._get_singleton("main")
@@ -154,7 +155,7 @@ class ProzorroTender(models.Model):
         subs = Subscription._get_active_subscriptions()
         if not subs:
             _logger.info("Prozorro: no active subscriptions, skipping sync")
-            return
+            return {"pulled": 0, "matched": 0, "error": None, "skipped": True}
 
         base_url = self._get_api_base_url()
         max_pages = self._get_pages_per_run()
@@ -195,10 +196,49 @@ class ProzorroTender(models.Model):
         except (urllib.error.HTTPError, urllib.error.URLError, ValueError) as e:
             _logger.exception("Prozorro: sync failed")
             cursor._record_error(str(e))
-            return
+            return {"pulled": pulled, "matched": matched, "error": str(e), "skipped": False}
 
         cursor._record_success(pulled, matched)
         _logger.info("Prozorro: sync done. pulled=%d, matched=%d", pulled, matched)
+        return {"pulled": pulled, "matched": matched, "error": None, "skipped": False}
+
+    def action_sync_now(self):
+        """Trigger a feed sync from the UI and surface the result as a notification."""
+        result = self.sudo()._cron_sync_feed() or {}
+        if result.get("error"):
+            return {
+                "type": "ir.actions.client",
+                "tag": "display_notification",
+                "params": {
+                    "title": _("Prozorro sync failed"),
+                    "message": result["error"],
+                    "type": "danger",
+                    "sticky": True,
+                },
+            }
+        if result.get("skipped"):
+            return {
+                "type": "ir.actions.client",
+                "tag": "display_notification",
+                "params": {
+                    "title": _("Prozorro sync skipped"),
+                    "message": _("No active subscriptions to evaluate against."),
+                    "type": "warning",
+                    "sticky": False,
+                },
+            }
+        return {
+            "type": "ir.actions.client",
+            "tag": "display_notification",
+            "params": {
+                "title": _("Prozorro sync done"),
+                "message": _("Pulled %(pulled)s tenders, %(matched)s matched.")
+                % {"pulled": result.get("pulled", 0), "matched": result.get("matched", 0)},
+                "type": "success",
+                "sticky": False,
+                "next": {"type": "ir.actions.client", "tag": "soft_reload"},
+            },
+        }
 
     # ------------------------------------------------------------------ Upsert
 

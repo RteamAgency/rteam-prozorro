@@ -36,6 +36,12 @@
         <field name="model">prozorro.tender</field>
         <field name="arch" type="xml">
             <list string="Tenders" decoration-success="status=='complete'" decoration-info="status=='active.tendering'" decoration-warning="status=='active.qualification'" decoration-muted="status=='cancelled'">
+                <header>
+                    <button name="action_sync_now" type="object" string="Sync now"
+                            class="btn-primary"
+                            display="always"
+                            groups="rteam_prozorro.group_prozorro_manager"/>
+                </header>
                 <field name="name"/>
                 <field name="title"/>
                 <field name="status"/>
