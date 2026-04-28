@@ -46,7 +46,6 @@ msgstr "Перегляд тендерів, керування власними �
 msgid "Configure API URL, all subscriptions, all tenders."
 msgstr "Налаштування API URL, всі підписки, всі тендери."
 
-#. -------------------- Menus --------------------
 
 #. module: rteam_prozorro
 #: model:ir.ui.menu,name:rteam_prozorro.menu_prozorro_tenders
@@ -73,6 +72,7 @@ msgstr "Коди CPV / ДК021"
 #. module: rteam_prozorro
 #: model:ir.ui.menu,name:rteam_prozorro.menu_prozorro_procurement_method
 #: model:ir.actions.act_window,name:rteam_prozorro.action_prozorro_procurement_method
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_subscription__procurement_method_ids
 msgid "Procurement methods"
 msgstr "Методи закупівлі"
 
@@ -85,6 +85,7 @@ msgstr "Статуси тендерів"
 #. module: rteam_prozorro
 #: model:ir.ui.menu,name:rteam_prozorro.menu_prozorro_region
 #: model:ir.actions.act_window,name:rteam_prozorro.action_prozorro_region
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_subscription__region_ids
 msgid "Regions"
 msgstr "Регіони"
 
@@ -98,8 +99,6 @@ msgstr "Налаштування"
 #: model:ir.actions.act_window,name:rteam_prozorro.action_prozorro_subscription
 msgid "Prozorro Subscriptions"
 msgstr "Підписки Prozorro"
-
-#. -------------------- Models --------------------
 
 #. module: rteam_prozorro
 #: model:ir.model,name:rteam_prozorro.model_prozorro_tender
@@ -135,8 +134,6 @@ msgstr "Регіон"
 #: model:ir.model,name:rteam_prozorro.model_prozorro_sync_cursor
 msgid "Prozorro Feed Sync Cursor"
 msgstr "Курсор синхронізації стрічки"
-
-#. -------------------- Subscription fields --------------------
 
 #. module: rteam_prozorro
 #: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_subscription__name
@@ -179,11 +176,6 @@ msgid "Keywords"
 msgstr "Ключові слова"
 
 #. module: rteam_prozorro
-#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_subscription__region_ids
-msgid "Regions"
-msgstr "Регіони"
-
-#. module: rteam_prozorro
 #: model:ir.model.fields,help:rteam_prozorro.field_prozorro_subscription__region_ids
 msgid "Match tenders whose procuring entity is registered in any of these regions. Empty = any region."
 msgstr "Збіг тендерів, замовник яких зареєстрований у будь-якому з обраних регіонів. Порожньо = будь-який регіон."
@@ -214,11 +206,6 @@ msgid "Match tenders in any of these lifecycle statuses. Empty = any."
 msgstr "Збіг тендерів у будь-якому з обраних статусів. Порожньо = будь-який."
 
 #. module: rteam_prozorro
-#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_subscription__procurement_method_ids
-msgid "Procurement methods"
-msgstr "Методи закупівлі"
-
-#. module: rteam_prozorro
 #: model:ir.model.fields,help:rteam_prozorro.field_prozorro_subscription__procurement_method_ids
 msgid "Match tenders run with any of these procurement procedures. Empty = any procedure."
 msgstr "Збіг тендерів, що проводяться за будь-якою з цих процедур. Порожньо = будь-яка процедура."
@@ -247,8 +234,6 @@ msgstr "Теги ліда"
 #: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_subscription__stage_id
 msgid "Lead stage"
 msgstr "Етап ліда"
-
-#. -------------------- Tender fields --------------------
 
 #. module: rteam_prozorro
 #: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_tender__name
@@ -342,33 +327,37 @@ msgstr "Підписки зі збігом"
 
 #. module: rteam_prozorro
 #: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_tender__lead_id
+#: code:addons/rteam_prozorro/models/prozorro_tender.py:0
 msgid "CRM Lead"
 msgstr "CRM-лід"
 
-#. -------------------- Tender status selection --------------------
-
 #. module: rteam_prozorro
 #: model:ir.model.fields.selection,name:rteam_prozorro.selection__prozorro_tender__status__draft
+#: model:prozorro.tender.status,name:rteam_prozorro.status_draft
 msgid "Draft"
 msgstr "Чернетка"
 
 #. module: rteam_prozorro
 #: model:ir.model.fields.selection,name:rteam_prozorro.selection__prozorro_tender__status__active_enquiries
+#: model:prozorro.tender.status,name:rteam_prozorro.status_active_enquiries
 msgid "Enquiries"
 msgstr "Період уточнень"
 
 #. module: rteam_prozorro
 #: model:ir.model.fields.selection,name:rteam_prozorro.selection__prozorro_tender__status__active_tendering
+#: model:prozorro.tender.status,name:rteam_prozorro.status_active_tendering
 msgid "Tendering"
 msgstr "Прийом пропозицій"
 
 #. module: rteam_prozorro
 #: model:ir.model.fields.selection,name:rteam_prozorro.selection__prozorro_tender__status__active_auction
+#: model:prozorro.tender.status,name:rteam_prozorro.status_active_auction
 msgid "Auction"
 msgstr "Аукціон"
 
 #. module: rteam_prozorro
 #: model:ir.model.fields.selection,name:rteam_prozorro.selection__prozorro_tender__status__active_qualification
+#: model:prozorro.tender.status,name:rteam_prozorro.status_active_qualification
 msgid "Qualification"
 msgstr "Кваліфікація"
 
@@ -379,20 +368,21 @@ msgstr "Визначено переможця"
 
 #. module: rteam_prozorro
 #: model:ir.model.fields.selection,name:rteam_prozorro.selection__prozorro_tender__status__complete
+#: model:prozorro.tender.status,name:rteam_prozorro.status_complete
 msgid "Complete"
 msgstr "Завершено"
 
 #. module: rteam_prozorro
 #: model:ir.model.fields.selection,name:rteam_prozorro.selection__prozorro_tender__status__cancelled
+#: model:prozorro.tender.status,name:rteam_prozorro.status_cancelled
 msgid "Cancelled"
 msgstr "Скасовано"
 
 #. module: rteam_prozorro
 #: model:ir.model.fields.selection,name:rteam_prozorro.selection__prozorro_tender__status__unsuccessful
+#: model:prozorro.tender.status,name:rteam_prozorro.status_unsuccessful
 msgid "Unsuccessful"
 msgstr "Не відбулися"
-
-#. -------------------- Buttons / actions --------------------
 
 #. module: rteam_prozorro
 #: code:addons/rteam_prozorro/models/prozorro_subscription.py:0
@@ -426,8 +416,6 @@ msgstr "Відкрити лід"
 #: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_tender_view_form
 msgid "Open in Prozorro"
 msgstr "Відкрити в Prozorro"
-
-#. -------------------- Notifications --------------------
 
 #. module: rteam_prozorro
 #: code:addons/rteam_prozorro/models/prozorro_tender.py:0
@@ -481,11 +469,6 @@ msgstr "Нові ліди"
 
 #. module: rteam_prozorro
 #: code:addons/rteam_prozorro/models/prozorro_tender.py:0
-msgid "CRM Lead"
-msgstr "CRM-лід"
-
-#. module: rteam_prozorro
-#: code:addons/rteam_prozorro/models/prozorro_tender.py:0
 msgid "Sync cron missing"
 msgstr "Cron-задача відсутня"
 
@@ -493,8 +476,6 @@ msgstr "Cron-задача відсутня"
 #: code:addons/rteam_prozorro/models/prozorro_tender.py:0
 msgid "Reinstall the module to restore the scheduled action."
 msgstr "Перевстановіть модуль, щоб відновити заплановану дію."
-
-#. -------------------- Test wizard --------------------
 
 #. module: rteam_prozorro
 #: model:ir.model,name:rteam_prozorro.model_prozorro_subscription_test
@@ -587,8 +568,6 @@ msgstr "Тендер збігається з підпискою"
 msgid "Does NOT match the subscription"
 msgstr "Тендер НЕ збігається з підпискою"
 
-#. -------------------- Procurement methods (master data) --------------------
-
 #. module: rteam_prozorro
 #: model:prozorro.procurement.method,name:rteam_prozorro.method_above_threshold_ua
 msgid "Open bidding"
@@ -664,23 +643,6 @@ msgstr "Цінові пропозиції"
 msgid "Direct contract reporting"
 msgstr "Звіт про прямий договір"
 
-#. -------------------- Tender statuses (master data) --------------------
-
-#. module: rteam_prozorro
-#: model:prozorro.tender.status,name:rteam_prozorro.status_draft
-msgid "Draft"
-msgstr "Чернетка"
-
-#. module: rteam_prozorro
-#: model:prozorro.tender.status,name:rteam_prozorro.status_active_enquiries
-msgid "Enquiries"
-msgstr "Період уточнень"
-
-#. module: rteam_prozorro
-#: model:prozorro.tender.status,name:rteam_prozorro.status_active_tendering
-msgid "Tendering"
-msgstr "Прийом пропозицій"
-
 #. module: rteam_prozorro
 #: model:prozorro.tender.status,name:rteam_prozorro.status_active_pre_qualification
 msgid "Pre-qualification"
@@ -692,36 +654,9 @@ msgid "Pre-qualification stand-still"
 msgstr "Прекваліфікація: блокувальний період"
 
 #. module: rteam_prozorro
-#: model:prozorro.tender.status,name:rteam_prozorro.status_active_auction
-msgid "Auction"
-msgstr "Аукціон"
-
-#. module: rteam_prozorro
-#: model:prozorro.tender.status,name:rteam_prozorro.status_active_qualification
-msgid "Qualification"
-msgstr "Кваліфікація"
-
-#. module: rteam_prozorro
 #: model:prozorro.tender.status,name:rteam_prozorro.status_active_awarded
 msgid "Awarded"
 msgstr "Визначено переможця"
-
-#. module: rteam_prozorro
-#: model:prozorro.tender.status,name:rteam_prozorro.status_complete
-msgid "Complete"
-msgstr "Завершено"
-
-#. module: rteam_prozorro
-#: model:prozorro.tender.status,name:rteam_prozorro.status_cancelled
-msgid "Cancelled"
-msgstr "Скасовано"
-
-#. module: rteam_prozorro
-#: model:prozorro.tender.status,name:rteam_prozorro.status_unsuccessful
-msgid "Unsuccessful"
-msgstr "Не відбулися"
-
-#. -------------------- Regions (master data) --------------------
 
 #. module: rteam_prozorro
 #: model:prozorro.region,name:rteam_prozorro.region_vinnytsia
@@ -857,8 +792,6 @@ msgstr "АР Крим"
 #: model:prozorro.region,name:rteam_prozorro.region_sevastopol
 msgid "Sevastopol"
 msgstr "м. Севастополь"
-
-#. -------------------- CPV codes (selected high-traffic items) --------------------
 
 #. module: rteam_prozorro
 #: model:prozorro.classification,name:rteam_prozorro.cpv_30000000_9

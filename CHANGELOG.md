@@ -2,6 +2,11 @@
 
 All notable changes to `rteam_prozorro` are documented here.
 
+## [19.0.5.2.2] - 2026-04-28
+
+### Fixed
+- Installing Ukrainian (or Russian) language in Settings crashed with `AttributeError: 'NoneType' object has no attribute 'groups'` while loading `i18n/uk.po`. Odoo 19's `tools/translate.py` parses each entry's `#.` auto-comment with `re.match(r"(module[s]?): (\w+)", entry.comment)` and naively calls `.groups()` without a None check. Our `.po` files contained decorative section-header comments like `#. -------------------- Menus --------------------` which polib glued onto the next msgid's comment block, breaking the regex. Stripped all such headers; also deduplicated 11 msgids that pointed at multiple Odoo metadata sources (e.g. `Regions` referenced from both the menu/action and the subscription field) by merging their `#:` reference lines per gettext convention. 178 unique entries, polib `check_for_duplicates=True` clean.
+
 ## [19.0.5.2.1] - 2026-04-28
 
 ### Fixed
