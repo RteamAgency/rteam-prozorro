@@ -2,6 +2,11 @@
 
 All notable changes to `rteam_prozorro` are documented here.
 
+## [19.0.5.3.1] - 2026-04-29
+
+### Fixed
+- Build 31524779 went red with `External ID not found in the system: rteam_prozorro.action_prozorro_sync_now_global` while parsing `prozorro_sync_cursor_views.xml`. The form view's header button references `%(action_prozorro_sync_now_global)d`, but the matching `<record>` was defined LATER in the same file. Forward references via `%()d` only resolve against `ir_model_data` rows that already exist, so definition must precede usage **even within a single XML file** (the manifest-ordering rule we already had for cross-file references). Reordered: server action first, form view second, act_window last. Fresh installs roll back without this fix; in-place upgrades hide it.
+
 ## [19.0.5.3.0] - 2026-04-29
 
 ### Added

@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
+    <!-- Server action defined first because the form view's header button
+         references it via %(action_prozorro_sync_now_global)d. Forward
+         references via %()d only resolve to records already in
+         ir_model_data, so definition MUST precede usage even within a
+         single XML file. Fresh installs roll back otherwise. -->
+    <record id="action_prozorro_sync_now_global" model="ir.actions.server">
+        <field name="name">Prozorro: Sync now (global)</field>
+        <field name="model_id" ref="model_prozorro_sync_cursor"/>
+        <field name="state">code</field>
+        <field name="code">action = env["prozorro.tender"].action_sync_now()</field>
+    </record>
+
     <record id="prozorro_sync_cursor_view_form" model="ir.ui.view">
         <field name="name">prozorro.sync.cursor.form</field>
         <field name="model">prozorro.sync.cursor</field>
@@ -57,15 +69,6 @@
         <field name="view_id" ref="prozorro_sync_cursor_view_form"/>
         <field name="target">current</field>
         <field name="context">{}</field>
-    </record>
-
-    <!-- Server action shorthand so the form-header button can call
-         action_sync_now without instantiating prozorro.tender directly. -->
-    <record id="action_prozorro_sync_now_global" model="ir.actions.server">
-        <field name="name">Prozorro: Sync now (global)</field>
-        <field name="model_id" ref="model_prozorro_sync_cursor"/>
-        <field name="state">code</field>
-        <field name="code">action = env["prozorro.tender"].action_sync_now()</field>
     </record>
 
 </odoo>
