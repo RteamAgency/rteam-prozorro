@@ -2,6 +2,11 @@
 
 All notable changes to `rteam_prozorro` are documented here.
 
+## [19.0.5.2.0] - 2026-04-28
+
+### Changed
+- Module icon iterated from "flower only" to **hybrid: 6-petal flower + Rteam P+ monogram in the centre disc**. The flower silhouette keeps the visual hook ("this is the Prozorro thing") while the P+ inside the teal disc anchors it to the Rteam product family alongside Health Check and AI Assistant. Same trademark-safe palette (violet -> teal gradient), no copy of Prozorro's pink/violet mark.
+
 ## [19.0.5.1.0] - 2026-04-28
 
 ### Changed
