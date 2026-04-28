@@ -1,6 +1,6 @@
 {
     "name": "Prozorro Connector",
-    "version": "19.0.2.2.0",
+    "version": "19.0.2.3.0",
     "category": "Sales/CRM",
     "summary": "Monitor Ukrainian Prozorro tenders, auto-create matching CRM opportunities",
     "description": """

@@ -2,6 +2,15 @@
 
 All notable changes to `rteam_prozorro` are documented here.
 
+## [19.0.2.3.0] - 2026-04-28
+
+### Added
+- Medical equipment CPV / DK021 subset seeded under `33000000-0`. 15 new codes covering the level-2 branches operators most commonly subscribe to:
+  - `33100000-1` Medical equipment (parent of all medical specifics)
+  - `33110000-4` Imaging, `33120000-7` Recording systems, `33130000-0` Dental, `33140000-3` Consumables (+ `33141000-0` non-chemical consumables), `33150000-6` Radiotherapy / physical therapy, `33160000-9` Operating techniques (+ `33169000-2` Surgical instruments), `33170000-2` Anaesthesia and resuscitation, `33180000-5` Functional support, `33190000-8` Miscellaneous medical devices
+  - `33600000-6` Pharmaceutical products, `33700000-7` Personal care, `33900000-9` Post-mortem and mortuary
+- Driven by ARAMIS-style use case: a hospital-supplier subscription needs to be reachable through CPV dropdown rather than typing free-form codes. Full DK021 dictionary load is still pending and remains a tracked follow-up.
+
 ## [19.0.2.2.0] - 2026-04-28
 
 ### Fixed

@@ -37,6 +37,96 @@
         <field name="name">Medical equipments, pharmaceuticals and personal care products</field>
         <field name="scheme">ДК021</field>
     </record>
+    <record id="cpv_33100000_1" model="prozorro.classification">
+        <field name="code">33100000-1</field>
+        <field name="name">Medical equipment</field>
+        <field name="scheme">ДК021</field>
+        <field name="parent_id" ref="cpv_33000000_0"/>
+    </record>
+    <record id="cpv_33110000_4" model="prozorro.classification">
+        <field name="code">33110000-4</field>
+        <field name="name">Imaging equipment for medical, dental and veterinary use</field>
+        <field name="scheme">ДК021</field>
+        <field name="parent_id" ref="cpv_33100000_1"/>
+    </record>
+    <record id="cpv_33120000_7" model="prozorro.classification">
+        <field name="code">33120000-7</field>
+        <field name="name">Recording systems and exploratory devices</field>
+        <field name="scheme">ДК021</field>
+        <field name="parent_id" ref="cpv_33100000_1"/>
+    </record>
+    <record id="cpv_33130000_0" model="prozorro.classification">
+        <field name="code">33130000-0</field>
+        <field name="name">Dental and subspecialty instruments and devices</field>
+        <field name="scheme">ДК021</field>
+        <field name="parent_id" ref="cpv_33100000_1"/>
+    </record>
+    <record id="cpv_33140000_3" model="prozorro.classification">
+        <field name="code">33140000-3</field>
+        <field name="name">Medical consumables</field>
+        <field name="scheme">ДК021</field>
+        <field name="parent_id" ref="cpv_33100000_1"/>
+    </record>
+    <record id="cpv_33141000_0" model="prozorro.classification">
+        <field name="code">33141000-0</field>
+        <field name="name">Medical non-chemical consumables and haematological consumables</field>
+        <field name="scheme">ДК021</field>
+        <field name="parent_id" ref="cpv_33140000_3"/>
+    </record>
+    <record id="cpv_33150000_6" model="prozorro.classification">
+        <field name="code">33150000-6</field>
+        <field name="name">Devices for radiotherapy, mechanotherapy, electrotherapy and physical therapy</field>
+        <field name="scheme">ДК021</field>
+        <field name="parent_id" ref="cpv_33100000_1"/>
+    </record>
+    <record id="cpv_33160000_9" model="prozorro.classification">
+        <field name="code">33160000-9</field>
+        <field name="name">Operating techniques</field>
+        <field name="scheme">ДК021</field>
+        <field name="parent_id" ref="cpv_33100000_1"/>
+    </record>
+    <record id="cpv_33169000_2" model="prozorro.classification">
+        <field name="code">33169000-2</field>
+        <field name="name">Surgical instruments</field>
+        <field name="scheme">ДК021</field>
+        <field name="parent_id" ref="cpv_33160000_9"/>
+    </record>
+    <record id="cpv_33170000_2" model="prozorro.classification">
+        <field name="code">33170000-2</field>
+        <field name="name">Anaesthesia and resuscitation</field>
+        <field name="scheme">ДК021</field>
+        <field name="parent_id" ref="cpv_33100000_1"/>
+    </record>
+    <record id="cpv_33180000_5" model="prozorro.classification">
+        <field name="code">33180000-5</field>
+        <field name="name">Functional support</field>
+        <field name="scheme">ДК021</field>
+        <field name="parent_id" ref="cpv_33100000_1"/>
+    </record>
+    <record id="cpv_33190000_8" model="prozorro.classification">
+        <field name="code">33190000-8</field>
+        <field name="name">Miscellaneous medical devices and products</field>
+        <field name="scheme">ДК021</field>
+        <field name="parent_id" ref="cpv_33100000_1"/>
+    </record>
+    <record id="cpv_33600000_6" model="prozorro.classification">
+        <field name="code">33600000-6</field>
+        <field name="name">Pharmaceutical products</field>
+        <field name="scheme">ДК021</field>
+        <field name="parent_id" ref="cpv_33000000_0"/>
+    </record>
+    <record id="cpv_33700000_7" model="prozorro.classification">
+        <field name="code">33700000-7</field>
+        <field name="name">Personal care products</field>
+        <field name="scheme">ДК021</field>
+        <field name="parent_id" ref="cpv_33000000_0"/>
+    </record>
+    <record id="cpv_33900000_9" model="prozorro.classification">
+        <field name="code">33900000-9</field>
+        <field name="name">Post-mortem and mortuary equipment and supplies</field>
+        <field name="scheme">ДК021</field>
+        <field name="parent_id" ref="cpv_33000000_0"/>
+    </record>
 
     <record id="cpv_34000000_7" model="prozorro.classification">
         <field name="code">34000000-7</field>
