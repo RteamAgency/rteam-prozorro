@@ -208,11 +208,50 @@ class ProzorroTender(models.Model):
         except (urllib.error.HTTPError, urllib.error.URLError, ValueError) as e:
             _logger.exception("Prozorro: sync failed")
             cursor._record_error(str(e))
+            self._notify_sync_result(pulled, matched, error=str(e))
             return {"pulled": pulled, "matched": matched, "error": str(e), "skipped": False}
 
         cursor._record_success(pulled, matched)
         _logger.info("Prozorro: sync done. pulled=%d, matched=%d", pulled, matched)
+        self._notify_sync_result(pulled, matched, error=None)
         return {"pulled": pulled, "matched": matched, "error": None, "skipped": False}
+
+    @api.model
+    def _notify_sync_result(self, pulled, matched, error=None):
+        """Push a real-time toast to Prozorro managers when a sync run finishes.
+
+        Sent over `bus.bus` so users get feedback even when the sync ran in
+        the background (cron / `_trigger()` path) instead of inline. Skipped
+        when nothing useful happened (no error, no new matches): hourly crons
+        finding 0 matches would otherwise spam the UI.
+        """
+        if error is None and not matched:
+            return
+        group = self.env.ref(
+            "rteam_prozorro.group_prozorro_manager", raise_if_not_found=False
+        )
+        if not group or not group.user_ids:
+            return
+        if error:
+            title = _("Prozorro sync failed")
+            message = error[:200]
+            ntype = "danger"
+            sticky = True
+        else:
+            title = _("Prozorro sync done")
+            message = _(
+                "Pulled %(pulled)s tenders, %(matched)s matched. "
+                "Refresh the Tenders list to see new results."
+            ) % {"pulled": pulled, "matched": matched}
+            ntype = "success"
+            sticky = False
+        Bus = self.env["bus.bus"].sudo()
+        for partner in group.user_ids.partner_id:
+            Bus._sendone(
+                partner,
+                "simple_notification",
+                {"title": title, "message": message, "type": ntype, "sticky": sticky},
+            )
 
     def action_sync_now(self):
         """Schedule the feed-sync cron for immediate background execution.

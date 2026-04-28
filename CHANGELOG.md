@@ -2,6 +2,14 @@
 
 All notable changes to `rteam_prozorro` are documented here.
 
+## [19.0.3.1.0] - 2026-04-28
+
+### Added
+- Real-time bus.bus toast pushed to all Prozorro Managers when an async sync finishes. Replaces the diagnostic feedback we lost when `action_sync_now` was made non-blocking. Toast renders "Pulled X, Y matched. Refresh Tenders to see new results." on success; failures appear as sticky `danger`-style toasts with the error head. 0-match runs stay silent so the hourly cron doesn't spam every UI session.
+
+### Why
+After flipping Sync now to async, operators had no way to know when the background fetch completed without tailing the server log. Toast closes the loop.
+
 ## [19.0.3.0.0] - 2026-04-28
 
 Two intertwined fixes for the lead-spam and sync-hang problems surfaced during ARAMIS dry runs.
