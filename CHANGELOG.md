@@ -2,6 +2,14 @@
 
 All notable changes to `rteam_prozorro` are documented here.
 
+## [19.0.5.1.0] - 2026-04-28
+
+### Changed
+- Replaced the placeholder 1px navy `icon.png` with a proper 512x512 module icon. Six-petal flower silhouette over the Rteam signature gradient (violet `#7C5CFC` -> teal `#00D4AA`) with a teal centre disc. Trademark-safe by design: the petal proportions and palette differ from Prozorro's official pink/violet mark, so the icon reads as "tender / Prozorro connector by Rteam" without imitating the government brand.
+
+### Why
+The Apps grid was rendering an empty navy square because `icon.png` was a 258-byte solid-colour stub. Reusing the actual Prozorro logo would be a trademark violation and apps.odoo.com policy reject. The flower-inspired Rteam-palette icon keeps the visual hook ("oh, this is the Prozorro thing") without the legal risk.
+
 ## [19.0.5.0.0] - 2026-04-28
 
 ### Added
