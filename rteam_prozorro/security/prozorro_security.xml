@@ -6,17 +6,25 @@
         <field name="sequence">21</field>
     </record>
 
+    <record id="res_groups_privilege_prozorro" model="res.groups.privilege">
+        <field name="name">Prozorro</field>
+        <field name="sequence">21</field>
+        <field name="category_id" ref="module_category_prozorro"/>
+    </record>
+
     <record id="group_prozorro_user" model="res.groups">
         <field name="name">Prozorro: User</field>
-        <field name="category_id" ref="module_category_prozorro"/>
+        <field name="sequence">10</field>
+        <field name="privilege_id" ref="res_groups_privilege_prozorro"/>
         <field name="comment">Read tenders, manage own subscriptions.</field>
     </record>
 
     <record id="group_prozorro_manager" model="res.groups">
         <field name="name">Prozorro: Manager</field>
-        <field name="category_id" ref="module_category_prozorro"/>
+        <field name="sequence">20</field>
+        <field name="privilege_id" ref="res_groups_privilege_prozorro"/>
         <field name="implied_ids" eval="[(4, ref('group_prozorro_user'))]"/>
-        <field name="users" eval="[(4, ref('base.user_admin'))]"/>
+        <field name="user_ids" eval="[(4, ref('base.user_admin'))]"/>
         <field name="comment">Configure API URL, all subscriptions, all tenders.</field>
     </record>
 
