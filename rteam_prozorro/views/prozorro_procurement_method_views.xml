@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="prozorro_procurement_method_view_list" model="ir.ui.view">
+        <field name="name">prozorro.procurement.method.list</field>
+        <field name="model">prozorro.procurement.method</field>
+        <field name="arch" type="xml">
+            <list string="Procurement methods" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="code"/>
+                <field name="name"/>
+                <field name="description" optional="hide"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="prozorro_procurement_method_view_form" model="ir.ui.view">
+        <field name="name">prozorro.procurement.method.form</field>
+        <field name="model">prozorro.procurement.method</field>
+        <field name="arch" type="xml">
+            <form string="Procurement method">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="code"/>
+                            <field name="sequence"/>
+                            <field name="active"/>
+                        </group>
+                        <group>
+                            <field name="name"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="description"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_prozorro_procurement_method" model="ir.actions.act_window">
+        <field name="name">Procurement methods</field>
+        <field name="res_model">prozorro.procurement.method</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No procurement methods loaded yet.</p>
+            <p>Standard Prozorro procurement procedure types are seeded at install. Edit translations here.</p>
+        </field>
+    </record>
+</odoo>

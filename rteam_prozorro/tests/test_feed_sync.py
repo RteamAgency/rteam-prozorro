@@ -55,13 +55,14 @@ class TestFeedSync(TransactionCase):
             self.Tender._cron_sync_feed()  # must not raise
 
     def test_sync_creates_matched_tender_and_lead(self):
+        status_active_tendering = self.env.ref("rteam_prozorro.status_active_tendering")
         sub = self.Subscription.create(
             {
                 "name": "Lasers test",
                 "active": True,
                 "create_lead": True,
                 "classification_ids": [(6, 0, [self.cpv_lasers.id])],
-                "status_filter": "active.tendering",
+                "status_ids": [(6, 0, [status_active_tendering.id])],
             }
         )
         self.Subscription.search([("id", "!=", sub.id)]).write({"active": False})
@@ -107,11 +108,12 @@ class TestFeedSync(TransactionCase):
         self.assertFalse(self.Tender.search([("uuid", "=", "no-match-1")]))
 
     def test_sync_advances_cursor(self):
+        status_active_tendering = self.env.ref("rteam_prozorro.status_active_tendering")
         sub = self.Subscription.create(
             {
                 "name": "any tendering",
                 "active": True,
-                "status_filter": "active.tendering",
+                "status_ids": [(6, 0, [status_active_tendering.id])],
             }
         )
         self.Subscription.search([("id", "!=", sub.id)]).write({"active": False})

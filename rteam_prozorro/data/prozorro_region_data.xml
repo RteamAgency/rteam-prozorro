@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!--
+        Ukrainian regions (24 oblasts + Kyiv + Crimea + Sevastopol).
+        match_tokens are lowercase substrings matched against the Prozorro
+        feed value `procuringEntity.address.region`. Tokens cover the most
+        common spelling forms without being so loose that they cross-match
+        (e.g. "івано-франківська" excludes simple "франківська" matches).
+    -->
+
+    <record id="region_vinnytsia" model="prozorro.region">
+        <field name="code">vinnytsia</field>
+        <field name="name">Vinnytsia oblast</field>
+        <field name="match_tokens">вінницька</field>
+        <field name="sequence">10</field>
+    </record>
+
+    <record id="region_volyn" model="prozorro.region">
+        <field name="code">volyn</field>
+        <field name="name">Volyn oblast</field>
+        <field name="match_tokens">волинська</field>
+        <field name="sequence">20</field>
+    </record>
+
+    <record id="region_dnipropetrovsk" model="prozorro.region">
+        <field name="code">dnipropetrovsk</field>
+        <field name="name">Dnipropetrovsk oblast</field>
+        <field name="match_tokens">дніпропетровська</field>
+        <field name="sequence">30</field>
+    </record>
+
+    <record id="region_donetsk" model="prozorro.region">
+        <field name="code">donetsk</field>
+        <field name="name">Donetsk oblast</field>
+        <field name="match_tokens">донецька</field>
+        <field name="sequence">40</field>
+    </record>
+
+    <record id="region_zhytomyr" model="prozorro.region">
+        <field name="code">zhytomyr</field>
+        <field name="name">Zhytomyr oblast</field>
+        <field name="match_tokens">житомирська</field>
+        <field name="sequence">50</field>
+    </record>
+
+    <record id="region_zakarpattia" model="prozorro.region">
+        <field name="code">zakarpattia</field>
+        <field name="name">Zakarpattia oblast</field>
+        <field name="match_tokens">закарпатська</field>
+        <field name="sequence">60</field>
+    </record>
+
+    <record id="region_zaporizhzhia" model="prozorro.region">
+        <field name="code">zaporizhzhia</field>
+        <field name="name">Zaporizhzhia oblast</field>
+        <field name="match_tokens">запорізька</field>
+        <field name="sequence">70</field>
+    </record>
+
+    <record id="region_ivano_frankivsk" model="prozorro.region">
+        <field name="code">ivano_frankivsk</field>
+        <field name="name">Ivano-Frankivsk oblast</field>
+        <field name="match_tokens">івано-франківська</field>
+        <field name="sequence">80</field>
+    </record>
+
+    <record id="region_kyiv_oblast" model="prozorro.region">
+        <field name="code">kyiv_oblast</field>
+        <field name="name">Kyiv oblast</field>
+        <field name="match_tokens">київська</field>
+        <field name="sequence">90</field>
+    </record>
+
+    <record id="region_kirovohrad" model="prozorro.region">
+        <field name="code">kirovohrad</field>
+        <field name="name">Kirovohrad oblast</field>
+        <field name="match_tokens">кіровоградська</field>
+        <field name="sequence">100</field>
+    </record>
+
+    <record id="region_luhansk" model="prozorro.region">
+        <field name="code">luhansk</field>
+        <field name="name">Luhansk oblast</field>
+        <field name="match_tokens">луганська</field>
+        <field name="sequence">110</field>
+    </record>
+
+    <record id="region_lviv" model="prozorro.region">
+        <field name="code">lviv</field>
+        <field name="name">Lviv oblast</field>
+        <field name="match_tokens">львівська</field>
+        <field name="sequence">120</field>
+    </record>
+
+    <record id="region_mykolaiv" model="prozorro.region">
+        <field name="code">mykolaiv</field>
+        <field name="name">Mykolaiv oblast</field>
+        <field name="match_tokens">миколаївська</field>
+        <field name="sequence">130</field>
+    </record>
+
+    <record id="region_odesa" model="prozorro.region">
+        <field name="code">odesa</field>
+        <field name="name">Odesa oblast</field>
+        <field name="match_tokens">одеська</field>
+        <field name="sequence">140</field>
+    </record>
+
+    <record id="region_poltava" model="prozorro.region">
+        <field name="code">poltava</field>
+        <field name="name">Poltava oblast</field>
+        <field name="match_tokens">полтавська</field>
+        <field name="sequence">150</field>
+    </record>
+
+    <record id="region_rivne" model="prozorro.region">
+        <field name="code">rivne</field>
+        <field name="name">Rivne oblast</field>
+        <field name="match_tokens">рівненська</field>
+        <field name="sequence">160</field>
+    </record>
+
+    <record id="region_sumy" model="prozorro.region">
+        <field name="code">sumy</field>
+        <field name="name">Sumy oblast</field>
+        <field name="match_tokens">сумська</field>
+        <field name="sequence">170</field>
+    </record>
+
+    <record id="region_ternopil" model="prozorro.region">
+        <field name="code">ternopil</field>
+        <field name="name">Ternopil oblast</field>
+        <field name="match_tokens">тернопільська</field>
+        <field name="sequence">180</field>
+    </record>
+
+    <record id="region_kharkiv" model="prozorro.region">
+        <field name="code">kharkiv</field>
+        <field name="name">Kharkiv oblast</field>
+        <field name="match_tokens">харківська</field>
+        <field name="sequence">190</field>
+    </record>
+
+    <record id="region_kherson" model="prozorro.region">
+        <field name="code">kherson</field>
+        <field name="name">Kherson oblast</field>
+        <field name="match_tokens">херсонська</field>
+        <field name="sequence">200</field>
+    </record>
+
+    <record id="region_khmelnytskyi" model="prozorro.region">
+        <field name="code">khmelnytskyi</field>
+        <field name="name">Khmelnytskyi oblast</field>
+        <field name="match_tokens">хмельницька</field>
+        <field name="sequence">210</field>
+    </record>
+
+    <record id="region_cherkasy" model="prozorro.region">
+        <field name="code">cherkasy</field>
+        <field name="name">Cherkasy oblast</field>
+        <field name="match_tokens">черкаська</field>
+        <field name="sequence">220</field>
+    </record>
+
+    <record id="region_chernivtsi" model="prozorro.region">
+        <field name="code">chernivtsi</field>
+        <field name="name">Chernivtsi oblast</field>
+        <field name="match_tokens">чернівецька</field>
+        <field name="sequence">230</field>
+    </record>
+
+    <record id="region_chernihiv" model="prozorro.region">
+        <field name="code">chernihiv</field>
+        <field name="name">Chernihiv oblast</field>
+        <field name="match_tokens">чернігівська</field>
+        <field name="sequence">240</field>
+    </record>
+
+    <record id="region_kyiv_city" model="prozorro.region">
+        <field name="code">kyiv_city</field>
+        <field name="name">Kyiv (city)</field>
+        <field name="match_tokens">м. київ,київ</field>
+        <field name="sequence">250</field>
+    </record>
+
+    <record id="region_crimea" model="prozorro.region">
+        <field name="code">crimea</field>
+        <field name="name">AR of Crimea</field>
+        <field name="match_tokens">крим</field>
+        <field name="sequence">260</field>
+    </record>
+
+    <record id="region_sevastopol" model="prozorro.region">
+        <field name="code">sevastopol</field>
+        <field name="name">Sevastopol</field>
+        <field name="match_tokens">севастополь</field>
+        <field name="sequence">270</field>
+    </record>
+</odoo>

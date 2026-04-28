@@ -2,6 +2,31 @@
 
 All notable changes to `rteam_prozorro` are documented here.
 
+## [19.0.2.0.0] - 2026-04-28
+
+UX refactor: replace API-code Char filters on `prozorro.subscription` with translatable Many2many master data so operators see human-readable names instead of `aboveThresholdUA,belowThreshold` in the form.
+
+### Added
+- `prozorro.procurement.method` master data model with 15 standard Prozorro procedure types (open bidding, simplified, ESCO, framework agreement, negotiation, etc.).
+- `prozorro.tender.status` master data model with 11 lifecycle statuses (draft, tendering, qualification, awarded, complete, cancelled, ...).
+- `prozorro.region` master data model with 27 Ukrainian regions (24 oblasts + Kyiv city + AR Crimea + Sevastopol). Each record carries `match_tokens` for case-insensitive substring match against the feed's free-form region string.
+- Configuration menus for the three new master-data models under `Prozorro > Configuration`.
+- ACL entries: read for users, full CRUD for managers (parity with `prozorro.classification`).
+
+### Changed
+- `prozorro.subscription.procurement_method_types` (Char) -> `procurement_method_ids` (M2M).
+- `prozorro.subscription.status_filter` (Char, default `active.tendering`) -> `status_ids` (M2M, default = the `active.tendering` master record).
+- `prozorro.subscription.region_filter` (Char) -> `region_ids` (M2M).
+- Subscription form view shows three `many2many_tags` widgets with `no_create` instead of free-form text inputs.
+- All test fixtures updated to use M2M references via `env.ref`.
+
+### Why
+The previous Char fields exposed raw Prozorro API codes to operators, who had no way to know that `aboveThresholdUA` means "Open bidding". Switching to master data makes the names translatable (UA + RU) via standard Odoo i18n, enables typo-free dropdowns, and surfaces the canonical procedure list as configuration the customer can audit.
+
+### Notes
+- This is a breaking schema change but the module has not been published to apps.odoo.com yet, so no migration script is provided. Re-installing or upgrading on Odoo.sh test19 will drop the obsolete columns.
+- Translation files (`i18n/uk.po`, `i18n/ru.po`) are intentionally postponed to the next minor release once the data models stabilise.
+
 ## [19.0.1.0.0] - 2026-04-28
 
 Initial scaffold (L0 free tier).

@@ -30,6 +30,24 @@
               action="action_prozorro_classification"
               sequence="10"/>
 
+    <menuitem id="menu_prozorro_procurement_method"
+              name="Procurement methods"
+              parent="menu_prozorro_config"
+              action="action_prozorro_procurement_method"
+              sequence="20"/>
+
+    <menuitem id="menu_prozorro_tender_status"
+              name="Tender statuses"
+              parent="menu_prozorro_config"
+              action="action_prozorro_tender_status"
+              sequence="30"/>
+
+    <menuitem id="menu_prozorro_region"
+              name="Regions"
+              parent="menu_prozorro_config"
+              action="action_prozorro_region"
+              sequence="40"/>
+
     <menuitem id="menu_prozorro_settings"
               name="Settings"
               parent="menu_prozorro_config"

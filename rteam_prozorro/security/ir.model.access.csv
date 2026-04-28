@@ -1,6 +1,12 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_prozorro_classification_user,prozorro.classification.user,model_prozorro_classification,group_prozorro_user,1,0,0,0
 access_prozorro_classification_manager,prozorro.classification.manager,model_prozorro_classification,group_prozorro_manager,1,1,1,1
+access_prozorro_procurement_method_user,prozorro.procurement.method.user,model_prozorro_procurement_method,group_prozorro_user,1,0,0,0
+access_prozorro_procurement_method_manager,prozorro.procurement.method.manager,model_prozorro_procurement_method,group_prozorro_manager,1,1,1,1
+access_prozorro_tender_status_user,prozorro.tender.status.user,model_prozorro_tender_status,group_prozorro_user,1,0,0,0
+access_prozorro_tender_status_manager,prozorro.tender.status.manager,model_prozorro_tender_status,group_prozorro_manager,1,1,1,1
+access_prozorro_region_user,prozorro.region.user,model_prozorro_region,group_prozorro_user,1,0,0,0
+access_prozorro_region_manager,prozorro.region.manager,model_prozorro_region,group_prozorro_manager,1,1,1,1
 access_prozorro_subscription_user,prozorro.subscription.user,model_prozorro_subscription,group_prozorro_user,1,1,1,1
 access_prozorro_subscription_manager,prozorro.subscription.manager,model_prozorro_subscription,group_prozorro_manager,1,1,1,1
 access_prozorro_subscription_keyword_user,prozorro.subscription.keyword.user,model_prozorro_subscription_keyword,group_prozorro_user,1,1,1,1

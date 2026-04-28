@@ -51,8 +51,21 @@ class TestSubscriptionMatch(TransactionCase):
         cls.cpv_lasers = cls.env.ref("rteam_prozorro.cpv_42610000_5")
         cls.cpv_it = cls.env.ref("rteam_prozorro.cpv_72000000_5")
 
+        cls.status_active_tendering = cls.env.ref("rteam_prozorro.status_active_tendering")
+        cls.status_active_qualification = cls.env.ref("rteam_prozorro.status_active_qualification")
+        cls.status_complete = cls.env.ref("rteam_prozorro.status_complete")
+        cls.method_above_threshold_ua = cls.env.ref("rteam_prozorro.method_above_threshold_ua")
+        cls.method_below_threshold = cls.env.ref("rteam_prozorro.method_below_threshold")
+        cls.method_esco = cls.env.ref("rteam_prozorro.method_esco")
+        cls.region_kyiv_oblast = cls.env.ref("rteam_prozorro.region_kyiv_oblast")
+        cls.region_lviv = cls.env.ref("rteam_prozorro.region_lviv")
+
     def _make_subscription(self, **kwargs):
         defaults = {"name": "Test sub", "active": True, "create_lead": False}
+        # Tests opt into status_ids explicitly. Default is no status filter
+        # (the model's default of `active.tendering` would mask intent).
+        if "status_ids" not in kwargs:
+            kwargs["status_ids"] = [(5, 0, 0)]
         defaults.update(kwargs)
         return self.Subscription.create(defaults)
 
@@ -69,11 +82,15 @@ class TestSubscriptionMatch(TransactionCase):
         self.assertTrue(sub._matches(make_tender()))
 
     def test_status_filter_excludes(self):
-        sub = self._make_subscription(status_filter="complete")
+        sub = self._make_subscription(status_ids=[(6, 0, [self.status_complete.id])])
         self.assertFalse(sub._matches(make_tender()))
 
     def test_status_filter_multi_includes(self):
-        sub = self._make_subscription(status_filter="active.tendering,active.qualification")
+        sub = self._make_subscription(
+            status_ids=[
+                (6, 0, [self.status_active_tendering.id, self.status_active_qualification.id])
+            ]
+        )
         self.assertTrue(sub._matches(make_tender()))
 
     def test_value_min_excludes(self):
@@ -89,11 +106,11 @@ class TestSubscriptionMatch(TransactionCase):
         self.assertTrue(sub._matches(make_tender()))
 
     def test_region_filter_includes(self):
-        sub = self._make_subscription(region_filter="київська")
+        sub = self._make_subscription(region_ids=[(6, 0, [self.region_kyiv_oblast.id])])
         self.assertTrue(sub._matches(make_tender()))
 
     def test_region_filter_excludes(self):
-        sub = self._make_subscription(region_filter="львівська")
+        sub = self._make_subscription(region_ids=[(6, 0, [self.region_lviv.id])])
         self.assertFalse(sub._matches(make_tender()))
 
     def test_keyword_contains(self):
@@ -131,18 +148,22 @@ class TestSubscriptionMatch(TransactionCase):
         self.assertFalse(sub._matches(make_tender()))
 
     def test_method_type_filter(self):
-        sub = self._make_subscription(procurement_method_types="belowThreshold")
+        sub = self._make_subscription(
+            procurement_method_ids=[(6, 0, [self.method_below_threshold.id])]
+        )
         self.assertFalse(sub._matches(make_tender()))
-        sub.procurement_method_types = "aboveThresholdUA,esco"
+        sub.procurement_method_ids = [
+            (6, 0, [self.method_above_threshold_ua.id, self.method_esco.id])
+        ]
         self.assertTrue(sub._matches(make_tender()))
 
     def test_all_filters_must_pass(self):
         sub = self._make_subscription(
             classification_ids=[(6, 0, [self.cpv_lasers.id])],
-            status_filter="active.tendering",
+            status_ids=[(6, 0, [self.status_active_tendering.id])],
             value_min=1_000_000,
             value_max=10_000_000,
-            region_filter="київська",
+            region_ids=[(6, 0, [self.region_kyiv_oblast.id])],
         )
         self.Keyword.create({"subscription_id": sub.id, "keyword": "лазер"})
         self.assertTrue(sub._matches(make_tender()))

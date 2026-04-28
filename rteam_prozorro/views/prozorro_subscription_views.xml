@@ -28,7 +28,7 @@
                 <field name="name"/>
                 <field name="user_id"/>
                 <field name="team_id" optional="show"/>
-                <field name="status_filter" optional="show"/>
+                <field name="status_ids" widget="many2many_tags" optional="show"/>
                 <field name="value_min" optional="hide"/>
                 <field name="value_max" optional="hide"/>
                 <field name="matched_count" optional="show"/>
@@ -79,9 +79,15 @@
                                     <field name="classification_ids" widget="many2many_tags" nolabel="1" colspan="2"/>
                                 </group>
                                 <group string="Region / Status / Method">
-                                    <field name="region_filter" placeholder="Київ, Львівська"/>
-                                    <field name="status_filter" placeholder="active.tendering"/>
-                                    <field name="procurement_method_types" placeholder="aboveThresholdUA,belowThreshold"/>
+                                    <field name="region_ids" widget="many2many_tags"
+                                           options="{'no_create': True}"
+                                           placeholder="All regions"/>
+                                    <field name="status_ids" widget="many2many_tags"
+                                           options="{'no_create': True}"
+                                           placeholder="All statuses"/>
+                                    <field name="procurement_method_ids" widget="many2many_tags"
+                                           options="{'no_create': True}"
+                                           placeholder="All procedure types"/>
                                 </group>
                             </group>
                             <group string="Value range">

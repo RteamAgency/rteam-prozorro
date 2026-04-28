@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!--
+        Canonical Prozorro tender lifecycle statuses. The set mirrors
+        prozorro.tender.status Selection and is shown to operators with
+        translatable, human names instead of API codes.
+    -->
+
+    <record id="status_draft" model="prozorro.tender.status">
+        <field name="code">draft</field>
+        <field name="name">Draft</field>
+        <field name="sequence">10</field>
+    </record>
+
+    <record id="status_active_enquiries" model="prozorro.tender.status">
+        <field name="code">active.enquiries</field>
+        <field name="name">Enquiries</field>
+        <field name="description">The procuring entity is accepting clarification questions.</field>
+        <field name="sequence">20</field>
+    </record>
+
+    <record id="status_active_tendering" model="prozorro.tender.status">
+        <field name="code">active.tendering</field>
+        <field name="name">Tendering</field>
+        <field name="description">Bid submission is open. This is the most common state suppliers care about.</field>
+        <field name="sequence">30</field>
+    </record>
+
+    <record id="status_active_pre_qualification" model="prozorro.tender.status">
+        <field name="code">active.pre-qualification</field>
+        <field name="name">Pre-qualification</field>
+        <field name="sequence">40</field>
+    </record>
+
+    <record id="status_active_pre_qualification_stand_still" model="prozorro.tender.status">
+        <field name="code">active.pre-qualification.stand-still</field>
+        <field name="name">Pre-qualification stand-still</field>
+        <field name="sequence">45</field>
+    </record>
+
+    <record id="status_active_auction" model="prozorro.tender.status">
+        <field name="code">active.auction</field>
+        <field name="name">Auction</field>
+        <field name="sequence">50</field>
+    </record>
+
+    <record id="status_active_qualification" model="prozorro.tender.status">
+        <field name="code">active.qualification</field>
+        <field name="name">Qualification</field>
+        <field name="sequence">60</field>
+    </record>
+
+    <record id="status_active_awarded" model="prozorro.tender.status">
+        <field name="code">active.awarded</field>
+        <field name="name">Awarded</field>
+        <field name="sequence">70</field>
+    </record>
+
+    <record id="status_complete" model="prozorro.tender.status">
+        <field name="code">complete</field>
+        <field name="name">Complete</field>
+        <field name="sequence">80</field>
+    </record>
+
+    <record id="status_cancelled" model="prozorro.tender.status">
+        <field name="code">cancelled</field>
+        <field name="name">Cancelled</field>
+        <field name="sequence">90</field>
+    </record>
+
+    <record id="status_unsuccessful" model="prozorro.tender.status">
+        <field name="code">unsuccessful</field>
+        <field name="name">Unsuccessful</field>
+        <field name="sequence">100</field>
+    </record>
+</odoo>

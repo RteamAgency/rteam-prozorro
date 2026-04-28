@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!--
+        Standard Prozorro procurement method types. Source:
+        https://prozorro-api-docs.readthedocs.io/en/latest/standards/proc-types.html
+        Names are written in English (Odoo source language); translations live
+        in i18n/uk.po and i18n/ru.po.
+    -->
+
+    <record id="method_above_threshold_ua" model="prozorro.procurement.method">
+        <field name="code">aboveThresholdUA</field>
+        <field name="name">Open bidding</field>
+        <field name="description">Standard above-threshold open bidding procedure under UA law.</field>
+        <field name="sequence">10</field>
+    </record>
+
+    <record id="method_above_threshold_eu" model="prozorro.procurement.method">
+        <field name="code">aboveThresholdEU</field>
+        <field name="name">Open bidding (EU)</field>
+        <field name="description">Above-threshold open bidding with English-language publication.</field>
+        <field name="sequence">20</field>
+    </record>
+
+    <record id="method_above_threshold_ua_defense" model="prozorro.procurement.method">
+        <field name="code">aboveThresholdUA.defense</field>
+        <field name="name">Open bidding (defense)</field>
+        <field name="description">Above-threshold open bidding for defense procurement.</field>
+        <field name="sequence">25</field>
+    </record>
+
+    <record id="method_below_threshold" model="prozorro.procurement.method">
+        <field name="code">belowThreshold</field>
+        <field name="name">Simplified procurement</field>
+        <field name="description">Below-threshold simplified procurement procedure.</field>
+        <field name="sequence">30</field>
+    </record>
+
+    <record id="method_simple_defense" model="prozorro.procurement.method">
+        <field name="code">simple.defense</field>
+        <field name="name">Simplified procurement (defense)</field>
+        <field name="sequence">35</field>
+    </record>
+
+    <record id="method_close_framework_agreement_ua" model="prozorro.procurement.method">
+        <field name="code">closeFrameworkAgreementUA</field>
+        <field name="name">Framework agreement</field>
+        <field name="description">Closed framework agreement procedure.</field>
+        <field name="sequence">40</field>
+    </record>
+
+    <record id="method_close_framework_agreement_selection_ua" model="prozorro.procurement.method">
+        <field name="code">closeFrameworkAgreementSelectionUA</field>
+        <field name="name">Framework agreement: selection</field>
+        <field name="sequence">45</field>
+    </record>
+
+    <record id="method_competitive_dialogue_ua" model="prozorro.procurement.method">
+        <field name="code">competitiveDialogueUA</field>
+        <field name="name">Competitive dialogue</field>
+        <field name="sequence">50</field>
+    </record>
+
+    <record id="method_competitive_dialogue_eu" model="prozorro.procurement.method">
+        <field name="code">competitiveDialogueEU</field>
+        <field name="name">Competitive dialogue (EU)</field>
+        <field name="sequence">55</field>
+    </record>
+
+    <record id="method_competitive_ordering" model="prozorro.procurement.method">
+        <field name="code">competitiveOrdering</field>
+        <field name="name">Competitive ordering</field>
+        <field name="sequence">60</field>
+    </record>
+
+    <record id="method_esco" model="prozorro.procurement.method">
+        <field name="code">esco</field>
+        <field name="name">ESCO procurement</field>
+        <field name="description">Energy-service contracting procedure.</field>
+        <field name="sequence">65</field>
+    </record>
+
+    <record id="method_negotiation" model="prozorro.procurement.method">
+        <field name="code">negotiation</field>
+        <field name="name">Negotiation</field>
+        <field name="sequence">70</field>
+    </record>
+
+    <record id="method_negotiation_quick" model="prozorro.procurement.method">
+        <field name="code">negotiation.quick</field>
+        <field name="name">Negotiation (urgent)</field>
+        <field name="sequence">75</field>
+    </record>
+
+    <record id="method_price_quotation" model="prozorro.procurement.method">
+        <field name="code">priceQuotation</field>
+        <field name="name">Price quotation</field>
+        <field name="sequence">80</field>
+    </record>
+
+    <record id="method_reporting" model="prozorro.procurement.method">
+        <field name="code">reporting</field>
+        <field name="name">Direct contract reporting</field>
+        <field name="description">Direct contract notification reporting procedure.</field>
+        <field name="sequence">85</field>
+    </record>
+</odoo>

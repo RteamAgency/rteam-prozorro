@@ -33,9 +33,11 @@ class ProzorroSubscription(models.Model):
         "prozorro.subscription.keyword", "subscription_id", string="Keywords"
     )
 
-    region_filter = fields.Char(
-        string="Region filter",
-        help="Comma-separated region names to match against the procuring entity address. Empty = any.",
+    region_ids = fields.Many2many(
+        "prozorro.region",
+        string="Regions",
+        help="Match tenders whose procuring entity is registered in any of "
+        "these regions. Empty = any region.",
     )
 
     value_min = fields.Monetary(string="Min value", currency_field="value_currency_id")
@@ -45,14 +47,16 @@ class ProzorroSubscription(models.Model):
         default=lambda s: s.env.ref("base.UAH", raise_if_not_found=False),
     )
 
-    status_filter = fields.Char(
-        string="Status filter",
-        default="active.tendering",
-        help="Comma-separated Prozorro tender statuses. Empty = any.",
+    status_ids = fields.Many2many(
+        "prozorro.tender.status",
+        string="Statuses",
+        default=lambda s: s._default_status_ids(),
+        help="Match tenders in any of these lifecycle statuses. Empty = any.",
     )
-    procurement_method_types = fields.Char(
-        string="Procurement method types",
-        help="Comma-separated, e.g. 'aboveThresholdUA,belowThreshold'. Empty = any.",
+    procurement_method_ids = fields.Many2many(
+        "prozorro.procurement.method",
+        string="Procurement methods",
+        help="Match tenders run with any of these procurement procedures. Empty = any procedure.",
     )
 
     create_lead = fields.Boolean(default=True, tracking=True)
@@ -62,6 +66,13 @@ class ProzorroSubscription(models.Model):
 
     matched_count = fields.Integer(compute="_compute_match_stats")
     last_match = fields.Datetime(compute="_compute_match_stats")
+
+    @api.model
+    def _default_status_ids(self):
+        active_tendering = self.env.ref(
+            "rteam_prozorro.status_active_tendering", raise_if_not_found=False
+        )
+        return [(6, 0, active_tendering.ids)] if active_tendering else False
 
     def _compute_match_stats(self):
         Tender = self.env["prozorro.tender"]
@@ -73,24 +84,6 @@ class ProzorroSubscription(models.Model):
     @api.model
     def _get_active_subscriptions(self):
         return self.search([("active", "=", True)])
-
-    def _status_filter_set(self):
-        self.ensure_one()
-        if not self.status_filter:
-            return None
-        return {s.strip() for s in self.status_filter.split(",") if s.strip()}
-
-    def _method_types_set(self):
-        self.ensure_one()
-        if not self.procurement_method_types:
-            return None
-        return {s.strip() for s in self.procurement_method_types.split(",") if s.strip()}
-
-    def _region_set(self):
-        self.ensure_one()
-        if not self.region_filter:
-            return None
-        return [r.strip().lower() for r in self.region_filter.split(",") if r.strip()]
 
     def _build_haystacks(self, tender):
         title = tender.get("title") or ""
@@ -110,13 +103,15 @@ class ProzorroSubscription(models.Model):
         """
         self.ensure_one()
 
-        statuses = self._status_filter_set()
-        if statuses and tender.get("status") not in statuses:
-            return False
+        if self.status_ids:
+            allowed_statuses = set(self.status_ids.mapped("code"))
+            if tender.get("status") not in allowed_statuses:
+                return False
 
-        methods = self._method_types_set()
-        if methods and tender.get("procurementMethodType") not in methods:
-            return False
+        if self.procurement_method_ids:
+            allowed_methods = set(self.procurement_method_ids.mapped("code"))
+            if tender.get("procurementMethodType") not in allowed_methods:
+                return False
 
         if self.classification_ids:
             sub_codes = set(self.classification_ids.mapped("code"))
@@ -135,12 +130,12 @@ class ProzorroSubscription(models.Model):
             if self.value_max and amount > self.value_max:
                 return False
 
-        regions = self._region_set()
-        if regions:
+        if self.region_ids:
             entity = tender.get("procuringEntity") or {}
             address = entity.get("address") or {}
             tender_region = (address.get("region") or "").lower()
-            if not any(r in tender_region for r in regions):
+            tokens = self.region_ids._token_set()
+            if not any(tok in tender_region for tok in tokens):
                 return False
 
         if self.keyword_ids:
