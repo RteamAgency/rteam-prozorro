@@ -227,9 +227,7 @@ class ProzorroTender(models.Model):
         """
         if error is None and not matched:
             return
-        group = self.env.ref(
-            "rteam_prozorro.group_prozorro_manager", raise_if_not_found=False
-        )
+        group = self.env.ref("rteam_prozorro.group_prozorro_manager", raise_if_not_found=False)
         if not group or not group.user_ids:
             return
         if error:
