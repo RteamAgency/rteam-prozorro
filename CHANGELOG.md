@@ -2,6 +2,16 @@
 
 All notable changes to `rteam_prozorro` are documented here.
 
+## [19.0.5.0.0] - 2026-04-28
+
+### Added
+- "Test against tender" wizard reachable from the subscription form header. Operator pastes a Prozorro tender UUID (or full prozorro.gov.ua URL) and the wizard fetches the tender via the live API, runs the subscription against it, and prints a per-filter verdict table: which filter passed, which failed, and *why* (e.g. `tender region 'Київська область' matched token(s) ['київська']` or `value 4400 UAH is BELOW min 5000`). Nothing is persisted - the tender is not saved, no lead is created.
+- New helper `prozorro.subscription._match_with_reasons(tender)` returns a list of `(filter_name, passed, reason)` tuples. The hot-path `_matches` now delegates to this helper but short-circuits as before.
+- UA + RU translations for all wizard strings appended to the existing `.po` files.
+
+### Why
+Tuning subscription rules used to depend on luck: you had to hope the live feed contained a tender that exercised the rule you were testing. The wizard breaks that dependency entirely - operators can paste any tender they're curious about and get an immediate, deterministic verdict without polluting `prozorro.tender` or the CRM pipeline. Field-by-field reasoning makes "why didn't this match" answerable in one screen.
+
 ## [19.0.4.0.0] - 2026-04-28
 
 ### Added

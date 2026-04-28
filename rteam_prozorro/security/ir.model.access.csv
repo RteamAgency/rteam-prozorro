@@ -7,6 +7,7 @@ access_prozorro_tender_status_user,prozorro.tender.status.user,model_prozorro_te
 access_prozorro_tender_status_manager,prozorro.tender.status.manager,model_prozorro_tender_status,group_prozorro_manager,1,1,1,1
 access_prozorro_region_user,prozorro.region.user,model_prozorro_region,group_prozorro_user,1,0,0,0
 access_prozorro_region_manager,prozorro.region.manager,model_prozorro_region,group_prozorro_manager,1,1,1,1
+access_prozorro_subscription_test_user,prozorro.subscription.test.user,model_prozorro_subscription_test,group_prozorro_user,1,1,1,1
 access_prozorro_subscription_user,prozorro.subscription.user,model_prozorro_subscription,group_prozorro_user,1,1,1,1
 access_prozorro_subscription_manager,prozorro.subscription.manager,model_prozorro_subscription,group_prozorro_manager,1,1,1,1
 access_prozorro_subscription_keyword_user,prozorro.subscription.keyword.user,model_prozorro_subscription_keyword,group_prozorro_user,1,1,1,1

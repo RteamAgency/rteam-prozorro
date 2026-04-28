@@ -108,18 +108,53 @@ class ProzorroSubscription(models.Model):
         """Return True if this subscription matches the given tender dict.
 
         `tender` is the raw JSON body (dict) returned by Prozorro for one tender.
+        Hot path: short-circuits on the first failed filter for performance.
+        """
+        for _name, passed, _reason in self._match_with_reasons(tender):
+            if not passed:
+                return False
+        return True
+
+    def _match_with_reasons(self, tender):
+        """Per-filter verdict for diagnostics. Yields (filter_name, passed, reason).
+
+        Unlike `_matches` this evaluates ALL filters even after one fails so
+        the test wizard can show every reason in one pass. Skipped filters
+        (empty / not configured) yield with `passed=True` and an explanatory
+        reason so operators understand why a filter was a no-op.
         """
         self.ensure_one()
+        results = []
 
         if self.status_ids:
-            allowed_statuses = set(self.status_ids.mapped("code"))
-            if tender.get("status") not in allowed_statuses:
-                return False
+            allowed = set(self.status_ids.mapped("code"))
+            tender_status = tender.get("status")
+            ok = tender_status in allowed
+            results.append(
+                (
+                    "Status",
+                    ok,
+                    f"tender status '{tender_status}' "
+                    + ("is in allowed set" if ok else f"NOT in {sorted(allowed)}"),
+                )
+            )
+        else:
+            results.append(("Status", True, "no filter configured (passes any)"))
 
         if self.procurement_method_ids:
-            allowed_methods = set(self.procurement_method_ids.mapped("code"))
-            if tender.get("procurementMethodType") not in allowed_methods:
-                return False
+            allowed = set(self.procurement_method_ids.mapped("code"))
+            method = tender.get("procurementMethodType")
+            ok = method in allowed
+            results.append(
+                (
+                    "Procurement method",
+                    ok,
+                    f"tender method '{method}' "
+                    + ("is in allowed set" if ok else f"NOT in {sorted(allowed)}"),
+                )
+            )
+        else:
+            results.append(("Procurement method", True, "no filter configured (passes any)"))
 
         if self.classification_ids:
             sub_codes = set(self.classification_ids.mapped("code"))
@@ -128,31 +163,64 @@ class ProzorroSubscription(models.Model):
                 for it in tender.get("items") or []
                 if (it.get("classification") or {}).get("id")
             }
-            if not (sub_codes & item_codes):
-                return False
+            overlap = sub_codes & item_codes
+            ok = bool(overlap)
+            if ok:
+                msg = f"matched on {sorted(overlap)}"
+            elif item_codes:
+                msg = f"tender CPVs {sorted(item_codes)} miss subscription set {sorted(sub_codes)}"
+            else:
+                msg = "tender has no CPV codes in items"
+            results.append(("CPV / DK021", ok, msg))
+        else:
+            results.append(("CPV / DK021", True, "no filter configured (passes any)"))
 
         amount = (tender.get("value") or {}).get("amount")
-        if amount is not None:
-            if self.value_min and amount < self.value_min:
-                return False
-            if self.value_max and amount > self.value_max:
-                return False
+        currency = (tender.get("value") or {}).get("currency")
+        if amount is None:
+            results.append(("Value range", True, "tender has no monetary value to compare"))
+        else:
+            below = self.value_min and amount < self.value_min
+            above = self.value_max and amount > self.value_max
+            ok = not (below or above)
+            label = f"{amount} {currency or ''}".strip()
+            if below:
+                msg = f"value {label} is BELOW min {self.value_min}"
+            elif above:
+                msg = f"value {label} is ABOVE max {self.value_max}"
+            elif self.value_min or self.value_max:
+                msg = f"value {label} is within [{self.value_min}, {self.value_max}]"
+            else:
+                msg = f"value {label}, no range constraint"
+            results.append(("Value range", ok, msg))
 
         if self.region_ids:
             entity = tender.get("procuringEntity") or {}
             address = entity.get("address") or {}
             tender_region = (address.get("region") or "").lower()
             tokens = self.region_ids._token_set()
-            if not any(tok in tender_region for tok in tokens):
-                return False
+            ok = bool(tender_region) and any(tok in tender_region for tok in tokens)
+            if ok:
+                hits = [tok for tok in tokens if tok in tender_region]
+                msg = f"tender region '{tender_region}' matched token(s) {hits}"
+            elif not tender_region:
+                msg = "tender has no region info on procuringEntity.address"
+            else:
+                msg = f"tender region '{tender_region}' matches none of {tokens}"
+            results.append(("Region", ok, msg))
+        else:
+            results.append(("Region", True, "no filter configured (passes any)"))
 
         if self.keyword_ids:
             haystacks = self._build_haystacks(tender)
             for kw in self.keyword_ids:
-                if not kw._matches(haystacks):
-                    return False
+                ok = kw._matches(haystacks)
+                tag = f"Keyword '{kw.keyword}' on {kw.field} ({kw.match_mode}{', negate' if kw.negate else ''})"
+                results.append((tag, ok, "passed" if ok else "did not match"))
+        else:
+            results.append(("Keywords", True, "no keyword rules configured"))
 
-        return True
+        return results
 
     def action_view_matched_tenders(self):
         self.ensure_one()

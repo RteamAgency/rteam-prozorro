@@ -48,6 +48,11 @@
                             class="btn-primary"
                             invisible="not id"
                             groups="rteam_prozorro.group_prozorro_manager"/>
+                    <button name="%(rteam_prozorro.action_prozorro_subscription_test)d"
+                            string="Test against tender" type="action"
+                            class="btn-secondary"
+                            invisible="not id"
+                            context="{'active_id': id}"/>
                     <button name="action_view_matched_tenders" string="Matched tenders" type="object" class="btn-secondary"/>
                 </header>
                 <sheet>

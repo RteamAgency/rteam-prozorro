@@ -494,6 +494,99 @@ msgstr "Cron-задача отсутствует"
 msgid "Reinstall the module to restore the scheduled action."
 msgstr "Переустановите модуль, чтобы восстановить запланированное действие."
 
+#. -------------------- Test wizard --------------------
+
+#. module: rteam_prozorro
+#: model:ir.model,name:rteam_prozorro.model_prozorro_subscription_test
+msgid "Prozorro Subscription Test Match"
+msgstr "Тест совпадения подписки"
+
+#. module: rteam_prozorro
+#: model:ir.actions.act_window,name:rteam_prozorro.action_prozorro_subscription_test
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_subscription_view_form
+msgid "Test against tender"
+msgstr "Проверить на тендере"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_subscription_test_view_form
+msgid "Evaluate"
+msgstr "Проверить"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_subscription_test__subscription_id
+msgid "Subscription"
+msgstr "Подписка"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_subscription_test__tender_uuid
+msgid "Tender UUID or URL"
+msgstr "UUID или URL тендера"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,help:rteam_prozorro.field_prozorro_subscription_test__tender_uuid
+msgid "The Prozorro tender id (e.g. `3af829c1a9af4812a5c2c4bf090f2b44`) or a full prozorro.gov.ua tender page URL."
+msgstr "ID тендера Prozorro (например `3af829c1a9af4812a5c2c4bf090f2b44`) или полный URL страницы тендера на prozorro.gov.ua."
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_subscription_test__verdict
+msgid "Verdict"
+msgstr "Вердикт"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields.selection,name:rteam_prozorro.selection__prozorro_subscription_test__verdict__match
+msgid "Matches"
+msgstr "Совпадение"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields.selection,name:rteam_prozorro.selection__prozorro_subscription_test__verdict__no_match
+msgid "Does NOT match"
+msgstr "Не совпадает"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields.selection,name:rteam_prozorro.selection__prozorro_subscription_test__verdict__error
+msgid "Fetch error"
+msgstr "Ошибка загрузки"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_subscription_test__summary_html
+msgid "Result"
+msgstr "Результат"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_subscription_test__fetched_title
+msgid "Tender title"
+msgstr "Название тендера"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_subscription_test__fetched_status
+msgid "Tender status"
+msgstr "Статус тендера"
+
+#. module: rteam_prozorro
+#: code:addons/rteam_prozorro/wizards/prozorro_subscription_test.py:0
+msgid "Provide a tender UUID or prozorro.gov.ua URL."
+msgstr "Введите UUID тендера или URL с prozorro.gov.ua."
+
+#. module: rteam_prozorro
+#: code:addons/rteam_prozorro/wizards/prozorro_subscription_test.py:0
+msgid "Fetch failed"
+msgstr "Не удалось загрузить"
+
+#. module: rteam_prozorro
+#: code:addons/rteam_prozorro/wizards/prozorro_subscription_test.py:0
+msgid "Prozorro API returned an empty payload."
+msgstr "API Prozorro вернул пустые данные."
+
+#. module: rteam_prozorro
+#: code:addons/rteam_prozorro/wizards/prozorro_subscription_test.py:0
+msgid "Matches the subscription"
+msgstr "Тендер совпадает с подпиской"
+
+#. module: rteam_prozorro
+#: code:addons/rteam_prozorro/wizards/prozorro_subscription_test.py:0
+msgid "Does NOT match the subscription"
+msgstr "Тендер НЕ совпадает с подпиской"
+
 #. -------------------- Procurement methods (master data) --------------------
 
 #. module: rteam_prozorro
