@@ -1,6 +1,6 @@
 {
     "name": "Prozorro Connector",
-    "version": "19.0.5.2.0",
+    "version": "19.0.5.2.1",
     "category": "Sales/CRM",
     "summary": "Monitor Ukrainian Prozorro tenders, auto-create matching CRM opportunities",
     "description": """
@@ -47,11 +47,11 @@ Targeted at Odoo 17 / 18 / 19 (Community + Enterprise).
         "views/prozorro_procurement_method_views.xml",
         "views/prozorro_tender_status_views.xml",
         "views/prozorro_region_views.xml",
+        "wizards/prozorro_subscription_test_views.xml",
         "views/prozorro_subscription_views.xml",
         "views/prozorro_tender_views.xml",
         "views/crm_lead_views.xml",
         "views/res_config_settings_views.xml",
-        "wizards/prozorro_subscription_test_views.xml",
         "views/menus.xml",
     ],
     "images": ["static/description/banner.png"],

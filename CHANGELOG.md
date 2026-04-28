@@ -2,6 +2,11 @@
 
 All notable changes to `rteam_prozorro` are documented here.
 
+## [19.0.5.2.1] - 2026-04-28
+
+### Fixed
+- Fresh install / Odoo.sh CI failure: `External ID not found in the system: rteam_prozorro.action_prozorro_subscription_test`. Root cause was a manifest-data ordering bug. `views/prozorro_subscription_views.xml` references the action via `%(...action_prozorro_subscription_test)d`, but `wizards/prozorro_subscription_test_views.xml` (which defines the action) was loaded AFTER it. On an existing DB, an in-place upgrade hides this because the action is already in `ir_model_data` from a previous install attempt; a fresh install rolls back. Moved the wizard XML to load before the subscription view.
+
 ## [19.0.5.2.0] - 2026-04-28
 
 ### Changed
