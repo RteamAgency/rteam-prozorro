@@ -2,6 +2,23 @@
 
 All notable changes to `rteam_prozorro` are documented here.
 
+## [19.0.5.3.0] - 2026-04-29
+
+### Added
+- **Sync Log via chatter**: `prozorro.sync.cursor` now inherits `mail.thread`. Every sync run posts to the chatter:
+  - Start: `Sync in progress...`
+  - End: `Sync completed: pulled N tenders, M matched.`
+  - Empty: `Sync skipped: no active subscriptions`
+  - Failure: `Sync failed: <reason>`
+- New menu item **Prozorro -> Sync Log** opens the singleton cursor's form view with full chatter history. Manager-only "Sync now" button on the form header re-runs the global sync.
+- Tender list header gets a new "Sync log" button alongside the existing "Sync now" / "Reset cursor" buttons. Clicking "Sync now" now redirects to the Sync Log so operators see progress in chatter instead of relying on the ephemeral toast.
+- New fields on `prozorro.sync.cursor`: `last_started_at`, `is_running` (lights up between start and end of a run).
+
+### Changed (Constitution alignment, App #2 retro)
+- `_get_int_param(key, default)` helper collapses the duplicated try/except float-parse logic in `_get_pages_per_run` and `_get_retention_days`.
+- `mail_template_prozorro_new_match`: repeated inline styles extracted into `t-set` vars (`badge_style`, `primary_button`, `secondary_button`, `muted`). QWeb still renders fully inlined HTML so Gmail / Outlook / mobile clients see the same output - CSS classes would have been stripped, hence we keep inline.
+- `_notify_sync_result` logs a warning when `group_prozorro_manager` xmlid is missing instead of silently skipping. Same for `ir_cron_prozorro_sync_feed` in `action_sync_now`.
+
 ## [19.0.5.2.4] - 2026-04-28
 
 ### Fixed

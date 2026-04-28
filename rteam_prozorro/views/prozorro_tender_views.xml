@@ -44,6 +44,10 @@
                     <button name="action_convert_to_lead" type="object" string="Convert to lead"
                             class="btn-secondary"
                             display="always"/>
+                    <button name="%(action_prozorro_sync_log)d" type="action"
+                            string="Sync log"
+                            class="btn-secondary"
+                            display="always"/>
                     <button name="action_reset_sync_cursor" type="object" string="Reset cursor"
                             class="btn-secondary"
                             display="always"

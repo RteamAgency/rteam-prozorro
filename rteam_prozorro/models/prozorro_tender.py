@@ -97,43 +97,26 @@ class ProzorroTender(models.Model):
     # ------------------------------------------------------------------ Config helpers
 
     @api.model
+    def _get_int_param(self, key, default):
+        """Read an int ir.config_parameter, falling back to default on
+        missing or non-numeric values."""
+        raw = self.env["ir.config_parameter"].sudo().get_param(key, default)
+        try:
+            return int(raw)
+        except (TypeError, ValueError):
+            return default
+
+    @api.model
     def _get_api_base_url(self):
-        return (
-            self.env["ir.config_parameter"]
-            .sudo()
-            .get_param(
-                "prozorro.api_url",
-                DEFAULT_API_URL,
-            )
-        )
+        return self.env["ir.config_parameter"].sudo().get_param("prozorro.api_url", DEFAULT_API_URL)
 
     @api.model
     def _get_pages_per_run(self):
-        try:
-            return int(
-                self.env["ir.config_parameter"]
-                .sudo()
-                .get_param(
-                    "prozorro.pages_per_run",
-                    DEFAULT_PAGES_PER_RUN,
-                )
-            )
-        except (TypeError, ValueError):
-            return DEFAULT_PAGES_PER_RUN
+        return self._get_int_param("prozorro.pages_per_run", DEFAULT_PAGES_PER_RUN)
 
     @api.model
     def _get_retention_days(self):
-        try:
-            return int(
-                self.env["ir.config_parameter"]
-                .sudo()
-                .get_param(
-                    "prozorro.retention_days",
-                    DEFAULT_RETENTION_DAYS,
-                )
-            )
-        except (TypeError, ValueError):
-            return DEFAULT_RETENTION_DAYS
+        return self._get_int_param("prozorro.retention_days", DEFAULT_RETENTION_DAYS)
 
     # ------------------------------------------------------------------ HTTP
 
@@ -158,10 +141,12 @@ class ProzorroTender(models.Model):
         Cursor = self.env["prozorro.sync.cursor"]
         Subscription = self.env["prozorro.subscription"]
         cursor = Cursor._get_singleton("main")
+        cursor._record_start()
 
         subs = Subscription._get_active_subscriptions()
         if not subs:
             _logger.info("Prozorro: no active subscriptions, skipping sync")
+            cursor._record_skipped(_("no active subscriptions"))
             return {"pulled": 0, "matched": 0, "error": None, "skipped": True}
 
         base_url = self._get_api_base_url()
@@ -228,7 +213,12 @@ class ProzorroTender(models.Model):
         if error is None and not matched:
             return
         group = self.env.ref("rteam_prozorro.group_prozorro_manager", raise_if_not_found=False)
-        if not group or not group.user_ids:
+        if not group:
+            _logger.warning(
+                "Prozorro: group_prozorro_manager xmlid missing, skipping toast notification"
+            )
+            return
+        if not group.user_ids:
             return
         if error:
             title = _("Prozorro sync failed")
@@ -252,16 +242,22 @@ class ProzorroTender(models.Model):
             )
 
     def action_sync_now(self):
-        """Schedule the feed-sync cron for immediate background execution.
+        """Schedule the feed-sync cron for immediate background execution
+        and open the Sync Log so the operator sees progress in chatter.
 
         The actual fetch can take minutes (one HTTP GET per matched tender,
         up to 2000 of them). Running synchronously inside an HTTP request
         froze the browser for the whole duration, so we hand off to the
-        cron worker via `_trigger()` and return a notification immediately.
-        Operators refresh the Tenders list to see results.
+        cron worker via `_trigger()` and redirect to the cursor form.
+        The cursor's chatter polls in real time: "Sync in progress..."
+        appears as the cron worker picks up the trigger, then "Sync
+        completed: pulled N tenders, M matched" once the run finishes.
         """
         cron = self.env.ref("rteam_prozorro.ir_cron_prozorro_sync_feed", raise_if_not_found=False)
         if not cron:
+            _logger.warning(
+                "Prozorro: ir_cron_prozorro_sync_feed xmlid missing, cannot trigger sync"
+            )
             return {
                 "type": "ir.actions.client",
                 "tag": "display_notification",
@@ -273,19 +269,8 @@ class ProzorroTender(models.Model):
                 },
             }
         cron.sudo()._trigger()
-        return {
-            "type": "ir.actions.client",
-            "tag": "display_notification",
-            "params": {
-                "title": _("Sync queued"),
-                "message": _(
-                    "A background sync was scheduled. Refresh the Tenders list "
-                    "in a minute or two to see new matches."
-                ),
-                "type": "success",
-                "sticky": False,
-            },
-        }
+        cursor = self.env["prozorro.sync.cursor"]._get_singleton("main")
+        return cursor.action_open_sync_log()
 
     def action_reset_sync_cursor(self):
         """Rewind the feed cursor to the head so the next sync pulls latest tenders.

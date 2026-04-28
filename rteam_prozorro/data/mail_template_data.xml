@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo noupdate="1">
+    <!-- Inline-only styles via t-set; Gmail / Outlook / mobile clients
+         strip <style> blocks so CSS classes are not an option. -->
+
     <record id="mail_template_prozorro_new_match" model="mail.template">
         <field name="name">Prozorro: new tender match</field>
         <field name="model_id" ref="model_prozorro_tender"/>
@@ -9,9 +12,15 @@
         <field name="auto_delete" eval="True"/>
         <field name="body_html" type="html">
 <div style="font-family:Arial,sans-serif;color:#0A1628">
-    <div style="display:inline-block;padding:4px 12px;background:#1f7a8c;color:#fff;font-weight:bold;border-radius:3px;font-size:12px;letter-spacing:0.5px">NEW MATCH</div>
+    <t t-set="accent" t-value="'#1f7a8c'"/>
+    <t t-set="accent_dark" t-value="'#0A1628'"/>
+    <t t-set="badge_style" t-value="'display:inline-block;padding:4px 12px;background:' + accent + ';color:#fff;font-weight:bold;border-radius:3px;font-size:12px;letter-spacing:0.5px'"/>
+    <t t-set="primary_button" t-value="'display:inline-block;padding:8px 16px;background:' + accent + ';color:#fff;text-decoration:none;border-radius:3px;font-weight:bold'"/>
+    <t t-set="secondary_button" t-value="'display:inline-block;padding:8px 16px;background:' + accent_dark + ';color:#fff;text-decoration:none;border-radius:3px;font-weight:bold'"/>
+    <t t-set="muted" t-value="'margin:6px 0;color:#666'"/>
+    <div t-attf-style="{{ badge_style }}">NEW MATCH</div>
     <h2 style="margin-top:12px" t-out="object.title or object.name"/>
-    <p style="margin:6px 0;color:#666">
+    <p t-attf-style="{{ muted }}">
         <span t-out="object.procuring_entity_name or ''"/>
         <t t-if="object.procuring_entity_region"> &#183; <span t-out="object.procuring_entity_region"/></t>
     </p>
@@ -25,13 +34,12 @@
         <t t-if="object.tender_period_end"><b>Tendering ends:</b> <span t-out="object.tender_period_end"/></t>
     </p>
     <p style="margin:14px 0">
-        <a t-att-href="object.url"
-           style="display:inline-block;padding:8px 16px;background:#1f7a8c;color:#fff;text-decoration:none;border-radius:3px;font-weight:bold">
+        <a t-att-href="object.url" t-attf-style="{{ primary_button }}">
             Open in Prozorro
         </a>
         &#160;
         <a t-att-href="'/odoo/action-prozorro.action_prozorro_tender/' + str(object.id)"
-           style="display:inline-block;padding:8px 16px;background:#0A1628;color:#fff;text-decoration:none;border-radius:3px;font-weight:bold">
+           t-attf-style="{{ secondary_button }}">
             View in Odoo
         </a>
     </p>

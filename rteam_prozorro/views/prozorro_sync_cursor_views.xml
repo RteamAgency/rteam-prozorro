@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="prozorro_sync_cursor_view_form" model="ir.ui.view">
+        <field name="name">prozorro.sync.cursor.form</field>
+        <field name="model">prozorro.sync.cursor</field>
+        <field name="arch" type="xml">
+            <form string="Prozorro Sync Log" create="0" delete="0">
+                <header>
+                    <button name="%(action_prozorro_sync_now_global)d"
+                            type="action"
+                            string="Sync now"
+                            class="btn-primary"
+                            groups="rteam_prozorro.group_prozorro_manager"/>
+                    <field name="is_running" widget="boolean_toggle" readonly="1"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>Prozorro Sync Log</h1>
+                        <p class="text-muted">
+                            Real-time chatter of every sync run. Each "Sync now" click
+                            and each scheduled cron run posts a line here.
+                        </p>
+                    </div>
+                    <group>
+                        <group string="Last run">
+                            <field name="last_started_at"/>
+                            <field name="last_sync"/>
+                            <field name="last_pulled"/>
+                            <field name="last_matched"/>
+                        </group>
+                        <group string="Lifetime">
+                            <field name="pulled_total"/>
+                            <field name="matched_total"/>
+                            <field name="last_error"
+                                   invisible="not last_error"
+                                   readonly="1"/>
+                            <field name="last_error_at"
+                                   invisible="not last_error_at"
+                                   readonly="1"/>
+                        </group>
+                    </group>
+                    <group string="Cursor (advanced)" groups="rteam_prozorro.group_prozorro_manager">
+                        <field name="name" readonly="1"/>
+                        <field name="offset" readonly="1"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_prozorro_sync_log" model="ir.actions.act_window">
+        <field name="name">Sync Log</field>
+        <field name="res_model">prozorro.sync.cursor</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="prozorro_sync_cursor_view_form"/>
+        <field name="target">current</field>
+        <field name="context">{}</field>
+    </record>
+
+    <!-- Server action shorthand so the form-header button can call
+         action_sync_now without instantiating prozorro.tender directly. -->
+    <record id="action_prozorro_sync_now_global" model="ir.actions.server">
+        <field name="name">Prozorro: Sync now (global)</field>
+        <field name="model_id" ref="model_prozorro_sync_cursor"/>
+        <field name="state">code</field>
+        <field name="code">action = env["prozorro.tender"].action_sync_now()</field>
+    </record>
+
+</odoo>

@@ -18,6 +18,12 @@
               action="action_prozorro_subscription"
               sequence="20"/>
 
+    <menuitem id="menu_prozorro_sync_log"
+              name="Sync Log"
+              parent="menu_prozorro_root"
+              action="action_prozorro_sync_log"
+              sequence="30"/>
+
     <menuitem id="menu_prozorro_config"
               name="Configuration"
               parent="menu_prozorro_root"
