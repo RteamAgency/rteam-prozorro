@@ -2,6 +2,23 @@
 
 All notable changes to `rteam_prozorro` are documented here.
 
+## [19.0.5.4.1] - 2026-04-29
+
+### Fixed
+- Chatter `Sync in progress...` and `Sync done: ...` messages from
+  19.0.5.4.0 never showed up in subscription chatter. The
+  `subs.message_post(...)` calls happened **inside the cron's main
+  transaction**, which wraps the long HTTP loop walking the Prozorro
+  feed (often 2000+ tenders, 30+ minutes per run). Any timeout,
+  network error, or container restart during that loop rolls back the
+  whole transaction including the start-message_post, so operators
+  see nothing despite clicking Sync now.
+- Replaced direct `message_post` calls with `_post_chatter_isolated(sub_ids, body)`
+  helper that opens an independent cursor (`self.pool.cursor()`) and
+  commits the chatter line on its own transaction. Same pattern as
+  `odoo_health_check`'s ir.cron.history logger. The chatter post now
+  survives any subsequent rollback in the sync loop.
+
 ## [19.0.5.4.0] - 2026-04-29
 
 ### Changed (simplification)

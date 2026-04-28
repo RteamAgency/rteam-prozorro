@@ -5,7 +5,7 @@ import urllib.request
 from collections import Counter
 from datetime import datetime, timedelta
 
-from odoo import _, api, fields, models
+from odoo import SUPERUSER_ID, _, api, fields, models
 
 _logger = logging.getLogger(__name__)
 
@@ -127,6 +127,29 @@ class ProzorroTender(models.Model):
         with urllib.request.urlopen(req, timeout=DEFAULT_HTTP_TIMEOUT) as resp:
             return json.loads(resp.read().decode("utf-8"))
 
+    # ------------------------------------------------------------------ Chatter
+    # Posts to subscription chatter run in an independent cursor so the
+    # message persists even if the long HTTP sync loop later rolls back
+    # (timeout, network error, container restart). Without this, a "Sync
+    # in progress..." message_post inside the cron transaction is lost
+    # together with everything else when the transaction rolls back, and
+    # operators see nothing in the chatter despite clicking Sync now.
+
+    def _post_chatter_isolated(self, sub_ids, body):
+        if not sub_ids:
+            return
+        try:
+            with self.pool.cursor() as new_cr:
+                env = api.Environment(new_cr, SUPERUSER_ID, {})
+                env["prozorro.subscription"].browse(sub_ids).message_post(
+                    body=body,
+                    subtype_xmlid="mail.mt_note",
+                )
+        except Exception:
+            _logger.exception(
+                "Prozorro: failed to post chatter line to subscriptions %s", sub_ids
+            )
+
     # ------------------------------------------------------------------ Cron
 
     @api.model
@@ -149,12 +172,12 @@ class ProzorroTender(models.Model):
             return {"pulled": 0, "matched": 0, "error": None, "skipped": True}
 
         # Sync started: post a one-line chatter note on each active
-        # subscription so operators tailing a subscription see real-time
-        # activity instead of staring at a frozen list. mt_note keeps
-        # it silent (no email / Discuss ping).
-        subs.message_post(
-            body=_("Prozorro sync in progress..."),
-            subtype_xmlid="mail.mt_note",
+        # subscription. Done in an independent cursor so the message
+        # persists even if the HTTP loop below later crashes / times out
+        # / hits a container restart. Without isolation, the operator
+        # sees nothing in chatter despite clicking Sync now.
+        self._post_chatter_isolated(
+            subs.ids, _("Prozorro sync in progress..."),
         )
 
         base_url = self._get_api_base_url()
@@ -204,9 +227,8 @@ class ProzorroTender(models.Model):
         except (urllib.error.HTTPError, urllib.error.URLError, ValueError) as e:
             _logger.exception("Prozorro: sync failed")
             cursor._record_error(str(e))
-            subs.message_post(
-                body=_("Prozorro sync failed: %s", str(e)[:200]),
-                subtype_xmlid="mail.mt_note",
+            self._post_chatter_isolated(
+                subs.ids, _("Prozorro sync failed: %s", str(e)[:200]),
             )
             self._notify_sync_result(pulled, matched, error=str(e))
             return {"pulled": pulled, "matched": matched, "error": str(e), "skipped": False}
@@ -214,17 +236,17 @@ class ProzorroTender(models.Model):
         cursor._record_success(pulled, matched)
         _logger.info("Prozorro: sync done. pulled=%d, matched=%d", pulled, matched)
         # Per-subscription chatter line with the run's outcome FOR THIS
-        # subscription. Operators see "found N tenders" on the rule that
-        # found them, not a global aggregate they have to interpret.
+        # subscription. Posted via isolated cursor so it survives any
+        # late-stage rollback (e.g. lead-creation failure on retry).
         for sub in subs:
             n = per_sub_matched.get(sub.id, 0)
-            sub.message_post(
-                body=_(
+            self._post_chatter_isolated(
+                sub.ids,
+                _(
                     "Prozorro sync done: pulled %(pulled)s tenders, %(matched)s matched this subscription.",
                     pulled=pulled,
                     matched=n,
                 ),
-                subtype_xmlid="mail.mt_note",
             )
         self._notify_sync_result(pulled, matched, error=None)
         return {"pulled": pulled, "matched": matched, "error": None, "skipped": False}
