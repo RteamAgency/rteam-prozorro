@@ -41,6 +41,9 @@
                             class="btn-primary"
                             display="always"
                             groups="rteam_prozorro.group_prozorro_manager"/>
+                    <button name="action_convert_to_lead" type="object" string="Convert to lead"
+                            class="btn-secondary"
+                            display="always"/>
                     <button name="action_reset_sync_cursor" type="object" string="Reset cursor"
                             class="btn-secondary"
                             display="always"
@@ -106,7 +109,14 @@
         <field name="arch" type="xml">
             <form string="Tender">
                 <header>
-                    <button name="action_open_in_prozorro" type="object" string="Open in Prozorro" class="btn-primary"/>
+                    <button name="action_convert_to_lead" type="object" string="Convert to lead"
+                            class="btn-primary"
+                            invisible="lead_id"/>
+                    <button name="action_open_lead" type="object" string="Open lead"
+                            class="btn-secondary"
+                            invisible="not lead_id"/>
+                    <button name="action_open_in_prozorro" type="object" string="Open in Prozorro"
+                            class="btn-secondary"/>
                     <field name="status" widget="statusbar"/>
                 </header>
                 <sheet>

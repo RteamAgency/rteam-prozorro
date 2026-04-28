@@ -215,60 +215,38 @@ class ProzorroTender(models.Model):
         return {"pulled": pulled, "matched": matched, "error": None, "skipped": False}
 
     def action_sync_now(self):
-        """Trigger a feed sync from the UI and surface the result as a notification."""
-        result = self.sudo()._cron_sync_feed() or {}
-        if result.get("error"):
+        """Schedule the feed-sync cron for immediate background execution.
+
+        The actual fetch can take minutes (one HTTP GET per matched tender,
+        up to 2000 of them). Running synchronously inside an HTTP request
+        froze the browser for the whole duration, so we hand off to the
+        cron worker via `_trigger()` and return a notification immediately.
+        Operators refresh the Tenders list to see results.
+        """
+        cron = self.env.ref("rteam_prozorro.ir_cron_prozorro_sync_feed", raise_if_not_found=False)
+        if not cron:
             return {
                 "type": "ir.actions.client",
                 "tag": "display_notification",
                 "params": {
-                    "title": _("Prozorro sync failed"),
-                    "message": result["error"],
+                    "title": _("Sync cron missing"),
+                    "message": _("Reinstall the module to restore the scheduled action."),
                     "type": "danger",
                     "sticky": True,
                 },
             }
-        if result.get("skipped"):
-            return {
-                "type": "ir.actions.client",
-                "tag": "display_notification",
-                "params": {
-                    "title": _("Prozorro sync skipped"),
-                    "message": _("No active subscriptions to evaluate against."),
-                    "type": "warning",
-                    "sticky": False,
-                },
-            }
-        pulled = result.get("pulled", 0) or 0
-        matched = result.get("matched", 0) or 0
-        if pulled == 0:
-            message = _(
-                "0 tenders pulled. The cursor may have run past the latest data; "
-                "click 'Reset cursor' on the Tenders list to rewind to the head of the feed."
-            )
-            ntype = "warning"
-        elif matched == 0:
-            message = _(
-                "Pulled %(pulled)s tenders but 0 matched any subscription. "
-                "Most likely your filters are too narrow: broaden the regions, "
-                "statuses, or value range and try again."
-            ) % {"pulled": pulled}
-            ntype = "warning"
-        else:
-            message = _("Pulled %(pulled)s tenders, %(matched)s matched.") % {
-                "pulled": pulled,
-                "matched": matched,
-            }
-            ntype = "success"
+        cron.sudo()._trigger()
         return {
             "type": "ir.actions.client",
             "tag": "display_notification",
             "params": {
-                "title": _("Prozorro sync done"),
-                "message": message,
-                "type": ntype,
-                "sticky": ntype != "success",
-                "next": {"type": "ir.actions.client", "tag": "soft_reload"},
+                "title": _("Sync queued"),
+                "message": _(
+                    "A background sync was scheduled. Refresh the Tenders list "
+                    "in a minute or two to see new matches."
+                ),
+                "type": "success",
+                "sticky": False,
             },
         }
 
@@ -419,6 +397,12 @@ class ProzorroTender(models.Model):
     # ------------------------------------------------------------------ Lead
 
     def _create_lead(self, subscription):
+        """Create a CRM lead for this tender.
+
+        `subscription` may be an empty recordset (manual conversion of a
+        tender without a linked subscription); in that case team / user /
+        tags / stage default to whatever crm.lead picks up itself.
+        """
         self.ensure_one()
         Lead = self.env["crm.lead"].sudo()
         title = (self.title or self.name or "Prozorro tender").strip()
@@ -443,16 +427,17 @@ class ProzorroTender(models.Model):
             "expected_revenue": self.value_amount or 0.0,
             "prozorro_tender_id": self.id,
         }
-        if subscription.team_id:
-            vals["team_id"] = subscription.team_id.id
-        if subscription.assign_to_user_id:
-            vals["user_id"] = subscription.assign_to_user_id.id
-        elif subscription.user_id:
-            vals["user_id"] = subscription.user_id.id
-        if subscription.tag_ids:
-            vals["tag_ids"] = [(6, 0, subscription.tag_ids.ids)]
-        if subscription.stage_id:
-            vals["stage_id"] = subscription.stage_id.id
+        if subscription:
+            if subscription.team_id:
+                vals["team_id"] = subscription.team_id.id
+            if subscription.assign_to_user_id:
+                vals["user_id"] = subscription.assign_to_user_id.id
+            elif subscription.user_id:
+                vals["user_id"] = subscription.user_id.id
+            if subscription.tag_ids:
+                vals["tag_ids"] = [(6, 0, subscription.tag_ids.ids)]
+            if subscription.stage_id:
+                vals["stage_id"] = subscription.stage_id.id
 
         lead = Lead.create(vals)
         self.lead_id = lead.id
@@ -484,4 +469,54 @@ class ProzorroTender(models.Model):
             "type": "ir.actions.act_url",
             "url": self.url,
             "target": "new",
+        }
+
+    def action_convert_to_lead(self):
+        """Promote each tender in self to a CRM lead.
+
+        Idempotent per record: tenders that already have a linked lead are
+        skipped. New leads use the first matched subscription as context
+        (team / user / tags / stage); tenders without a matched subscription
+        get a bare lead. On a single record, opens the resulting lead;
+        on a batch, opens the lead pipeline filtered to the new leads.
+        """
+        created = self.env["crm.lead"]
+        for tender in self:
+            if tender.lead_id:
+                continue
+            subscription = tender.matched_subscription_ids[:1]
+            lead = tender._create_lead(subscription or self.env["prozorro.subscription"])
+            created |= lead
+        if len(self) == 1:
+            return self.action_open_lead()
+        if not created:
+            return {
+                "type": "ir.actions.client",
+                "tag": "display_notification",
+                "params": {
+                    "title": _("No new leads"),
+                    "message": _("All selected tenders already had a linked lead."),
+                    "type": "warning",
+                    "sticky": False,
+                },
+            }
+        return {
+            "type": "ir.actions.act_window",
+            "name": _("New leads"),
+            "res_model": "crm.lead",
+            "view_mode": "list,form",
+            "domain": [("id", "in", created.ids)],
+        }
+
+    def action_open_lead(self):
+        self.ensure_one()
+        if not self.lead_id:
+            return False
+        return {
+            "type": "ir.actions.act_window",
+            "name": _("CRM Lead"),
+            "res_model": "crm.lead",
+            "res_id": self.lead_id.id,
+            "view_mode": "form",
+            "target": "current",
         }

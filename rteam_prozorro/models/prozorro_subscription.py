@@ -59,7 +59,15 @@ class ProzorroSubscription(models.Model):
         help="Match tenders run with any of these procurement procedures. Empty = any procedure.",
     )
 
-    create_lead = fields.Boolean(default=True, tracking=True)
+    create_lead = fields.Boolean(
+        string="Auto-create lead",
+        default=False,
+        tracking=True,
+        help="If on, every matched tender automatically becomes a CRM lead. "
+        "Leave OFF for high-volume subscriptions: matches are persisted as "
+        "Prozorro Tenders and operators promote them to leads via the "
+        "'Convert to lead' button on the tender form.",
+    )
     assign_to_user_id = fields.Many2one("res.users", string="Assign lead to")
     tag_ids = fields.Many2many("crm.tag", string="Tags applied to lead")
     stage_id = fields.Many2one("crm.stage", string="Lead stage")

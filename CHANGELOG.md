@@ -2,6 +2,25 @@
 
 All notable changes to `rteam_prozorro` are documented here.
 
+## [19.0.3.0.0] - 2026-04-28
+
+Two intertwined fixes for the lead-spam and sync-hang problems surfaced during ARAMIS dry runs.
+
+### Changed (BREAKING)
+- `prozorro.subscription.create_lead` default flipped from `True` to `False`. The previous behaviour spammed the CRM pipeline with a separate lead per matched tender (459 leads from one Sync now is real). Existing subscriptions keep their stored value; only the default for new subscriptions changes.
+- Field renamed in UI: `Create Lead` -> `Auto-create lead`, with a help line clarifying that the off-state expects manual promotion via the new tender-form button.
+
+### Added
+- `action_convert_to_lead` on `prozorro.tender`: idempotent button that promotes one tender (or a multi-selection from the list) to a `crm.lead`. Uses the first matched subscription as context for team / user / tags / stage; falls back to a bare lead when no subscription is on record.
+- `action_open_lead` helper that opens the linked lead form. Tender form header now shows "Convert to lead" when no lead, "Open lead" otherwise.
+- Tender list header gains a multi-select "Convert to lead" button so an operator can triage 50 matches into 5 leads in one click.
+
+### Fixed
+- Sync now froze the browser for up to 7.5 minutes because it ran the feed pull (up to 2000 HTTP fetches) inside the HTTP request. `action_sync_now` now hands off to the existing `prozorro_sync_feed` cron via `_trigger()` and returns a "Sync queued" toast immediately. The cron worker picks it up within ~60s. Operators refresh the Tenders list to see new matches.
+
+### Migration note
+Subscriptions created before this version that had `create_lead=True` continue to auto-create leads. To switch them to manual workflow, untick `Auto-create lead` on the subscription form. No SQL migration required.
+
 ## [19.0.2.3.0] - 2026-04-28
 
 ### Added
