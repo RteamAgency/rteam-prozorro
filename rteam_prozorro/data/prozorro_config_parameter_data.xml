@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="ir_config_parameter_prozorro_api_url" model="ir.config_parameter">
+        <field name="key">prozorro.api_url</field>
+        <field name="value">https://public.api.openprocurement.org/api/2.5/tenders</field>
+    </record>
+    <record id="ir_config_parameter_prozorro_pages_per_run" model="ir.config_parameter">
+        <field name="key">prozorro.pages_per_run</field>
+        <field name="value">20</field>
+    </record>
+    <record id="ir_config_parameter_prozorro_retention_days" model="ir.config_parameter">
+        <field name="key">prozorro.retention_days</field>
+        <field name="value">60</field>
+    </record>
+</odoo>

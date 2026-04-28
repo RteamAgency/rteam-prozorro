@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!--
+        Sample CPV / DK021:2015 codes. This is a representative subset for the
+        scaffold release; the full ~9700-code dictionary will be loaded in a
+        follow-up commit from the official CSV. Codes here are chosen to cover
+        the ARAMIS founding-case domain (lasers, machine tools, IT services,
+        construction, services).
+    -->
+
+    <record id="cpv_30000000_9" model="prozorro.classification">
+        <field name="code">30000000-9</field>
+        <field name="name">Office and computing machinery, equipment and supplies</field>
+        <field name="scheme">ДК021</field>
+    </record>
+    <record id="cpv_30100000_3" model="prozorro.classification">
+        <field name="code">30100000-3</field>
+        <field name="name">Office machinery, equipment and supplies</field>
+        <field name="scheme">ДК021</field>
+        <field name="parent_id" ref="cpv_30000000_9"/>
+    </record>
+    <record id="cpv_30200000_1" model="prozorro.classification">
+        <field name="code">30200000-1</field>
+        <field name="name">Computer equipment and supplies</field>
+        <field name="scheme">ДК021</field>
+        <field name="parent_id" ref="cpv_30000000_9"/>
+    </record>
+
+    <record id="cpv_31000000_6" model="prozorro.classification">
+        <field name="code">31000000-6</field>
+        <field name="name">Electrical machinery, apparatus, equipment and consumables; lighting</field>
+        <field name="scheme">ДК021</field>
+    </record>
+
+    <record id="cpv_33000000_0" model="prozorro.classification">
+        <field name="code">33000000-0</field>
+        <field name="name">Medical equipments, pharmaceuticals and personal care products</field>
+        <field name="scheme">ДК021</field>
+    </record>
+
+    <record id="cpv_34000000_7" model="prozorro.classification">
+        <field name="code">34000000-7</field>
+        <field name="name">Transport equipment and auxiliary products to transportation</field>
+        <field name="scheme">ДК021</field>
+    </record>
+
+    <record id="cpv_35000000_4" model="prozorro.classification">
+        <field name="code">35000000-4</field>
+        <field name="name">Security, fire-fighting, police and defence equipment</field>
+        <field name="scheme">ДК021</field>
+    </record>
+
+    <record id="cpv_42000000_6" model="prozorro.classification">
+        <field name="code">42000000-6</field>
+        <field name="name">Industrial machinery</field>
+        <field name="scheme">ДК021</field>
+    </record>
+    <record id="cpv_42600000_2" model="prozorro.classification">
+        <field name="code">42600000-2</field>
+        <field name="name">Machine tools</field>
+        <field name="scheme">ДК021</field>
+        <field name="parent_id" ref="cpv_42000000_6"/>
+    </record>
+    <record id="cpv_42610000_5" model="prozorro.classification">
+        <field name="code">42610000-5</field>
+        <field name="name">Lasers and machines fitted with lasers</field>
+        <field name="scheme">ДК021</field>
+        <field name="parent_id" ref="cpv_42600000_2"/>
+    </record>
+    <record id="cpv_42612000_9" model="prozorro.classification">
+        <field name="code">42612000-9</field>
+        <field name="name">Machining centres</field>
+        <field name="scheme">ДК021</field>
+        <field name="parent_id" ref="cpv_42600000_2"/>
+    </record>
+    <record id="cpv_42620000_8" model="prozorro.classification">
+        <field name="code">42620000-8</field>
+        <field name="name">Lathes, drilling and milling machine tools</field>
+        <field name="scheme">ДК021</field>
+        <field name="parent_id" ref="cpv_42600000_2"/>
+    </record>
+
+    <record id="cpv_44000000_0" model="prozorro.classification">
+        <field name="code">44000000-0</field>
+        <field name="name">Construction structures and materials; auxiliary products to construction</field>
+        <field name="scheme">ДК021</field>
+    </record>
+
+    <record id="cpv_45000000_7" model="prozorro.classification">
+        <field name="code">45000000-7</field>
+        <field name="name">Construction work</field>
+        <field name="scheme">ДК021</field>
+    </record>
+
+    <record id="cpv_50000000_5" model="prozorro.classification">
+        <field name="code">50000000-5</field>
+        <field name="name">Repair and maintenance services</field>
+        <field name="scheme">ДК021</field>
+    </record>
+
+    <record id="cpv_55000000_0" model="prozorro.classification">
+        <field name="code">55000000-0</field>
+        <field name="name">Hotel, restaurant and retail trade services</field>
+        <field name="scheme">ДК021</field>
+    </record>
+
+    <record id="cpv_60000000_8" model="prozorro.classification">
+        <field name="code">60000000-8</field>
+        <field name="name">Transport services (excluding waste transport)</field>
+        <field name="scheme">ДК021</field>
+    </record>
+
+    <record id="cpv_71000000_8" model="prozorro.classification">
+        <field name="code">71000000-8</field>
+        <field name="name">Architectural, construction, engineering and inspection services</field>
+        <field name="scheme">ДК021</field>
+    </record>
+
+    <record id="cpv_72000000_5" model="prozorro.classification">
+        <field name="code">72000000-5</field>
+        <field name="name">IT services: consulting, software development, Internet and support</field>
+        <field name="scheme">ДК021</field>
+    </record>
+    <record id="cpv_72200000_7" model="prozorro.classification">
+        <field name="code">72200000-7</field>
+        <field name="name">Software programming and consultancy services</field>
+        <field name="scheme">ДК021</field>
+        <field name="parent_id" ref="cpv_72000000_5"/>
+    </record>
+    <record id="cpv_72260000_5" model="prozorro.classification">
+        <field name="code">72260000-5</field>
+        <field name="name">Software-related services</field>
+        <field name="scheme">ДК021</field>
+        <field name="parent_id" ref="cpv_72000000_5"/>
+    </record>
+    <record id="cpv_72500000_0" model="prozorro.classification">
+        <field name="code">72500000-0</field>
+        <field name="name">Computer-related services</field>
+        <field name="scheme">ДК021</field>
+        <field name="parent_id" ref="cpv_72000000_5"/>
+    </record>
+
+    <record id="cpv_75000000_6" model="prozorro.classification">
+        <field name="code">75000000-6</field>
+        <field name="name">Administration, defence and social security services</field>
+        <field name="scheme">ДК021</field>
+    </record>
+
+    <record id="cpv_79000000_4" model="prozorro.classification">
+        <field name="code">79000000-4</field>
+        <field name="name">Business services: law, marketing, consulting, recruitment, printing and security</field>
+        <field name="scheme">ДК021</field>
+    </record>
+
+    <record id="cpv_80000000_4" model="prozorro.classification">
+        <field name="code">80000000-4</field>
+        <field name="name">Education and training services</field>
+        <field name="scheme">ДК021</field>
+    </record>
+
+    <record id="cpv_85000000_9" model="prozorro.classification">
+        <field name="code">85000000-9</field>
+        <field name="name">Health and social work services</field>
+        <field name="scheme">ДК021</field>
+    </record>
+
+    <record id="cpv_90000000_7" model="prozorro.classification">
+        <field name="code">90000000-7</field>
+        <field name="name">Sewage, refuse, cleaning and environmental services</field>
+        <field name="scheme">ДК021</field>
+    </record>
+
+    <record id="cpv_98000000_3" model="prozorro.classification">
+        <field name="code">98000000-3</field>
+        <field name="name">Other community, social and personal services</field>
+        <field name="scheme">ДК021</field>
+    </record>
+</odoo>

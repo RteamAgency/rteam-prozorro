@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="mail_template_prozorro_new_match" model="mail.template">
+        <field name="name">Prozorro: new tender match</field>
+        <field name="model_id" ref="model_prozorro_tender"/>
+        <field name="subject">[Prozorro] {{ object.name }} - {{ (object.title or '')[:50] }}</field>
+        <field name="email_from">{{ (object.company_id.email or user.email or '') }}</field>
+        <field name="email_to">{{ object.matched_subscription_ids[:1].user_id.email if object.matched_subscription_ids and object.matched_subscription_ids[:1].user_id else '' }}</field>
+        <field name="auto_delete" eval="True"/>
+        <field name="body_html" type="html">
+<div style="font-family:Arial,sans-serif;color:#0A1628">
+    <div style="display:inline-block;padding:4px 12px;background:#1f7a8c;color:#fff;font-weight:bold;border-radius:3px;font-size:12px;letter-spacing:0.5px">NEW MATCH</div>
+    <h2 style="margin-top:12px" t-out="object.title or object.name"/>
+    <p style="margin:6px 0;color:#666">
+        <span t-out="object.procuring_entity_name or ''"/>
+        <t t-if="object.procuring_entity_region"> &#183; <span t-out="object.procuring_entity_region"/></t>
+    </p>
+    <p style="margin:6px 0">
+        <b>Status:</b> <span t-out="object.status or ''"/>
+        <t t-if="object.value_amount"> &#183; <b>Value:</b>
+            <span t-out="object.value_amount"/> <span t-out="object.value_currency_id.name or ''"/>
+        </t>
+    </p>
+    <p style="margin:6px 0">
+        <t t-if="object.tender_period_end"><b>Tendering ends:</b> <span t-out="object.tender_period_end"/></t>
+    </p>
+    <p style="margin:14px 0">
+        <a t-att-href="object.url"
+           style="display:inline-block;padding:8px 16px;background:#1f7a8c;color:#fff;text-decoration:none;border-radius:3px;font-weight:bold">
+            Open in Prozorro
+        </a>
+        &#160;
+        <a t-att-href="'/odoo/action-prozorro.action_prozorro_tender/' + str(object.id)"
+           style="display:inline-block;padding:8px 16px;background:#0A1628;color:#fff;text-decoration:none;border-radius:3px;font-weight:bold">
+            View in Odoo
+        </a>
+    </p>
+    <details>
+        <summary style="cursor:pointer;color:#666;font-size:13px;padding:6px 0">
+            Show items
+        </summary>
+        <pre style="background:#f5f5f5;padding:10px;border-radius:3px;font-size:12px;white-space:pre-wrap" t-out="object.items_summary or ''"/>
+    </details>
+</div>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="module_category_prozorro" model="ir.module.category">
+        <field name="name">Prozorro</field>
+        <field name="description">Prozorro tender monitoring and CRM automation</field>
+        <field name="sequence">21</field>
+    </record>
+
+    <record id="group_prozorro_user" model="res.groups">
+        <field name="name">Prozorro: User</field>
+        <field name="category_id" ref="module_category_prozorro"/>
+        <field name="comment">Read tenders, manage own subscriptions.</field>
+    </record>
+
+    <record id="group_prozorro_manager" model="res.groups">
+        <field name="name">Prozorro: Manager</field>
+        <field name="category_id" ref="module_category_prozorro"/>
+        <field name="implied_ids" eval="[(4, ref('group_prozorro_user'))]"/>
+        <field name="users" eval="[(4, ref('base.user_admin'))]"/>
+        <field name="comment">Configure API URL, all subscriptions, all tenders.</field>
+    </record>
+
+    <record id="prozorro_subscription_user_rule" model="ir.rule">
+        <field name="name">Prozorro Subscription: own + global</field>
+        <field name="model_id" ref="model_prozorro_subscription"/>
+        <field name="domain_force">['|', ('user_id', '=', user.id), ('user_id', '=', False)]</field>
+        <field name="groups" eval="[(4, ref('group_prozorro_user'))]"/>
+    </record>
+
+    <record id="prozorro_subscription_manager_rule" model="ir.rule">
+        <field name="name">Prozorro Subscription: manager all</field>
+        <field name="model_id" ref="model_prozorro_subscription"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_prozorro_manager'))]"/>
+    </record>
+
+    <record id="prozorro_tender_company_rule" model="ir.rule">
+        <field name="name">Prozorro Tender: multi-company</field>
+        <field name="model_id" ref="model_prozorro_tender"/>
+        <field name="domain_force">['|', ('company_id', 'in', company_ids), ('company_id', '=', False)]</field>
+        <field name="global" eval="True"/>
+    </record>
+</odoo>

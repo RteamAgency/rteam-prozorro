@@ -1,0 +1,11 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_prozorro_classification_user,prozorro.classification.user,model_prozorro_classification,group_prozorro_user,1,0,0,0
+access_prozorro_classification_manager,prozorro.classification.manager,model_prozorro_classification,group_prozorro_manager,1,1,1,1
+access_prozorro_subscription_user,prozorro.subscription.user,model_prozorro_subscription,group_prozorro_user,1,1,1,1
+access_prozorro_subscription_manager,prozorro.subscription.manager,model_prozorro_subscription,group_prozorro_manager,1,1,1,1
+access_prozorro_subscription_keyword_user,prozorro.subscription.keyword.user,model_prozorro_subscription_keyword,group_prozorro_user,1,1,1,1
+access_prozorro_subscription_keyword_manager,prozorro.subscription.keyword.manager,model_prozorro_subscription_keyword,group_prozorro_manager,1,1,1,1
+access_prozorro_tender_user,prozorro.tender.user,model_prozorro_tender,group_prozorro_user,1,0,0,0
+access_prozorro_tender_manager,prozorro.tender.manager,model_prozorro_tender,group_prozorro_manager,1,1,1,1
+access_prozorro_sync_cursor_user,prozorro.sync.cursor.user,model_prozorro_sync_cursor,group_prozorro_user,1,0,0,0
+access_prozorro_sync_cursor_manager,prozorro.sync.cursor.manager,model_prozorro_sync_cursor,group_prozorro_manager,1,1,1,1

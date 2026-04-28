@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="prozorro_tender_view_search" model="ir.ui.view">
+        <field name="name">prozorro.tender.search</field>
+        <field name="model">prozorro.tender</field>
+        <field name="arch" type="xml">
+            <search string="Tenders">
+                <field name="name"/>
+                <field name="title"/>
+                <field name="procuring_entity_name"/>
+                <field name="procuring_entity_edrpou"/>
+                <field name="classification_ids"/>
+                <field name="matched_subscription_ids"/>
+                <filter name="tendering" string="Tendering" domain="[('status','=','active.tendering')]"/>
+                <filter name="qualification" string="Qualification" domain="[('status','=','active.qualification')]"/>
+                <filter name="awarded" string="Awarded" domain="[('status','=','active.awarded')]"/>
+                <filter name="complete" string="Complete" domain="[('status','=','complete')]"/>
+                <separator/>
+                <filter name="with_lead" string="With CRM lead" domain="[('lead_id','!=',False)]"/>
+                <filter name="without_lead" string="No lead yet" domain="[('lead_id','=',False)]"/>
+                <separator/>
+                <filter name="ending_soon" string="Tendering ends in 7 days"
+                        domain="[('tender_period_end','&gt;=', context_today().strftime('%Y-%m-%d')),
+                                 ('tender_period_end','&lt;=', (context_today() + relativedelta(days=7)).strftime('%Y-%m-%d'))]"/>
+                <group expand="0" string="Group by">
+                    <filter name="group_status" string="Status" context="{'group_by':'status'}"/>
+                    <filter name="group_subscription" string="Subscription" context="{'group_by':'matched_subscription_ids'}"/>
+                    <filter name="group_region" string="Region" context="{'group_by':'procuring_entity_region'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="prozorro_tender_view_list" model="ir.ui.view">
+        <field name="name">prozorro.tender.list</field>
+        <field name="model">prozorro.tender</field>
+        <field name="arch" type="xml">
+            <list string="Tenders" decoration-success="status=='complete'" decoration-info="status=='active.tendering'" decoration-warning="status=='active.qualification'" decoration-muted="status=='cancelled'">
+                <field name="name"/>
+                <field name="title"/>
+                <field name="status"/>
+                <field name="value_amount" sum="Total"/>
+                <field name="value_currency_id" optional="hide"/>
+                <field name="procuring_entity_name" optional="show"/>
+                <field name="procuring_entity_region" optional="show"/>
+                <field name="tender_period_end" optional="show"/>
+                <field name="lead_id" optional="show"/>
+                <field name="date_imported" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="prozorro_tender_view_kanban" model="ir.ui.view">
+        <field name="name">prozorro.tender.kanban</field>
+        <field name="model">prozorro.tender</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="status" class="o_kanban_small_column">
+                <field name="name"/>
+                <field name="title"/>
+                <field name="status"/>
+                <field name="value_amount"/>
+                <field name="value_currency_id"/>
+                <field name="procuring_entity_name"/>
+                <field name="tender_period_end"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_card oe_kanban_global_click">
+                            <div class="o_kanban_record_top">
+                                <strong><field name="name"/></strong>
+                            </div>
+                            <div class="o_kanban_record_body">
+                                <div t-if="record.title.raw_value" class="text-truncate">
+                                    <field name="title"/>
+                                </div>
+                                <div class="text-muted o_text_overflow">
+                                    <field name="procuring_entity_name"/>
+                                </div>
+                                <div t-if="record.value_amount.raw_value">
+                                    <strong><field name="value_amount" widget="monetary"/></strong>
+                                </div>
+                                <div t-if="record.tender_period_end.raw_value" class="text-muted small">
+                                    Ends: <field name="tender_period_end"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="prozorro_tender_view_form" model="ir.ui.view">
+        <field name="name">prozorro.tender.form</field>
+        <field name="model">prozorro.tender</field>
+        <field name="arch" type="xml">
+            <form string="Tender">
+                <header>
+                    <button name="action_open_in_prozorro" type="object" string="Open in Prozorro" class="btn-primary"/>
+                    <field name="status" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" type="object" name="action_open_in_prozorro" icon="fa-external-link">
+                            <span class="o_stat_text">Prozorro</span>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" readonly="1"/></h1>
+                        <h2><field name="title" readonly="1"/></h2>
+                    </div>
+                    <group>
+                        <group string="Procurement">
+                            <field name="procurement_method"/>
+                            <field name="procurement_method_type"/>
+                            <field name="value_amount" widget="monetary"/>
+                            <field name="value_currency_id"/>
+                        </group>
+                        <group string="Procuring entity">
+                            <field name="procuring_entity_name"/>
+                            <field name="procuring_entity_edrpou"/>
+                            <field name="procuring_entity_country"/>
+                            <field name="procuring_entity_region"/>
+                            <field name="procuring_entity_locality"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Key dates">
+                            <field name="tender_period_start"/>
+                            <field name="tender_period_end"/>
+                            <field name="enquiry_period_end"/>
+                            <field name="auction_period_start"/>
+                        </group>
+                        <group string="CRM">
+                            <field name="matched_subscription_ids" widget="many2many_tags"/>
+                            <field name="lead_id"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Items">
+                            <field name="items_summary" readonly="1" nolabel="1"/>
+                            <field name="items_count" readonly="1"/>
+                            <field name="classification_ids" widget="many2many_tags"/>
+                        </page>
+                        <page string="Description">
+                            <field name="description" readonly="1" nolabel="1"/>
+                        </page>
+                        <page string="Raw payload">
+                            <field name="api_url" readonly="1"/>
+                            <field name="raw_json" readonly="1" nolabel="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_prozorro_tender" model="ir.actions.act_window">
+        <field name="name">Tenders</field>
+        <field name="res_model">prozorro.tender</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="search_view_id" ref="prozorro_tender_view_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No matched tenders yet.</p>
+            <p>Once you have at least one active subscription, the hourly cron will populate this list as new tenders match your rules.</p>
+        </field>
+    </record>
+</odoo>

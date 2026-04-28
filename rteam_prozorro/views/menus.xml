@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_prozorro_root"
+              name="Prozorro"
+              web_icon="rteam_prozorro,static/description/icon.png"
+              sequence="100"
+              groups="rteam_prozorro.group_prozorro_user"/>
+
+    <menuitem id="menu_prozorro_tenders"
+              name="Tenders"
+              parent="menu_prozorro_root"
+              action="action_prozorro_tender"
+              sequence="10"/>
+
+    <menuitem id="menu_prozorro_subscriptions"
+              name="Subscriptions"
+              parent="menu_prozorro_root"
+              action="action_prozorro_subscription"
+              sequence="20"/>
+
+    <menuitem id="menu_prozorro_config"
+              name="Configuration"
+              parent="menu_prozorro_root"
+              sequence="90"
+              groups="rteam_prozorro.group_prozorro_manager"/>
+
+    <menuitem id="menu_prozorro_classification"
+              name="CPV Codes"
+              parent="menu_prozorro_config"
+              action="action_prozorro_classification"
+              sequence="10"/>
+
+    <menuitem id="menu_prozorro_settings"
+              name="Settings"
+              parent="menu_prozorro_config"
+              action="action_prozorro_settings"
+              sequence="90"/>
+</odoo>
