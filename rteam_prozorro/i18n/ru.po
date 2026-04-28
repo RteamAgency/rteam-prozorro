@@ -1109,16 +1109,16 @@ msgid "3af829c1a9af4812a5c2c4bf090f2b44 or full prozorro.gov.ua URL"
 msgstr "3af829c1a9af4812a5c2c4bf090f2b44 или полный URL prozorro.gov.ua"
 
 #. module: rteam_prozorro
-#: rteam_prozorro/models/prozorro_subscription_keyword.py:52
+#: code:rteam_prozorro/models/prozorro_subscription_keyword.py:52
 msgid "Invalid regex %r: %s"
 msgstr "Неверное регулярное выражение %r: %s"
 
 #. module: rteam_prozorro
-#: rteam_prozorro/models/prozorro_tender.py:241
+#: code:rteam_prozorro/models/prozorro_tender.py:241
 msgid "Pulled %(pulled)s tenders, %(matched)s matched. "
 msgstr "Получено %(pulled)s тендеров, совпадений: %(matched)s. "
 
 #. module: rteam_prozorro
-#: rteam_prozorro/models/prozorro_tender.py:282
+#: code:rteam_prozorro/models/prozorro_tender.py:282
 msgid "A background sync was scheduled. Refresh the Tenders list "
 msgstr "Запланирована фоновая синхронизация. Обновите список тендеров "

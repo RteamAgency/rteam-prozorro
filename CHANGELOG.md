@@ -2,6 +2,11 @@
 
 All notable changes to `rteam_prozorro` are documented here.
 
+## [19.0.5.2.4] - 2026-04-28
+
+### Fixed
+- The 3 Python `_()` references added in 19.0.5.2.3 were missing the required `code:` prefix on the `#:` reference line. Odoo's `TranslationFileReader` logged `malformed po file: unknown occurrence: rteam_prozorro/models/prozorro_*.py` at ERROR level, which Odoo.sh interprets as a failed build (build 31522903 went red even though the registry loaded fine). Added the `code:` prefix to all three references.
+
 ## [19.0.5.2.3] - 2026-04-28
 
 ### Added
