@@ -147,7 +147,14 @@ class ProzorroTender(models.Model):
 
     @api.model
     def _cron_sync_feed(self):
-        """Cron entry point. Always returns a result dict for the manual UI button to render."""
+        """Cron entry point. Always returns a result dict for the manual UI button to render.
+
+        Walks the Prozorro feed in descending order (latest tenders first). The
+        cursor stores the offset returned after the last walked page so the
+        next run continues backward from where the previous one stopped.
+        `descending=1` is preserved across pages within a single run (without
+        it the API switches to ascending and we'd skip past the latest tail).
+        """
         Cursor = self.env["prozorro.sync.cursor"]
         Subscription = self.env["prozorro.subscription"]
         cursor = Cursor._get_singleton("main")
@@ -159,9 +166,14 @@ class ProzorroTender(models.Model):
 
         base_url = self._get_api_base_url()
         max_pages = self._get_pages_per_run()
-        url = base_url + "?descending=1&limit=%d" % DEFAULT_PAGE_LIMIT
-        if cursor.offset:
-            url = base_url + "?offset=%s&limit=%d" % (cursor.offset, DEFAULT_PAGE_LIMIT)
+
+        def _page_url(offset):
+            params = f"descending=1&limit={DEFAULT_PAGE_LIMIT}"
+            if offset:
+                params += f"&offset={offset}"
+            return base_url + "?" + params
+
+        url = _page_url(cursor.offset)
 
         pulled, matched = 0, 0
         try:
@@ -191,7 +203,7 @@ class ProzorroTender(models.Model):
                 if not next_offset or next_offset == cursor.offset:
                     break
                 cursor.offset = next_offset
-                url = base_url + "?offset=%s&limit=%d" % (next_offset, DEFAULT_PAGE_LIMIT)
+                url = _page_url(next_offset)
 
         except (urllib.error.HTTPError, urllib.error.URLError, ValueError) as e:
             _logger.exception("Prozorro: sync failed")
@@ -227,16 +239,56 @@ class ProzorroTender(models.Model):
                     "sticky": False,
                 },
             }
+        pulled = result.get("pulled", 0) or 0
+        matched = result.get("matched", 0) or 0
+        if pulled == 0:
+            message = _(
+                "0 tenders pulled. The cursor may have run past the latest data; "
+                "click 'Reset cursor' on the Tenders list to rewind to the head of the feed."
+            )
+            ntype = "warning"
+        elif matched == 0:
+            message = _(
+                "Pulled %(pulled)s tenders but 0 matched any subscription. "
+                "Most likely your filters are too narrow: broaden the regions, "
+                "statuses, or value range and try again."
+            ) % {"pulled": pulled}
+            ntype = "warning"
+        else:
+            message = _("Pulled %(pulled)s tenders, %(matched)s matched.") % {
+                "pulled": pulled,
+                "matched": matched,
+            }
+            ntype = "success"
         return {
             "type": "ir.actions.client",
             "tag": "display_notification",
             "params": {
                 "title": _("Prozorro sync done"),
-                "message": _("Pulled %(pulled)s tenders, %(matched)s matched.")
-                % {"pulled": result.get("pulled", 0), "matched": result.get("matched", 0)},
+                "message": message,
+                "type": ntype,
+                "sticky": ntype != "success",
+                "next": {"type": "ir.actions.client", "tag": "soft_reload"},
+            },
+        }
+
+    def action_reset_sync_cursor(self):
+        """Rewind the feed cursor to the head so the next sync pulls latest tenders.
+
+        Manager-only debug helper. Useful when iterating on subscription rules:
+        without this you have to wait until the cron walks far enough back to
+        re-encounter tenders you have just made matchable.
+        """
+        cursor = self.env["prozorro.sync.cursor"]._get_singleton("main")
+        cursor.sudo().write({"offset": False, "last_error": False})
+        return {
+            "type": "ir.actions.client",
+            "tag": "display_notification",
+            "params": {
+                "title": _("Cursor reset"),
+                "message": _("The next sync will start from the latest tenders."),
                 "type": "success",
                 "sticky": False,
-                "next": {"type": "ir.actions.client", "tag": "soft_reload"},
             },
         }
 

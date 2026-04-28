@@ -2,6 +2,16 @@
 
 All notable changes to `rteam_prozorro` are documented here.
 
+## [19.0.2.2.0] - 2026-04-28
+
+### Fixed
+- Subscription form: CPV / DK021 section was a column of an inner two-column group and reserved a wide empty area when no codes were selected. Moved CPV out into its own full-width section below Region/Status/Method (and same for Keywords); empty subscription forms are now compact.
+- Feed sync direction bug: subsequent pages within one cron run dropped the `descending=1` query param, so the API silently switched to ascending and walked away from the latest tenders. URL builder now preserves `descending=1` across all pages of a run.
+
+### Added
+- "Reset cursor" header button on the Tenders list (manager-only, with confirm prompt). Clears `prozorro.sync.cursor.offset` so the next sync starts from the head of the feed; useful while tuning subscription rules so the cron doesn't have to walk all the way back through history.
+- Sync now notification is now diagnostic. Three branches: 0 pulled -> hint to reset cursor; >0 pulled but 0 matched -> hint to broaden filters; otherwise -> success. Sticky for warnings so the operator can read the hint.
+
 ## [19.0.2.1.0] - 2026-04-28
 
 ### Added

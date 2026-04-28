@@ -41,6 +41,11 @@
                             class="btn-primary"
                             display="always"
                             groups="rteam_prozorro.group_prozorro_manager"/>
+                    <button name="action_reset_sync_cursor" type="object" string="Reset cursor"
+                            class="btn-secondary"
+                            display="always"
+                            confirm="Rewind the feed cursor so the next sync pulls latest tenders. Continue?"
+                            groups="rteam_prozorro.group_prozorro_manager"/>
                 </header>
                 <field name="name"/>
                 <field name="title"/>

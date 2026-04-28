@@ -79,9 +79,6 @@
                     <notebook>
                         <page string="Filters">
                             <group>
-                                <group string="CPV / DK021">
-                                    <field name="classification_ids" widget="many2many_tags" nolabel="1" colspan="2"/>
-                                </group>
                                 <group string="Region / Status / Method">
                                     <field name="region_ids" widget="many2many_tags"
                                            options="{'no_create': True}"
@@ -93,22 +90,25 @@
                                            options="{'no_create': True}"
                                            placeholder="All procedure types"/>
                                 </group>
+                                <group string="Value range">
+                                    <field name="value_currency_id"/>
+                                    <field name="value_min"/>
+                                    <field name="value_max"/>
+                                </group>
                             </group>
-                            <group string="Value range">
-                                <field name="value_currency_id"/>
-                                <field name="value_min"/>
-                                <field name="value_max"/>
-                            </group>
-                            <group string="Keywords">
-                                <field name="keyword_ids" nolabel="1" colspan="2">
-                                    <list editable="bottom">
-                                        <field name="keyword"/>
-                                        <field name="field"/>
-                                        <field name="match_mode"/>
-                                        <field name="negate"/>
-                                    </list>
-                                </field>
-                            </group>
+                            <separator string="CPV / DK021 codes"/>
+                            <field name="classification_ids" widget="many2many_tags"
+                                   options="{'no_create': True}"
+                                   placeholder="Any CPV"/>
+                            <separator string="Keywords"/>
+                            <field name="keyword_ids" nolabel="1">
+                                <list editable="bottom">
+                                    <field name="keyword"/>
+                                    <field name="field"/>
+                                    <field name="match_mode"/>
+                                    <field name="negate"/>
+                                </list>
+                            </field>
                         </page>
                         <page string="Stats">
                             <group>
