@@ -21,5 +21,5 @@ class ResConfigSettings(models.TransientModel):
         config_parameter="prozorro.retention_days",
         default=60,
         help="Drop matched tenders this many days after tender_period_end "
-             "unless a CRM lead is linked.",
+        "unless a CRM lead is linked.",
     )

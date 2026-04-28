@@ -16,19 +16,30 @@ class ProzorroSubscriptionKeyword(models.Model):
     _description = "Prozorro Subscription Keyword"
 
     subscription_id = fields.Many2one(
-        "prozorro.subscription", required=True, ondelete="cascade", index=True,
+        "prozorro.subscription",
+        required=True,
+        ondelete="cascade",
+        index=True,
     )
     keyword = fields.Char(required=True)
-    field = fields.Selection([
-        ("title", "Title only"),
-        ("description", "Description only"),
-        ("items", "Items only"),
-        ("any", "Any text"),
-    ], default="any", required=True)
-    match_mode = fields.Selection([
-        ("contains", "Contains (case-insensitive)"),
-        ("regex", "Regex"),
-    ], default="contains", required=True)
+    field = fields.Selection(
+        [
+            ("title", "Title only"),
+            ("description", "Description only"),
+            ("items", "Items only"),
+            ("any", "Any text"),
+        ],
+        default="any",
+        required=True,
+    )
+    match_mode = fields.Selection(
+        [
+            ("contains", "Contains (case-insensitive)"),
+            ("regex", "Regex"),
+        ],
+        default="contains",
+        required=True,
+    )
     negate = fields.Boolean(string="Exclude when matched")
 
     @api.constrains("match_mode", "keyword")

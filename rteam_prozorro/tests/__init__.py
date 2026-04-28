@@ -1,2 +1,1 @@
-from . import test_subscription_match
-from . import test_feed_sync
+from . import test_feed_sync, test_subscription_match

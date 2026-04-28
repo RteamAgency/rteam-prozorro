@@ -4,7 +4,7 @@ import urllib.error
 import urllib.request
 from datetime import datetime, timedelta
 
-from odoo import _, api, fields, models
+from odoo import api, fields, models
 
 _logger = logging.getLogger(__name__)
 
@@ -48,7 +48,8 @@ class ProzorroTender(models.Model):
 
     value_amount = fields.Monetary(currency_field="value_currency_id", tracking=True)
     value_currency_id = fields.Many2one(
-        "res.currency", default=lambda s: s.env.ref("base.UAH", raise_if_not_found=False),
+        "res.currency",
+        default=lambda s: s.env.ref("base.UAH", raise_if_not_found=False),
     )
 
     procuring_entity_name = fields.Char(string="Procuring entity")
@@ -72,13 +73,19 @@ class ProzorroTender(models.Model):
     date_imported = fields.Datetime(default=fields.Datetime.now, index=True)
     raw_json = fields.Text(string="Raw payload")
 
-    matched_subscription_ids = fields.Many2many("prozorro.subscription", string="Matched subscriptions")
+    matched_subscription_ids = fields.Many2many(
+        "prozorro.subscription", string="Matched subscriptions"
+    )
     lead_id = fields.Many2one("crm.lead", string="CRM Lead", ondelete="set null", index=True)
     company_id = fields.Many2one(
-        "res.company", default=lambda s: s.env.company, required=True,
+        "res.company",
+        default=lambda s: s.env.company,
+        required=True,
     )
 
-    _sql_constraints = [("prozorro_tender_uuid_uniq", "unique(uuid)", "Tender UUID must be unique."),]
+    _sql_constraints = [
+        ("prozorro_tender_uuid_uniq", "unique(uuid)", "Tender UUID must be unique."),
+    ]
 
     # ------------------------------------------------------------------ Compute
 
@@ -91,25 +98,40 @@ class ProzorroTender(models.Model):
 
     @api.model
     def _get_api_base_url(self):
-        return self.env["ir.config_parameter"].sudo().get_param(
-            "prozorro.api_url", DEFAULT_API_URL,
+        return (
+            self.env["ir.config_parameter"]
+            .sudo()
+            .get_param(
+                "prozorro.api_url",
+                DEFAULT_API_URL,
+            )
         )
 
     @api.model
     def _get_pages_per_run(self):
         try:
-            return int(self.env["ir.config_parameter"].sudo().get_param(
-                "prozorro.pages_per_run", DEFAULT_PAGES_PER_RUN,
-            ))
+            return int(
+                self.env["ir.config_parameter"]
+                .sudo()
+                .get_param(
+                    "prozorro.pages_per_run",
+                    DEFAULT_PAGES_PER_RUN,
+                )
+            )
         except (TypeError, ValueError):
             return DEFAULT_PAGES_PER_RUN
 
     @api.model
     def _get_retention_days(self):
         try:
-            return int(self.env["ir.config_parameter"].sudo().get_param(
-                "prozorro.retention_days", DEFAULT_RETENTION_DAYS,
-            ))
+            return int(
+                self.env["ir.config_parameter"]
+                .sudo()
+                .get_param(
+                    "prozorro.retention_days",
+                    DEFAULT_RETENTION_DAYS,
+                )
+            )
         except (TypeError, ValueError):
             return DEFAULT_RETENTION_DAYS
 
@@ -158,7 +180,7 @@ class ProzorroTender(models.Model):
                     tender_payload = full.get("data") or {}
                     if not tender_payload:
                         continue
-                    matches = subs.filtered(lambda s: s._matches(tender_payload))
+                    matches = subs.filtered(lambda s, tp=tender_payload: s._matches(tp))
                     if matches:
                         self._upsert_tender(tender_payload, matches, base_url)
                         matched += 1
@@ -221,7 +243,7 @@ class ProzorroTender(models.Model):
 
         items = payload.get("items") or []
         items_summary = "\n".join(
-            "- %s (qty %s)" % (it.get("description") or "?", it.get("quantity") or "?")
+            f"- {it.get('description') or '?'} (qty {it.get('quantity') or '?'})"
             for it in items[:30]
         )
 
@@ -234,11 +256,13 @@ class ProzorroTender(models.Model):
 
         # CPV / classification handling
         Classification = self.env["prozorro.classification"]
-        codes = sorted({
-            (it.get("classification") or {}).get("id")
-            for it in items
-            if (it.get("classification") or {}).get("id")
-        })
+        codes = sorted(
+            {
+                (it.get("classification") or {}).get("id")
+                for it in items
+                if (it.get("classification") or {}).get("id")
+            }
+        )
         cls_ids = []
         for code in codes:
             cls = Classification.search([("code", "=", code)], limit=1)
@@ -246,14 +270,20 @@ class ProzorroTender(models.Model):
                 # Auto-create unknown CPV codes as bare placeholders. The full
                 # DK021:2015 dictionary is preloaded but reality drifts; missing
                 # codes still need to be linkable.
-                cls = Classification.sudo().create({
-                    "code": code,
-                    "name": (next(
-                        ((it.get("classification") or {}).get("description") or "")
-                        for it in items
-                        if (it.get("classification") or {}).get("id") == code
-                    ), "")[0] or code,
-                })
+                cls = Classification.sudo().create(
+                    {
+                        "code": code,
+                        "name": (
+                            next(
+                                ((it.get("classification") or {}).get("description") or "")
+                                for it in items
+                                if (it.get("classification") or {}).get("id") == code
+                            ),
+                            "",
+                        )[0]
+                        or code,
+                    }
+                )
             cls_ids.append(cls.id)
 
         return {
@@ -307,9 +337,7 @@ class ProzorroTender(models.Model):
             f"Procuring entity: {self.procuring_entity_name or '?'}",
         ]
         if self.value_amount:
-            body_lines.append(
-                f"Value: {self.value_amount} {self.value_currency_id.name or ''}"
-            )
+            body_lines.append(f"Value: {self.value_amount} {self.value_currency_id.name or ''}")
         if self.tender_period_end:
             body_lines.append(f"Tendering ends: {self.tender_period_end}")
         if self.url:
@@ -345,10 +373,13 @@ class ProzorroTender(models.Model):
         """Drop matched tenders that finished long ago and are not linked to a CRM lead."""
         days = self._get_retention_days()
         cutoff = fields.Datetime.now() - timedelta(days=days)
-        stale = self.search([
-            ("tender_period_end", "<", cutoff),
-            ("lead_id", "=", False),
-        ], limit=500)
+        stale = self.search(
+            [
+                ("tender_period_end", "<", cutoff),
+                ("lead_id", "=", False),
+            ],
+            limit=500,
+        )
         if stale:
             _logger.info("Prozorro: pruning %d stale tenders older than %d days", len(stale), days)
             stale.unlink()

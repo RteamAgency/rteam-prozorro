@@ -20,14 +20,19 @@ def make_tender(**overrides):
         "items": [
             {
                 "description": "Лазер промисловий 6 кВт",
-                "classification": {"scheme": "ДК021", "id": "42610000-5",
-                                   "description": "Lasers and machines fitted with lasers"},
+                "classification": {
+                    "scheme": "ДК021",
+                    "id": "42610000-5",
+                    "description": "Lasers and machines fitted with lasers",
+                },
                 "quantity": 2,
                 "unit": {"name": "шт"},
             }
         ],
-        "tenderPeriod": {"startDate": "2026-04-28T10:00:00+03:00",
-                         "endDate": "2026-05-28T18:00:00+03:00"},
+        "tenderPeriod": {
+            "startDate": "2026-04-28T10:00:00+03:00",
+            "endDate": "2026-05-28T18:00:00+03:00",
+        },
         "dateModified": "2026-04-28T10:30:00+03:00",
     }
     base.update(overrides)
@@ -98,20 +103,26 @@ class TestSubscriptionMatch(TransactionCase):
 
     def test_keyword_negate(self):
         sub = self._make_subscription()
-        self.Keyword.create({"subscription_id": sub.id, "keyword": "лазер",
-                             "field": "any", "negate": True})
+        self.Keyword.create(
+            {"subscription_id": sub.id, "keyword": "лазер", "field": "any", "negate": True}
+        )
         self.assertFalse(sub._matches(make_tender()))
 
     def test_keyword_regex(self):
         sub = self._make_subscription()
-        self.Keyword.create({"subscription_id": sub.id, "keyword": r"\d+ кВт",
-                             "field": "any", "match_mode": "regex"})
+        self.Keyword.create(
+            {
+                "subscription_id": sub.id,
+                "keyword": r"\d+ кВт",
+                "field": "any",
+                "match_mode": "regex",
+            }
+        )
         self.assertTrue(sub._matches(make_tender()))
 
     def test_keyword_in_items_only(self):
         sub = self._make_subscription()
-        self.Keyword.create({"subscription_id": sub.id, "keyword": "верстат",
-                             "field": "items"})
+        self.Keyword.create({"subscription_id": sub.id, "keyword": "верстат", "field": "items"})
         self.assertTrue(sub._matches(make_tender()))
 
     def test_method_type_filter(self):

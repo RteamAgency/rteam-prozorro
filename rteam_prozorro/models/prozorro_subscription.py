@@ -19,14 +19,19 @@ class ProzorroSubscription(models.Model):
     user_id = fields.Many2one("res.users", default=lambda s: s.env.user, tracking=True)
     team_id = fields.Many2one("crm.team", string="Sales Team")
     company_id = fields.Many2one(
-        "res.company", default=lambda s: s.env.company, required=True,
+        "res.company",
+        default=lambda s: s.env.company,
+        required=True,
     )
 
     classification_ids = fields.Many2many(
-        "prozorro.classification", string="CPV / DK021 codes",
+        "prozorro.classification",
+        string="CPV / DK021 codes",
         help="Match tenders whose items reference any of these codes. Empty = any.",
     )
-    keyword_ids = fields.One2many("prozorro.subscription.keyword", "subscription_id", string="Keywords")
+    keyword_ids = fields.One2many(
+        "prozorro.subscription.keyword", "subscription_id", string="Keywords"
+    )
 
     region_filter = fields.Char(
         string="Region filter",
@@ -36,7 +41,8 @@ class ProzorroSubscription(models.Model):
     value_min = fields.Monetary(string="Min value", currency_field="value_currency_id")
     value_max = fields.Monetary(string="Max value", currency_field="value_currency_id")
     value_currency_id = fields.Many2one(
-        "res.currency", default=lambda s: s.env.ref("base.UAH", raise_if_not_found=False),
+        "res.currency",
+        default=lambda s: s.env.ref("base.UAH", raise_if_not_found=False),
     )
 
     status_filter = fields.Char(
@@ -89,9 +95,7 @@ class ProzorroSubscription(models.Model):
     def _build_haystacks(self, tender):
         title = tender.get("title") or ""
         desc = tender.get("description") or ""
-        items = "\n".join(
-            (it.get("description") or "") for it in tender.get("items") or []
-        )
+        items = "\n".join((it.get("description") or "") for it in tender.get("items") or [])
         return {
             "title": title,
             "description": desc,
@@ -134,7 +138,7 @@ class ProzorroSubscription(models.Model):
         regions = self._region_set()
         if regions:
             entity = tender.get("procuringEntity") or {}
-            address = (entity.get("address") or {})
+            address = entity.get("address") or {}
             tender_region = (address.get("region") or "").lower()
             if not any(r in tender_region for r in regions):
                 return False

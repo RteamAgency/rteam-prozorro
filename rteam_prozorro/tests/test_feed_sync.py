@@ -31,7 +31,7 @@ def fake_urlopen(payloads_by_url):
         for prefix, payload in payloads_by_url.items():
             if prefix in url:
                 return _MockResp(payload)
-        raise AssertionError("Unmocked URL: %s" % url)
+        raise AssertionError(f"Unmocked URL: {url}")
 
     with patch("urllib.request.urlopen", side_effect=_opener):
         yield
@@ -55,13 +55,15 @@ class TestFeedSync(TransactionCase):
             self.Tender._cron_sync_feed()  # must not raise
 
     def test_sync_creates_matched_tender_and_lead(self):
-        sub = self.Subscription.create({
-            "name": "Lasers test",
-            "active": True,
-            "create_lead": True,
-            "classification_ids": [(6, 0, [self.cpv_lasers.id])],
-            "status_filter": "active.tendering",
-        })
+        sub = self.Subscription.create(
+            {
+                "name": "Lasers test",
+                "active": True,
+                "create_lead": True,
+                "classification_ids": [(6, 0, [self.cpv_lasers.id])],
+                "status_filter": "active.tendering",
+            }
+        )
         self.Subscription.search([("id", "!=", sub.id)]).write({"active": False})
 
         feed_payload = {
@@ -83,11 +85,13 @@ class TestFeedSync(TransactionCase):
         self.assertEqual(tender.lead_id.prozorro_tender_id, tender)
 
     def test_sync_unmatched_not_persisted(self):
-        sub = self.Subscription.create({
-            "name": "IT-only",
-            "active": True,
-            "classification_ids": [(6, 0, [self.env.ref("rteam_prozorro.cpv_72000000_5").id])],
-        })
+        sub = self.Subscription.create(
+            {
+                "name": "IT-only",
+                "active": True,
+                "classification_ids": [(6, 0, [self.env.ref("rteam_prozorro.cpv_72000000_5").id])],
+            }
+        )
         self.Subscription.search([("id", "!=", sub.id)]).write({"active": False})
 
         feed_payload = {
@@ -103,19 +107,25 @@ class TestFeedSync(TransactionCase):
         self.assertFalse(self.Tender.search([("uuid", "=", "no-match-1")]))
 
     def test_sync_advances_cursor(self):
-        sub = self.Subscription.create({
-            "name": "any tendering", "active": True, "status_filter": "active.tendering",
-        })
+        sub = self.Subscription.create(
+            {
+                "name": "any tendering",
+                "active": True,
+                "status_filter": "active.tendering",
+            }
+        )
         self.Subscription.search([("id", "!=", sub.id)]).write({"active": False})
 
         feed_payload = {
             "data": [{"id": "x1"}],
             "next_page": {"offset": "OFFSET-NEXT"},
         }
-        with fake_urlopen({
-            self.Tender._get_api_base_url() + "?": feed_payload,
-            "/x1": {"data": make_tender(id="x1")},
-        }):
+        with fake_urlopen(
+            {
+                self.Tender._get_api_base_url() + "?": feed_payload,
+                "/x1": {"data": make_tender(id="x1")},
+            }
+        ):
             self.Tender._cron_sync_feed()
 
         cursor = self.Cursor._get_singleton("main")

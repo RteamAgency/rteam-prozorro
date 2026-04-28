@@ -17,13 +17,19 @@ class ProzorroClassification(models.Model):
     code = fields.Char(string="Code", required=True, index=True)
     name = fields.Char(string="Description", required=True, translate=True)
     scheme = fields.Char(string="Scheme", default="ДК021", index=True)
-    parent_id = fields.Many2one("prozorro.classification", string="Parent", index=True, ondelete="set null")
+    parent_id = fields.Many2one(
+        "prozorro.classification", string="Parent", index=True, ondelete="set null"
+    )
     child_ids = fields.One2many("prozorro.classification", "parent_id", string="Children")
     active = fields.Boolean(default=True)
     display_name = fields.Char(compute="_compute_display_name", store=True)
 
     _sql_constraints = [
-        ("prozorro_classification_code_uniq", "unique(code, scheme)", "CPV code must be unique per scheme."),
+        (
+            "prozorro_classification_code_uniq",
+            "unique(code, scheme)",
+            "CPV code must be unique per scheme.",
+        ),
     ]
 
     @api.depends("code", "name")
