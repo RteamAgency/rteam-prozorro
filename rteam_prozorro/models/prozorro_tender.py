@@ -2,6 +2,7 @@ import json
 import logging
 import urllib.error
 import urllib.request
+from collections import Counter
 from datetime import datetime, timedelta
 
 from odoo import _, api, fields, models
@@ -141,16 +142,24 @@ class ProzorroTender(models.Model):
         Cursor = self.env["prozorro.sync.cursor"]
         Subscription = self.env["prozorro.subscription"]
         cursor = Cursor._get_singleton("main")
-        cursor._record_start()
 
         subs = Subscription._get_active_subscriptions()
         if not subs:
             _logger.info("Prozorro: no active subscriptions, skipping sync")
-            cursor._record_skipped(_("no active subscriptions"))
             return {"pulled": 0, "matched": 0, "error": None, "skipped": True}
+
+        # Sync started: post a one-line chatter note on each active
+        # subscription so operators tailing a subscription see real-time
+        # activity instead of staring at a frozen list. mt_note keeps
+        # it silent (no email / Discuss ping).
+        subs.message_post(
+            body=_("Prozorro sync in progress..."),
+            subtype_xmlid="mail.mt_note",
+        )
 
         base_url = self._get_api_base_url()
         max_pages = self._get_pages_per_run()
+        per_sub_matched = Counter()
 
         def _page_url(offset):
             params = f"descending=1&limit={DEFAULT_PAGE_LIMIT}"
@@ -182,6 +191,8 @@ class ProzorroTender(models.Model):
                     if matches:
                         self._upsert_tender(tender_payload, matches, base_url)
                         matched += 1
+                        for sub in matches:
+                            per_sub_matched[sub.id] += 1
 
                 next_page = data.get("next_page") or {}
                 next_offset = next_page.get("offset")
@@ -193,11 +204,28 @@ class ProzorroTender(models.Model):
         except (urllib.error.HTTPError, urllib.error.URLError, ValueError) as e:
             _logger.exception("Prozorro: sync failed")
             cursor._record_error(str(e))
+            subs.message_post(
+                body=_("Prozorro sync failed: %s", str(e)[:200]),
+                subtype_xmlid="mail.mt_note",
+            )
             self._notify_sync_result(pulled, matched, error=str(e))
             return {"pulled": pulled, "matched": matched, "error": str(e), "skipped": False}
 
         cursor._record_success(pulled, matched)
         _logger.info("Prozorro: sync done. pulled=%d, matched=%d", pulled, matched)
+        # Per-subscription chatter line with the run's outcome FOR THIS
+        # subscription. Operators see "found N tenders" on the rule that
+        # found them, not a global aggregate they have to interpret.
+        for sub in subs:
+            n = per_sub_matched.get(sub.id, 0)
+            sub.message_post(
+                body=_(
+                    "Prozorro sync done: pulled %(pulled)s tenders, %(matched)s matched this subscription.",
+                    pulled=pulled,
+                    matched=n,
+                ),
+                subtype_xmlid="mail.mt_note",
+            )
         self._notify_sync_result(pulled, matched, error=None)
         return {"pulled": pulled, "matched": matched, "error": None, "skipped": False}
 
@@ -242,16 +270,15 @@ class ProzorroTender(models.Model):
             )
 
     def action_sync_now(self):
-        """Schedule the feed-sync cron for immediate background execution
-        and open the Sync Log so the operator sees progress in chatter.
+        """Schedule the feed-sync cron for immediate background execution.
 
         The actual fetch can take minutes (one HTTP GET per matched tender,
         up to 2000 of them). Running synchronously inside an HTTP request
         froze the browser for the whole duration, so we hand off to the
-        cron worker via `_trigger()` and redirect to the cursor form.
-        The cursor's chatter polls in real time: "Sync in progress..."
-        appears as the cron worker picks up the trigger, then "Sync
-        completed: pulled N tenders, M matched" once the run finishes.
+        cron worker via `_trigger()` and return a toast notification.
+        The cron itself posts a chatter line on each active subscription
+        at start and end, so operators tail those subscriptions to see
+        what every run did.
         """
         cron = self.env.ref("rteam_prozorro.ir_cron_prozorro_sync_feed", raise_if_not_found=False)
         if not cron:
@@ -269,8 +296,19 @@ class ProzorroTender(models.Model):
                 },
             }
         cron.sudo()._trigger()
-        cursor = self.env["prozorro.sync.cursor"]._get_singleton("main")
-        return cursor.action_open_sync_log()
+        return {
+            "type": "ir.actions.client",
+            "tag": "display_notification",
+            "params": {
+                "title": _("Sync queued"),
+                "message": _(
+                    "A background sync was scheduled. Open any active subscription "
+                    "to follow progress in its chatter."
+                ),
+                "type": "success",
+                "sticky": False,
+            },
+        }
 
     def action_reset_sync_cursor(self):
         """Rewind the feed cursor to the head so the next sync pulls latest tenders.

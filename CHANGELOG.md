@@ -2,6 +2,37 @@
 
 All notable changes to `rteam_prozorro` are documented here.
 
+## [19.0.5.4.0] - 2026-04-29
+
+### Changed (simplification)
+- Sync chatter is now posted on each **active subscription's** chatter
+  instead of a separate Sync Log page. Subscriptions already have
+  `mail.thread`; operators tail the subscription form they are tuning
+  and see real-time activity. Two messages per run (per active sub):
+  - Start: `Prozorro sync in progress...`
+  - End: `Prozorro sync done: pulled N tenders, M matched this subscription.`
+  - Failure: `Prozorro sync failed: <reason>`
+- Both messages use `mail.mt_note` so they are silent in chatter (no
+  email or Discuss ping). Hourly cron + 3 active subs = 6 silent notes
+  per hour, only visible when someone opens the subscription form.
+
+### Removed (overengineering rollback from 19.0.5.3.x)
+- Dropped `views/prozorro_sync_cursor_views.xml` (sync-log form view).
+- Dropped the `Sync Log` menu item.
+- Dropped the `Sync log` button in the Tender list header.
+- Dropped the `action_prozorro_sync_now_global` server action.
+- Dropped `is_running` and `last_started_at` fields on `prozorro.sync.cursor`.
+- Dropped `mail.thread` inheritance on `prozorro.sync.cursor`.
+- `action_sync_now` reverted to its original toast-only behaviour.
+
+### Why
+- 19.0.5.3.0 added an entire new page just to display chatter, which
+  read as new-model overhead for what was a one-line ask ("post start
+  and end of sync to chatter"). Subscriptions are the natural place
+  since users already look at them when tuning rules; no new UI surface.
+- Also fixes the lingering `column prozorro_sync_cursor.is_running does
+  not exist` 500 error from the half-applied 5.3.0 schema.
+
 ## [19.0.5.3.1] - 2026-04-29
 
 ### Fixed
