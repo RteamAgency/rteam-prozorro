@@ -1,0 +1,898 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* rteam_prozorro
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0\n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: 2026-04-28 21:00+0000\n"
+"Last-Translator: Rteam <alex@rteam.top>\n"
+"Language-Team: Ukrainian\n"
+"Language: uk\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: rteam_prozorro
+#: model:ir.module.category,name:rteam_prozorro.module_category_prozorro
+#: model:ir.ui.menu,name:rteam_prozorro.menu_prozorro_root
+msgid "Prozorro"
+msgstr "Prozorro"
+
+#. module: rteam_prozorro
+#: model:ir.module.category,description:rteam_prozorro.module_category_prozorro
+msgid "Prozorro tender monitoring and CRM automation"
+msgstr "Моніторинг тендерів Prozorro та автоматизація CRM"
+
+#. module: rteam_prozorro
+#: model:res.groups,name:rteam_prozorro.group_prozorro_user
+msgid "Prozorro: User"
+msgstr "Prozorro: Користувач"
+
+#. module: rteam_prozorro
+#: model:res.groups,name:rteam_prozorro.group_prozorro_manager
+msgid "Prozorro: Manager"
+msgstr "Prozorro: Менеджер"
+
+#. module: rteam_prozorro
+#: model:res.groups,comment:rteam_prozorro.group_prozorro_user
+msgid "Read tenders, manage own subscriptions."
+msgstr "Перегляд тендерів, керування власними підписками."
+
+#. module: rteam_prozorro
+#: model:res.groups,comment:rteam_prozorro.group_prozorro_manager
+msgid "Configure API URL, all subscriptions, all tenders."
+msgstr "Налаштування API URL, всі підписки, всі тендери."
+
+#. -------------------- Menus --------------------
+
+#. module: rteam_prozorro
+#: model:ir.ui.menu,name:rteam_prozorro.menu_prozorro_tenders
+#: model:ir.actions.act_window,name:rteam_prozorro.action_prozorro_tender
+msgid "Tenders"
+msgstr "Тендери"
+
+#. module: rteam_prozorro
+#: model:ir.ui.menu,name:rteam_prozorro.menu_prozorro_subscriptions
+msgid "Subscriptions"
+msgstr "Підписки"
+
+#. module: rteam_prozorro
+#: model:ir.ui.menu,name:rteam_prozorro.menu_prozorro_config
+msgid "Configuration"
+msgstr "Налаштування"
+
+#. module: rteam_prozorro
+#: model:ir.ui.menu,name:rteam_prozorro.menu_prozorro_classification
+#: model:ir.actions.act_window,name:rteam_prozorro.action_prozorro_classification
+msgid "CPV Codes"
+msgstr "Коди CPV / ДК021"
+
+#. module: rteam_prozorro
+#: model:ir.ui.menu,name:rteam_prozorro.menu_prozorro_procurement_method
+#: model:ir.actions.act_window,name:rteam_prozorro.action_prozorro_procurement_method
+msgid "Procurement methods"
+msgstr "Методи закупівлі"
+
+#. module: rteam_prozorro
+#: model:ir.ui.menu,name:rteam_prozorro.menu_prozorro_tender_status
+#: model:ir.actions.act_window,name:rteam_prozorro.action_prozorro_tender_status
+msgid "Tender statuses"
+msgstr "Статуси тендерів"
+
+#. module: rteam_prozorro
+#: model:ir.ui.menu,name:rteam_prozorro.menu_prozorro_region
+#: model:ir.actions.act_window,name:rteam_prozorro.action_prozorro_region
+msgid "Regions"
+msgstr "Регіони"
+
+#. module: rteam_prozorro
+#: model:ir.ui.menu,name:rteam_prozorro.menu_prozorro_settings
+#: model:ir.actions.act_window,name:rteam_prozorro.action_prozorro_settings
+msgid "Settings"
+msgstr "Налаштування"
+
+#. module: rteam_prozorro
+#: model:ir.actions.act_window,name:rteam_prozorro.action_prozorro_subscription
+msgid "Prozorro Subscriptions"
+msgstr "Підписки Prozorro"
+
+#. -------------------- Models --------------------
+
+#. module: rteam_prozorro
+#: model:ir.model,name:rteam_prozorro.model_prozorro_tender
+msgid "Prozorro Tender"
+msgstr "Тендер Prozorro"
+
+#. module: rteam_prozorro
+#: model:ir.model,name:rteam_prozorro.model_prozorro_subscription
+msgid "Prozorro Subscription"
+msgstr "Підписка Prozorro"
+
+#. module: rteam_prozorro
+#: model:ir.model,name:rteam_prozorro.model_prozorro_classification
+msgid "Prozorro CPV / DK021 Classification"
+msgstr "Класифікація CPV / ДК021"
+
+#. module: rteam_prozorro
+#: model:ir.model,name:rteam_prozorro.model_prozorro_procurement_method
+msgid "Prozorro Procurement Method Type"
+msgstr "Тип процедури закупівлі"
+
+#. module: rteam_prozorro
+#: model:ir.model,name:rteam_prozorro.model_prozorro_tender_status
+msgid "Prozorro Tender Status"
+msgstr "Статус тендера"
+
+#. module: rteam_prozorro
+#: model:ir.model,name:rteam_prozorro.model_prozorro_region
+msgid "Prozorro Region"
+msgstr "Регіон"
+
+#. module: rteam_prozorro
+#: model:ir.model,name:rteam_prozorro.model_prozorro_sync_cursor
+msgid "Prozorro Feed Sync Cursor"
+msgstr "Курсор синхронізації стрічки"
+
+#. -------------------- Subscription fields --------------------
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_subscription__name
+msgid "Name"
+msgstr "Назва"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_subscription__active
+msgid "Active"
+msgstr "Активна"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_subscription__user_id
+msgid "User"
+msgstr "Користувач"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_subscription__team_id
+msgid "Sales Team"
+msgstr "Команда продажів"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_subscription__company_id
+msgid "Company"
+msgstr "Компанія"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_subscription__classification_ids
+msgid "CPV / DK021 codes"
+msgstr "Коди CPV / ДК021"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,help:rteam_prozorro.field_prozorro_subscription__classification_ids
+msgid "Match tenders whose items reference any of these codes. Empty = any."
+msgstr "Збіг тендерів, у позиціях яких є будь-який з цих кодів. Порожньо = будь-який."
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_subscription__keyword_ids
+msgid "Keywords"
+msgstr "Ключові слова"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_subscription__region_ids
+msgid "Regions"
+msgstr "Регіони"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,help:rteam_prozorro.field_prozorro_subscription__region_ids
+msgid "Match tenders whose procuring entity is registered in any of these regions. Empty = any region."
+msgstr "Збіг тендерів, замовник яких зареєстрований у будь-якому з обраних регіонів. Порожньо = будь-який регіон."
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_subscription__value_min
+msgid "Min value"
+msgstr "Мін. сума"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_subscription__value_max
+msgid "Max value"
+msgstr "Макс. сума"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_subscription__value_currency_id
+msgid "Value Currency"
+msgstr "Валюта"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_subscription__status_ids
+msgid "Statuses"
+msgstr "Статуси"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,help:rteam_prozorro.field_prozorro_subscription__status_ids
+msgid "Match tenders in any of these lifecycle statuses. Empty = any."
+msgstr "Збіг тендерів у будь-якому з обраних статусів. Порожньо = будь-який."
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_subscription__procurement_method_ids
+msgid "Procurement methods"
+msgstr "Методи закупівлі"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,help:rteam_prozorro.field_prozorro_subscription__procurement_method_ids
+msgid "Match tenders run with any of these procurement procedures. Empty = any procedure."
+msgstr "Збіг тендерів, що проводяться за будь-якою з цих процедур. Порожньо = будь-яка процедура."
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_subscription__create_lead
+msgid "Auto-create lead"
+msgstr "Автостворення ліда"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,help:rteam_prozorro.field_prozorro_subscription__create_lead
+msgid "If on, every matched tender automatically becomes a CRM lead. Leave OFF for high-volume subscriptions: matches are persisted as Prozorro Tenders and operators promote them to leads via the 'Convert to lead' button on the tender form."
+msgstr "Якщо увімкнено - кожен знайдений тендер автоматично стає лідом у CRM. Залиште ВИМКНЕНИМ для підписок з великим потоком: збіги зберігаються як тендери Prozorro, а оператори переводять їх у ліди вручну кнопкою 'Створити лід' у формі тендера."
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_subscription__assign_to_user_id
+msgid "Assign lead to"
+msgstr "Призначити лід"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_subscription__tag_ids
+msgid "Tags applied to lead"
+msgstr "Теги ліда"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_subscription__stage_id
+msgid "Lead stage"
+msgstr "Етап ліда"
+
+#. -------------------- Tender fields --------------------
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_tender__name
+msgid "Tender ID"
+msgstr "ID тендера"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_tender__title
+msgid "Title"
+msgstr "Назва"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_tender__description
+msgid "Description"
+msgstr "Опис"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_tender__status
+msgid "Status"
+msgstr "Статус"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_tender__procurement_method_type
+msgid "Procurement method type"
+msgstr "Тип процедури"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_tender__value_amount
+msgid "Value Amount"
+msgstr "Сума"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_tender__procuring_entity_name
+msgid "Procuring entity"
+msgstr "Замовник"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_tender__procuring_entity_edrpou
+msgid "EDRPOU"
+msgstr "ЄДРПОУ"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_tender__procuring_entity_region
+msgid "Procuring Entity Region"
+msgstr "Регіон замовника"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_tender__tender_period_start
+msgid "Tender Period Start"
+msgstr "Початок прийому пропозицій"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_tender__tender_period_end
+msgid "Tender Period End"
+msgstr "Кінець прийому пропозицій"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_tender__enquiry_period_end
+msgid "Enquiries until"
+msgstr "Запитання до"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_tender__auction_period_start
+msgid "Auction at"
+msgstr "Аукціон о"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_tender__classification_ids
+msgid "CPV / DK021"
+msgstr "CPV / ДК021"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_tender__items_summary
+msgid "Items"
+msgstr "Позиції"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_tender__url
+msgid "Public URL"
+msgstr "Публічна URL"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_tender__raw_json
+msgid "Raw payload"
+msgstr "Сирі дані"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_tender__matched_subscription_ids
+msgid "Matched subscriptions"
+msgstr "Підписки зі збігом"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_tender__lead_id
+msgid "CRM Lead"
+msgstr "CRM-лід"
+
+#. -------------------- Tender status selection --------------------
+
+#. module: rteam_prozorro
+#: model:ir.model.fields.selection,name:rteam_prozorro.selection__prozorro_tender__status__draft
+msgid "Draft"
+msgstr "Чернетка"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields.selection,name:rteam_prozorro.selection__prozorro_tender__status__active_enquiries
+msgid "Enquiries"
+msgstr "Період уточнень"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields.selection,name:rteam_prozorro.selection__prozorro_tender__status__active_tendering
+msgid "Tendering"
+msgstr "Прийом пропозицій"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields.selection,name:rteam_prozorro.selection__prozorro_tender__status__active_auction
+msgid "Auction"
+msgstr "Аукціон"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields.selection,name:rteam_prozorro.selection__prozorro_tender__status__active_qualification
+msgid "Qualification"
+msgstr "Кваліфікація"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields.selection,name:rteam_prozorro.selection__prozorro_tender__status__active_awarded
+msgid "Awarded (active)"
+msgstr "Визначено переможця"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields.selection,name:rteam_prozorro.selection__prozorro_tender__status__complete
+msgid "Complete"
+msgstr "Завершено"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields.selection,name:rteam_prozorro.selection__prozorro_tender__status__cancelled
+msgid "Cancelled"
+msgstr "Скасовано"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields.selection,name:rteam_prozorro.selection__prozorro_tender__status__unsuccessful
+msgid "Unsuccessful"
+msgstr "Не відбулися"
+
+#. -------------------- Buttons / actions --------------------
+
+#. module: rteam_prozorro
+#: code:addons/rteam_prozorro/models/prozorro_subscription.py:0
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_subscription_view_form
+msgid "Matched tenders"
+msgstr "Знайдені тендери"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_tender_view_list
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_subscription_view_form
+msgid "Sync now"
+msgstr "Синхронізувати"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_tender_view_list
+msgid "Reset cursor"
+msgstr "Скинути курсор"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_tender_view_list
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_tender_view_form
+msgid "Convert to lead"
+msgstr "Створити лід"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_tender_view_form
+msgid "Open lead"
+msgstr "Відкрити лід"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_tender_view_form
+msgid "Open in Prozorro"
+msgstr "Відкрити в Prozorro"
+
+#. -------------------- Notifications --------------------
+
+#. module: rteam_prozorro
+#: code:addons/rteam_prozorro/models/prozorro_tender.py:0
+msgid "Prozorro sync done"
+msgstr "Синхронізацію виконано"
+
+#. module: rteam_prozorro
+#: code:addons/rteam_prozorro/models/prozorro_tender.py:0
+msgid "Prozorro sync failed"
+msgstr "Помилка синхронізації"
+
+#. module: rteam_prozorro
+#: code:addons/rteam_prozorro/models/prozorro_tender.py:0
+msgid "Pulled %(pulled)s tenders, %(matched)s matched. Refresh the Tenders list to see new results."
+msgstr "Завантажено %(pulled)s тендерів, %(matched)s збіглося. Оновіть список тендерів, щоб побачити нові результати."
+
+#. module: rteam_prozorro
+#: code:addons/rteam_prozorro/models/prozorro_tender.py:0
+msgid "Sync queued"
+msgstr "Синхронізацію поставлено в чергу"
+
+#. module: rteam_prozorro
+#: code:addons/rteam_prozorro/models/prozorro_tender.py:0
+msgid "A background sync was scheduled. Refresh the Tenders list in a minute or two to see new matches."
+msgstr "Фонову синхронізацію заплановано. Оновіть список тендерів через хвилину-дві, щоб побачити нові збіги."
+
+#. module: rteam_prozorro
+#: code:addons/rteam_prozorro/models/prozorro_tender.py:0
+msgid "Cursor reset"
+msgstr "Курсор скинуто"
+
+#. module: rteam_prozorro
+#: code:addons/rteam_prozorro/models/prozorro_tender.py:0
+msgid "The next sync will start from the latest tenders."
+msgstr "Наступна синхронізація почнеться зі свіжих тендерів."
+
+#. module: rteam_prozorro
+#: code:addons/rteam_prozorro/models/prozorro_tender.py:0
+msgid "No new leads"
+msgstr "Нових лідів немає"
+
+#. module: rteam_prozorro
+#: code:addons/rteam_prozorro/models/prozorro_tender.py:0
+msgid "All selected tenders already had a linked lead."
+msgstr "Усі обрані тендери вже мали прив'язаний лід."
+
+#. module: rteam_prozorro
+#: code:addons/rteam_prozorro/models/prozorro_tender.py:0
+msgid "New leads"
+msgstr "Нові ліди"
+
+#. module: rteam_prozorro
+#: code:addons/rteam_prozorro/models/prozorro_tender.py:0
+msgid "CRM Lead"
+msgstr "CRM-лід"
+
+#. module: rteam_prozorro
+#: code:addons/rteam_prozorro/models/prozorro_tender.py:0
+msgid "Sync cron missing"
+msgstr "Cron-задача відсутня"
+
+#. module: rteam_prozorro
+#: code:addons/rteam_prozorro/models/prozorro_tender.py:0
+msgid "Reinstall the module to restore the scheduled action."
+msgstr "Перевстановіть модуль, щоб відновити заплановану дію."
+
+#. -------------------- Procurement methods (master data) --------------------
+
+#. module: rteam_prozorro
+#: model:prozorro.procurement.method,name:rteam_prozorro.method_above_threshold_ua
+msgid "Open bidding"
+msgstr "Відкриті торги"
+
+#. module: rteam_prozorro
+#: model:prozorro.procurement.method,name:rteam_prozorro.method_above_threshold_eu
+msgid "Open bidding (EU)"
+msgstr "Відкриті торги з публікацією англ. мовою"
+
+#. module: rteam_prozorro
+#: model:prozorro.procurement.method,name:rteam_prozorro.method_above_threshold_ua_defense
+msgid "Open bidding (defense)"
+msgstr "Відкриті торги (оборонні)"
+
+#. module: rteam_prozorro
+#: model:prozorro.procurement.method,name:rteam_prozorro.method_below_threshold
+msgid "Simplified procurement"
+msgstr "Спрощена закупівля"
+
+#. module: rteam_prozorro
+#: model:prozorro.procurement.method,name:rteam_prozorro.method_simple_defense
+msgid "Simplified procurement (defense)"
+msgstr "Спрощена закупівля (оборонна)"
+
+#. module: rteam_prozorro
+#: model:prozorro.procurement.method,name:rteam_prozorro.method_close_framework_agreement_ua
+msgid "Framework agreement"
+msgstr "Рамкова угода"
+
+#. module: rteam_prozorro
+#: model:prozorro.procurement.method,name:rteam_prozorro.method_close_framework_agreement_selection_ua
+msgid "Framework agreement: selection"
+msgstr "Рамкова угода: відбір"
+
+#. module: rteam_prozorro
+#: model:prozorro.procurement.method,name:rteam_prozorro.method_competitive_dialogue_ua
+msgid "Competitive dialogue"
+msgstr "Конкурентний діалог"
+
+#. module: rteam_prozorro
+#: model:prozorro.procurement.method,name:rteam_prozorro.method_competitive_dialogue_eu
+msgid "Competitive dialogue (EU)"
+msgstr "Конкурентний діалог (ЄС)"
+
+#. module: rteam_prozorro
+#: model:prozorro.procurement.method,name:rteam_prozorro.method_competitive_ordering
+msgid "Competitive ordering"
+msgstr "Конкурентне замовлення"
+
+#. module: rteam_prozorro
+#: model:prozorro.procurement.method,name:rteam_prozorro.method_esco
+msgid "ESCO procurement"
+msgstr "ЕСКО-закупівля"
+
+#. module: rteam_prozorro
+#: model:prozorro.procurement.method,name:rteam_prozorro.method_negotiation
+msgid "Negotiation"
+msgstr "Переговорна процедура"
+
+#. module: rteam_prozorro
+#: model:prozorro.procurement.method,name:rteam_prozorro.method_negotiation_quick
+msgid "Negotiation (urgent)"
+msgstr "Переговорна процедура (термінова)"
+
+#. module: rteam_prozorro
+#: model:prozorro.procurement.method,name:rteam_prozorro.method_price_quotation
+msgid "Price quotation"
+msgstr "Цінові пропозиції"
+
+#. module: rteam_prozorro
+#: model:prozorro.procurement.method,name:rteam_prozorro.method_reporting
+msgid "Direct contract reporting"
+msgstr "Звіт про прямий договір"
+
+#. -------------------- Tender statuses (master data) --------------------
+
+#. module: rteam_prozorro
+#: model:prozorro.tender.status,name:rteam_prozorro.status_draft
+msgid "Draft"
+msgstr "Чернетка"
+
+#. module: rteam_prozorro
+#: model:prozorro.tender.status,name:rteam_prozorro.status_active_enquiries
+msgid "Enquiries"
+msgstr "Період уточнень"
+
+#. module: rteam_prozorro
+#: model:prozorro.tender.status,name:rteam_prozorro.status_active_tendering
+msgid "Tendering"
+msgstr "Прийом пропозицій"
+
+#. module: rteam_prozorro
+#: model:prozorro.tender.status,name:rteam_prozorro.status_active_pre_qualification
+msgid "Pre-qualification"
+msgstr "Прекваліфікація"
+
+#. module: rteam_prozorro
+#: model:prozorro.tender.status,name:rteam_prozorro.status_active_pre_qualification_stand_still
+msgid "Pre-qualification stand-still"
+msgstr "Прекваліфікація: блокувальний період"
+
+#. module: rteam_prozorro
+#: model:prozorro.tender.status,name:rteam_prozorro.status_active_auction
+msgid "Auction"
+msgstr "Аукціон"
+
+#. module: rteam_prozorro
+#: model:prozorro.tender.status,name:rteam_prozorro.status_active_qualification
+msgid "Qualification"
+msgstr "Кваліфікація"
+
+#. module: rteam_prozorro
+#: model:prozorro.tender.status,name:rteam_prozorro.status_active_awarded
+msgid "Awarded"
+msgstr "Визначено переможця"
+
+#. module: rteam_prozorro
+#: model:prozorro.tender.status,name:rteam_prozorro.status_complete
+msgid "Complete"
+msgstr "Завершено"
+
+#. module: rteam_prozorro
+#: model:prozorro.tender.status,name:rteam_prozorro.status_cancelled
+msgid "Cancelled"
+msgstr "Скасовано"
+
+#. module: rteam_prozorro
+#: model:prozorro.tender.status,name:rteam_prozorro.status_unsuccessful
+msgid "Unsuccessful"
+msgstr "Не відбулися"
+
+#. -------------------- Regions (master data) --------------------
+
+#. module: rteam_prozorro
+#: model:prozorro.region,name:rteam_prozorro.region_vinnytsia
+msgid "Vinnytsia oblast"
+msgstr "Вінницька область"
+
+#. module: rteam_prozorro
+#: model:prozorro.region,name:rteam_prozorro.region_volyn
+msgid "Volyn oblast"
+msgstr "Волинська область"
+
+#. module: rteam_prozorro
+#: model:prozorro.region,name:rteam_prozorro.region_dnipropetrovsk
+msgid "Dnipropetrovsk oblast"
+msgstr "Дніпропетровська область"
+
+#. module: rteam_prozorro
+#: model:prozorro.region,name:rteam_prozorro.region_donetsk
+msgid "Donetsk oblast"
+msgstr "Донецька область"
+
+#. module: rteam_prozorro
+#: model:prozorro.region,name:rteam_prozorro.region_zhytomyr
+msgid "Zhytomyr oblast"
+msgstr "Житомирська область"
+
+#. module: rteam_prozorro
+#: model:prozorro.region,name:rteam_prozorro.region_zakarpattia
+msgid "Zakarpattia oblast"
+msgstr "Закарпатська область"
+
+#. module: rteam_prozorro
+#: model:prozorro.region,name:rteam_prozorro.region_zaporizhzhia
+msgid "Zaporizhzhia oblast"
+msgstr "Запорізька область"
+
+#. module: rteam_prozorro
+#: model:prozorro.region,name:rteam_prozorro.region_ivano_frankivsk
+msgid "Ivano-Frankivsk oblast"
+msgstr "Івано-Франківська область"
+
+#. module: rteam_prozorro
+#: model:prozorro.region,name:rteam_prozorro.region_kyiv_oblast
+msgid "Kyiv oblast"
+msgstr "Київська область"
+
+#. module: rteam_prozorro
+#: model:prozorro.region,name:rteam_prozorro.region_kirovohrad
+msgid "Kirovohrad oblast"
+msgstr "Кіровоградська область"
+
+#. module: rteam_prozorro
+#: model:prozorro.region,name:rteam_prozorro.region_luhansk
+msgid "Luhansk oblast"
+msgstr "Луганська область"
+
+#. module: rteam_prozorro
+#: model:prozorro.region,name:rteam_prozorro.region_lviv
+msgid "Lviv oblast"
+msgstr "Львівська область"
+
+#. module: rteam_prozorro
+#: model:prozorro.region,name:rteam_prozorro.region_mykolaiv
+msgid "Mykolaiv oblast"
+msgstr "Миколаївська область"
+
+#. module: rteam_prozorro
+#: model:prozorro.region,name:rteam_prozorro.region_odesa
+msgid "Odesa oblast"
+msgstr "Одеська область"
+
+#. module: rteam_prozorro
+#: model:prozorro.region,name:rteam_prozorro.region_poltava
+msgid "Poltava oblast"
+msgstr "Полтавська область"
+
+#. module: rteam_prozorro
+#: model:prozorro.region,name:rteam_prozorro.region_rivne
+msgid "Rivne oblast"
+msgstr "Рівненська область"
+
+#. module: rteam_prozorro
+#: model:prozorro.region,name:rteam_prozorro.region_sumy
+msgid "Sumy oblast"
+msgstr "Сумська область"
+
+#. module: rteam_prozorro
+#: model:prozorro.region,name:rteam_prozorro.region_ternopil
+msgid "Ternopil oblast"
+msgstr "Тернопільська область"
+
+#. module: rteam_prozorro
+#: model:prozorro.region,name:rteam_prozorro.region_kharkiv
+msgid "Kharkiv oblast"
+msgstr "Харківська область"
+
+#. module: rteam_prozorro
+#: model:prozorro.region,name:rteam_prozorro.region_kherson
+msgid "Kherson oblast"
+msgstr "Херсонська область"
+
+#. module: rteam_prozorro
+#: model:prozorro.region,name:rteam_prozorro.region_khmelnytskyi
+msgid "Khmelnytskyi oblast"
+msgstr "Хмельницька область"
+
+#. module: rteam_prozorro
+#: model:prozorro.region,name:rteam_prozorro.region_cherkasy
+msgid "Cherkasy oblast"
+msgstr "Черкаська область"
+
+#. module: rteam_prozorro
+#: model:prozorro.region,name:rteam_prozorro.region_chernivtsi
+msgid "Chernivtsi oblast"
+msgstr "Чернівецька область"
+
+#. module: rteam_prozorro
+#: model:prozorro.region,name:rteam_prozorro.region_chernihiv
+msgid "Chernihiv oblast"
+msgstr "Чернігівська область"
+
+#. module: rteam_prozorro
+#: model:prozorro.region,name:rteam_prozorro.region_kyiv_city
+msgid "Kyiv (city)"
+msgstr "м. Київ"
+
+#. module: rteam_prozorro
+#: model:prozorro.region,name:rteam_prozorro.region_crimea
+msgid "AR of Crimea"
+msgstr "АР Крим"
+
+#. module: rteam_prozorro
+#: model:prozorro.region,name:rteam_prozorro.region_sevastopol
+msgid "Sevastopol"
+msgstr "м. Севастополь"
+
+#. -------------------- CPV codes (selected high-traffic items) --------------------
+
+#. module: rteam_prozorro
+#: model:prozorro.classification,name:rteam_prozorro.cpv_30000000_9
+msgid "Office and computing machinery, equipment and supplies"
+msgstr "Офісна та комп'ютерна техніка, устатковання та приладдя"
+
+#. module: rteam_prozorro
+#: model:prozorro.classification,name:rteam_prozorro.cpv_30200000_1
+msgid "Computer equipment and supplies"
+msgstr "Комп'ютерне обладнання та приладдя"
+
+#. module: rteam_prozorro
+#: model:prozorro.classification,name:rteam_prozorro.cpv_31000000_6
+msgid "Electrical machinery, apparatus, equipment and consumables; lighting"
+msgstr "Електричні машини, апаратура, обладнання та витратні матеріали; освітлення"
+
+#. module: rteam_prozorro
+#: model:prozorro.classification,name:rteam_prozorro.cpv_33000000_0
+msgid "Medical equipments, pharmaceuticals and personal care products"
+msgstr "Медичне обладнення, фармацевтика та засоби особистого догляду"
+
+#. module: rteam_prozorro
+#: model:prozorro.classification,name:rteam_prozorro.cpv_33100000_1
+msgid "Medical equipment"
+msgstr "Медичне обладнення"
+
+#. module: rteam_prozorro
+#: model:prozorro.classification,name:rteam_prozorro.cpv_33110000_4
+msgid "Imaging equipment for medical, dental and veterinary use"
+msgstr "Обладнання візуалізації для медичного, стоматологічного та ветеринарного застосування"
+
+#. module: rteam_prozorro
+#: model:prozorro.classification,name:rteam_prozorro.cpv_33120000_7
+msgid "Recording systems and exploratory devices"
+msgstr "Системи реєстрації медичної інформації та дослідне обладнення"
+
+#. module: rteam_prozorro
+#: model:prozorro.classification,name:rteam_prozorro.cpv_33130000_0
+msgid "Dental and subspecialty instruments and devices"
+msgstr "Стоматологічне та вузькоспеціалізоване обладнення"
+
+#. module: rteam_prozorro
+#: model:prozorro.classification,name:rteam_prozorro.cpv_33140000_3
+msgid "Medical consumables"
+msgstr "Медичні витратні матеріали"
+
+#. module: rteam_prozorro
+#: model:prozorro.classification,name:rteam_prozorro.cpv_33141000_0
+msgid "Medical non-chemical consumables and haematological consumables"
+msgstr "Медичні нехімічні та гематологічні витратні матеріали"
+
+#. module: rteam_prozorro
+#: model:prozorro.classification,name:rteam_prozorro.cpv_33150000_6
+msgid "Devices for radiotherapy, mechanotherapy, electrotherapy and physical therapy"
+msgstr "Пристрої для радіо-, механо-, електро- та фізіотерапії"
+
+#. module: rteam_prozorro
+#: model:prozorro.classification,name:rteam_prozorro.cpv_33160000_9
+msgid "Operating techniques"
+msgstr "Хірургічне обладнення"
+
+#. module: rteam_prozorro
+#: model:prozorro.classification,name:rteam_prozorro.cpv_33169000_2
+msgid "Surgical instruments"
+msgstr "Хірургічні інструменти"
+
+#. module: rteam_prozorro
+#: model:prozorro.classification,name:rteam_prozorro.cpv_33170000_2
+msgid "Anaesthesia and resuscitation"
+msgstr "Анестезія та реанімація"
+
+#. module: rteam_prozorro
+#: model:prozorro.classification,name:rteam_prozorro.cpv_33180000_5
+msgid "Functional support"
+msgstr "Функціональна підтримка"
+
+#. module: rteam_prozorro
+#: model:prozorro.classification,name:rteam_prozorro.cpv_33190000_8
+msgid "Miscellaneous medical devices and products"
+msgstr "Різні медичні пристрої та вироби"
+
+#. module: rteam_prozorro
+#: model:prozorro.classification,name:rteam_prozorro.cpv_33600000_6
+msgid "Pharmaceutical products"
+msgstr "Фармацевтична продукція"
+
+#. module: rteam_prozorro
+#: model:prozorro.classification,name:rteam_prozorro.cpv_33700000_7
+msgid "Personal care products"
+msgstr "Засоби особистого догляду"
+
+#. module: rteam_prozorro
+#: model:prozorro.classification,name:rteam_prozorro.cpv_33900000_9
+msgid "Post-mortem and mortuary equipment and supplies"
+msgstr "Обладнання та приладдя для патологоанатомічних робіт"
+
+#. module: rteam_prozorro
+#: model:prozorro.classification,name:rteam_prozorro.cpv_42000000_6
+msgid "Industrial machinery"
+msgstr "Промислові машини"
+
+#. module: rteam_prozorro
+#: model:prozorro.classification,name:rteam_prozorro.cpv_42600000_2
+msgid "Machine tools"
+msgstr "Верстати"
+
+#. module: rteam_prozorro
+#: model:prozorro.classification,name:rteam_prozorro.cpv_42610000_5
+msgid "Lasers and machines fitted with lasers"
+msgstr "Лазерне обладнання"
+
+#. module: rteam_prozorro
+#: model:prozorro.classification,name:rteam_prozorro.cpv_45000000_7
+msgid "Construction work"
+msgstr "Будівельні роботи"
+
+#. module: rteam_prozorro
+#: model:prozorro.classification,name:rteam_prozorro.cpv_50000000_5
+msgid "Repair and maintenance services"
+msgstr "Послуги з ремонту та обслуговування"
+
+#. module: rteam_prozorro
+#: model:prozorro.classification,name:rteam_prozorro.cpv_72000000_5
+msgid "IT services: consulting, software development, Internet and support"
+msgstr "Послуги у сфері ІТ: консультування, розробка ПЗ, інтернет, підтримка"
+
+#. module: rteam_prozorro
+#: model:prozorro.classification,name:rteam_prozorro.cpv_85000000_9
+msgid "Health and social work services"
+msgstr "Послуги у сфері охорони здоров'я та соціальної роботи"

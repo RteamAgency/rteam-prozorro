@@ -2,6 +2,19 @@
 
 All notable changes to `rteam_prozorro` are documented here.
 
+## [19.0.4.0.0] - 2026-04-28
+
+### Added
+- Ukrainian (`i18n/uk.po`) and Russian (`i18n/ru.po`) translations covering all UI surfaces an operator interacts with: field labels, help texts, button strings, action and menu names, notification messages, model `_description` strings, status / region / procurement-method master data names, and the most-trafficked CPV / DK021 codes (medical equipment branch + electrical machinery + lasers + IT services + a few others). 171 msgid entries per language.
+- Help texts for `region_ids`, `status_ids`, `procurement_method_ids`, `classification_ids`, `create_lead` are translated; the long auto-create-lead help is verbatim-translated.
+
+### Why
+With Ukrainian-language users testing on Odoo 17/18/19 (per ARAMIS dry runs) the previously English-only UI made the form opaque. The .po files apply the moment the user installs the Ukrainian language pack and re-upgrades the module - no schema migration, no view changes.
+
+### Notes
+- CPV codes auto-created from the live feed already arrive in Ukrainian (Prozorro's `classification.description` field is UA), so this PR only translates the seeded subset.
+- Subsequent feature PRs that add or rename strings should append entries to both `.po` files; there is no auto-extraction step in CI yet.
+
 ## [19.0.3.1.0] - 2026-04-28
 
 ### Added
