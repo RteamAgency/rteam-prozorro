@@ -2,6 +2,11 @@
 
 All notable changes to `rteam_prozorro` are documented here.
 
+## [19.0.2.0.1] - 2026-04-28
+
+### Fixed
+- Empty Prozorro Settings pane: `<app name="prozorro">` did not match the action context `module=rteam_prozorro`, so Odoo's settings filter rendered the page blank. Renamed the block to `name="rteam_prozorro"` to match the module technical name.
+
 ## [19.0.2.0.0] - 2026-04-28
 
 UX refactor: replace API-code Char filters on `prozorro.subscription` with translatable Many2many master data so operators see human-readable names instead of `aboveThresholdUA,belowThreshold` in the form.

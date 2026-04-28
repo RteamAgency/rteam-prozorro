@@ -6,7 +6,7 @@
         <field name="inherit_id" ref="base.res_config_settings_view_form"/>
         <field name="arch" type="xml">
             <xpath expr="//form" position="inside">
-                <app data-string="Prozorro" string="Prozorro" name="prozorro" groups="rteam_prozorro.group_prozorro_user">
+                <app data-string="Prozorro" string="Prozorro" name="rteam_prozorro" groups="rteam_prozorro.group_prozorro_user">
                     <block title="Feed" name="prozorro_feed">
                         <setting string="API base URL" help="Public read endpoint of the Prozorro / OpenProcurement API.">
                             <field name="prozorro_api_url"/>
