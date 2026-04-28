@@ -12,7 +12,7 @@
                 <filter name="active" string="Active" domain="[('active','=',True)]"/>
                 <filter name="archived" string="Archived" domain="[('active','=',False)]"/>
                 <filter name="creates_lead" string="Creates lead" domain="[('create_lead','=',True)]"/>
-                <group expand="0" string="Group by">
+                <group>
                     <filter name="group_user" string="Owner" context="{'group_by': 'user_id'}"/>
                     <filter name="group_team" string="Sales Team" context="{'group_by': 'team_id'}"/>
                 </group>

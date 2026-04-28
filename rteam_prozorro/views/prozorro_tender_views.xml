@@ -22,7 +22,7 @@
                 <filter name="ending_soon" string="Tendering ends in 7 days"
                         domain="[('tender_period_end','&gt;=', context_today().strftime('%Y-%m-%d')),
                                  ('tender_period_end','&lt;=', (context_today() + relativedelta(days=7)).strftime('%Y-%m-%d'))]"/>
-                <group expand="0" string="Group by">
+                <group>
                     <filter name="group_status" string="Status" context="{'group_by':'status'}"/>
                     <filter name="group_subscription" string="Subscription" context="{'group_by':'matched_subscription_ids'}"/>
                     <filter name="group_region" string="Region" context="{'group_by':'procuring_entity_region'}"/>

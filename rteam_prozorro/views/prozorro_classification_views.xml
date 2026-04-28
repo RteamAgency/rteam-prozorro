@@ -10,7 +10,7 @@
                 <field name="scheme"/>
                 <filter name="active" string="Active" domain="[('active','=',True)]"/>
                 <filter name="inactive" string="Archived" domain="[('active','=',False)]"/>
-                <group expand="0" string="Group by">
+                <group>
                     <filter name="group_parent" string="Parent" context="{'group_by': 'parent_id'}"/>
                     <filter name="group_scheme" string="Scheme" context="{'group_by': 'scheme'}"/>
                 </group>
