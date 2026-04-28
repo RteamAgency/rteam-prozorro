@@ -298,9 +298,10 @@ class ProzorroTender(models.Model):
         up to 2000 of them). Running synchronously inside an HTTP request
         froze the browser for the whole duration, so we hand off to the
         cron worker via `_trigger()` and return a toast notification.
-        The cron itself posts a chatter line on each active subscription
-        at start and end, so operators tail those subscriptions to see
-        what every run did.
+        Posts "Sync queued..." to each active subscription's chatter
+        immediately on click - the cron picks up the trigger 30s-2min
+        later (Odoo.sh webhook poll cadence) and posts its own
+        "in progress" / "done" lines once it actually runs.
         """
         cron = self.env.ref("rteam_prozorro.ir_cron_prozorro_sync_feed", raise_if_not_found=False)
         if not cron:
@@ -317,6 +318,17 @@ class ProzorroTender(models.Model):
                     "sticky": True,
                 },
             }
+        # Instant chatter feedback. The user's RPC transaction commits as
+        # soon as this action returns, so a plain message_post is fine
+        # here (no need for the isolated-cursor pattern that protects
+        # the cron's long loop).
+        subs = self.env["prozorro.subscription"]._get_active_subscriptions()
+        if subs:
+            user_name = self.env.user.name
+            subs.message_post(
+                body=_("Prozorro sync queued by %s...", user_name),
+                subtype_xmlid="mail.mt_note",
+            )
         cron.sudo()._trigger()
         return {
             "type": "ir.actions.client",

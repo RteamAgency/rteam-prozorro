@@ -2,6 +2,19 @@
 
 All notable changes to `rteam_prozorro` are documented here.
 
+## [19.0.5.4.2] - 2026-04-29
+
+### Changed
+- `action_sync_now` now posts `Prozorro sync queued by <user>...` to
+  each active subscription's chatter **immediately on click**. Previous
+  versions only posted "Sync in progress..." once the cron worker
+  actually picked up the `_trigger()` queue, which on Odoo.sh can take
+  30 seconds to ~2 minutes (webhook poll cadence). Operators were
+  seeing nothing for that whole window. Now the timeline is:
+  - click: `queued by <user>` (instant, in user's RPC transaction)
+  - cron starts: `sync in progress...` (isolated cursor)
+  - cron ends: `sync done: pulled N, matched M this subscription` (isolated cursor)
+
 ## [19.0.5.4.1] - 2026-04-29
 
 ### Fixed
