@@ -2,6 +2,11 @@
 
 All notable changes to `rteam_prozorro` are documented here.
 
+## [19.0.5.2.3] - 2026-04-28
+
+### Added
+- 40 missing UK / RU translations for strings introduced after the initial 19.0.4.0.0 i18n drop. Covers Settings UI (Feed / API base URL / Pages per sync run / Retention (days) / help texts), subscription form filters (All regions / All statuses / All procedure types / Any CPV / Region·Status·Method / Stats / Value range / placeholder / Filters), classification / region / procurement-method / tender-status master-data forms, tender form (CRM, Key dates, Procurement, Tender, search filters, Reset cursor confirm), test wizard (Close, Test match against tender, placeholder), and three Python notification strings (`Invalid regex …`, `Pulled … matched`, `A background sync was scheduled …`). Each entry has a real `#:` reference (`model_terms:ir.ui.view,arch_db:…` or `code:…`) so Odoo's translation loader actually picks it up.
+
 ## [19.0.5.2.2] - 2026-04-28
 
 ### Fixed

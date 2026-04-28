@@ -922,3 +922,203 @@ msgstr "Послуги у сфері ІТ: консультування, роз�
 #: model:prozorro.classification,name:rteam_prozorro.cpv_85000000_9
 msgid "Health and social work services"
 msgstr "Послуги у сфері охорони здоров'я та соціальної роботи"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.res_config_settings_view_form_inherit_prozorro
+msgid "API base URL"
+msgstr "Базовий URL API"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.res_config_settings_view_form_inherit_prozorro
+msgid "Public read endpoint of the Prozorro / OpenProcurement API."
+msgstr "Публічна точка читання API Prozorro / OpenProcurement."
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.res_config_settings_view_form_inherit_prozorro
+msgid "Pages per sync run"
+msgstr "Сторінок за один запуск"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.res_config_settings_view_form_inherit_prozorro
+msgid "Each page returns up to 100 tenders."
+msgstr "Кожна сторінка містить до 100 тендерів."
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.res_config_settings_view_form_inherit_prozorro
+msgid "Retention (days)"
+msgstr "Зберігання (днів)"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.res_config_settings_view_form_inherit_prozorro
+msgid "Drop matched tenders this many days after tender_period_end unless a CRM lead is linked."
+msgstr "Видаляти знайдені тендери через цю кількість днів після tender_period_end, якщо до них не прив'язано CRM-лід."
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.res_config_settings_view_form_inherit_prozorro
+msgid "Feed"
+msgstr "Стрічка"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_subscription_view_form
+msgid "All procedure types"
+msgstr "Усі типи процедур"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_subscription_view_form
+msgid "All regions"
+msgstr "Усі регіони"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_subscription_view_form
+msgid "All statuses"
+msgstr "Усі статуси"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_subscription_view_form
+msgid "Any CPV"
+msgstr "Будь-який CPV"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_subscription_view_form
+msgid "Filters"
+msgstr "Фільтри"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_subscription_view_form
+msgid "Region / Status / Method"
+msgstr "Регіон / Статус / Метод"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_subscription_view_form
+msgid "Stats"
+msgstr "Статистика"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_subscription_view_form
+msgid "Value range"
+msgstr "Діапазон сум"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_subscription_view_form
+msgid "e.g. Lasers Kyiv 100K-5M"
+msgstr "напр. Лазери Київ 100K-5M"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_subscription_view_search
+msgid "Owner"
+msgstr "Власник"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_subscription_view_search
+msgid "Creates lead"
+msgstr "Створює лід"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_subscription_view_search
+msgid "Archived"
+msgstr "Архівовані"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_classification_view_form
+msgid "CPV code"
+msgstr "Код CPV"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_classification_view_list
+msgid "CPV codes"
+msgstr "Коди CPV"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_classification_view_form
+msgid "Children"
+msgstr "Дочірні"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_classification_view_search
+msgid "Parent"
+msgstr "Батьківський"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_classification_view_search
+msgid "Scheme"
+msgstr "Схема"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_procurement_method_view_form
+msgid "Procurement method"
+msgstr "Метод закупівлі"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_region_view_form
+msgid "Region"
+msgstr "Регіон"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_tender_view_form
+msgid "CRM"
+msgstr "CRM"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_tender_view_form
+msgid "Key dates"
+msgstr "Ключові дати"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_tender_view_form
+msgid "Procurement"
+msgstr "Закупівля"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_tender_view_form
+msgid "Tender"
+msgstr "Тендер"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_tender_view_search
+msgid "No lead yet"
+msgstr "Лід ще не створено"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_tender_view_search
+msgid "Tendering ends in 7 days"
+msgstr "Прийом пропозицій завершується через 7 днів"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_tender_view_search
+msgid "With CRM lead"
+msgstr "З CRM-лідом"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_tender_view_list
+msgid "Rewind the feed cursor so the next sync pulls latest tenders. Continue?"
+msgstr "Скинути курсор стрічки, щоб наступна синхронізація отримала останні тендери. Продовжити?"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_subscription_test_view_form
+msgid "Close"
+msgstr "Закрити"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_subscription_test_view_form
+msgid "Test match against tender"
+msgstr "Перевірити збіг з тендером"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_subscription_test_view_form
+msgid "3af829c1a9af4812a5c2c4bf090f2b44 or full prozorro.gov.ua URL"
+msgstr "3af829c1a9af4812a5c2c4bf090f2b44 або повний URL prozorro.gov.ua"
+
+#. module: rteam_prozorro
+#: rteam_prozorro/models/prozorro_subscription_keyword.py:52
+msgid "Invalid regex %r: %s"
+msgstr "Невірний регулярний вираз %r: %s"
+
+#. module: rteam_prozorro
+#: rteam_prozorro/models/prozorro_tender.py:241
+msgid "Pulled %(pulled)s tenders, %(matched)s matched. "
+msgstr "Отримано %(pulled)s тендерів, збігів: %(matched)s. "
+
+#. module: rteam_prozorro
+#: rteam_prozorro/models/prozorro_tender.py:282
+msgid "A background sync was scheduled. Refresh the Tenders list "
+msgstr "Заплановано фонову синхронізацію. Оновіть список тендерів "
