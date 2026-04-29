@@ -1090,6 +1090,21 @@ msgstr "С CRM-лидом"
 
 #. module: rteam_prozorro
 #: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_tender_view_list
+msgid "Total"
+msgstr "Всего"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_tender_view_form
+msgid "Ends:"
+msgstr "Завершается:"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_tender_view_form
+msgid "<span class=\"o_stat_text\">Prozorro</span>"
+msgstr "<span class=\"o_stat_text\">Prozorro</span>"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_tender_view_list
 msgid "Rewind the feed cursor so the next sync pulls latest tenders. Continue?"
 msgstr "Сбросить курсор ленты, чтобы следующая синхронизация получила последние тендеры. Продолжить?"
 
@@ -1141,28 +1156,28 @@ msgstr "Стандартный переключатель 'Лиды' из мод
 
 #. module: rteam_prozorro
 #: model_terms:ir.ui.view,arch_db:rteam_prozorro.res_config_settings_view_form_inherit_prozorro
-msgid "Leads are disabled."
-msgstr "Лиды отключены."
-
-#. module: rteam_prozorro
-#: model_terms:ir.ui.view,arch_db:rteam_prozorro.res_config_settings_view_form_inherit_prozorro
-msgid "With this off, Prozorro syncs tenders normally but"
-msgstr "Когда этот переключатель выключен, Prozorro синхронизирует тендеры как обычно, но"
-
-#. module: rteam_prozorro
-#: model_terms:ir.ui.view,arch_db:rteam_prozorro.res_config_settings_view_form_inherit_prozorro
-msgid "will not create CRM leads"
-msgstr "не будет создавать CRM-лиды"
-
-#. module: rteam_prozorro
-#: model_terms:ir.ui.view,arch_db:rteam_prozorro.res_config_settings_view_form_inherit_prozorro
-msgid ", even if a subscription has \"Auto-create lead\" checked. Turn this on to activate lead creation. (Saving the toggle adds the"
-msgstr ", даже если в подписке включён флаг \"Автосоздание лида\". Включите, чтобы активировать создание лидов. (Сохранение переключателя добавляет группу"
-
-#. module: rteam_prozorro
-#: model_terms:ir.ui.view,arch_db:rteam_prozorro.res_config_settings_view_form_inherit_prozorro
-msgid "group to all internal users; it is the same toggle as Settings -> CRM -> Leads.)"
-msgstr "всем внутренним пользователям; это тот же переключатель, что и Настройки -> CRM -> Лиды.)"
+msgid ""
+"<i class=\"fa fa-exclamation-triangle\"/>\n"
+"                                <strong> Leads are disabled.</strong>\n"
+"                                With this off, Prozorro syncs tenders normally\n"
+"                                but <strong>will not create CRM leads</strong>,\n"
+"                                even if a subscription has \"Auto-create lead\"\n"
+"                                checked. Turn this on to activate lead\n"
+"                                creation. (Saving the toggle adds the\n"
+"                                <code>crm.group_use_lead</code> group to all\n"
+"                                internal users; it is the same toggle as\n"
+"                                Settings -&gt; CRM -&gt; Leads.)"
+msgstr ""
+"<i class=\"fa fa-exclamation-triangle\"/>\n"
+"                                <strong> Лиды отключены.</strong>\n"
+"                                Когда этот переключатель выключен, Prozorro синхронизирует\n"
+"                                тендеры как обычно, но <strong>не будет создавать CRM-лиды</strong>,\n"
+"                                даже если в подписке включён\n"
+"                                флаг \"Автосоздание лида\". Включите, чтобы активировать\n"
+"                                создание лидов. (Сохранение переключателя добавляет группу\n"
+"                                <code>crm.group_use_lead</code> всем\n"
+"                                внутренним пользователям; это тот же переключатель, что и\n"
+"                                Настройки -&gt; CRM -&gt; Лиды.)"
 
 #. module: rteam_prozorro
 #: model_terms:ir.ui.view,arch_db:rteam_prozorro.res_config_settings_view_form_inherit_prozorro
@@ -1171,13 +1186,13 @@ msgstr "Если включено, синхронизация ленты зап�
 
 #. module: rteam_prozorro
 #: model_terms:ir.ui.view,arch_db:rteam_prozorro.res_config_settings_view_form_inherit_prozorro
-msgid "Run every"
-msgstr "Запускать каждые"
+msgid "<span>Run every</span>"
+msgstr "<span>Запускать каждые</span>"
 
 #. module: rteam_prozorro
 #: model_terms:ir.ui.view,arch_db:rteam_prozorro.res_config_settings_view_form_inherit_prozorro
-msgid "hour(s)"
-msgstr "ч."
+msgid "<span>hour(s)</span>"
+msgstr "<span>ч.</span>"
 
 #. module: rteam_prozorro
 #: model_terms:ir.ui.view,arch_db:rteam_prozorro.res_config_settings_view_form_inherit_prozorro
@@ -1196,8 +1211,8 @@ msgstr "- запущена"
 
 #. module: rteam_prozorro
 #: model_terms:ir.ui.view,arch_db:rteam_prozorro.res_config_settings_view_form_inherit_prozorro
-msgid "Last error:"
-msgstr "Последняя ошибка:"
+msgid "<strong>Last error:</strong>"
+msgstr "<strong>Последняя ошибка:</strong>"
 
 # --- res.config.settings field labels and helps (Python side) ---
 
@@ -1234,9 +1249,13 @@ msgstr "Как часто крон-задача получает новые те
 
 #. module: rteam_prozorro
 #: model:ir.model.fields,field_description:rteam_prozorro.field_res_config_settings__prozorro_is_running
-#: model_terms:ir.ui.view,arch_db:rteam_prozorro.res_config_settings_view_form_inherit_prozorro
 msgid "Sync running now"
 msgstr "Идёт синхронизация"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.res_config_settings_view_form_inherit_prozorro
+msgid "<i class=\"fa fa-spinner fa-spin\"/> <strong>Sync running now</strong>"
+msgstr "<i class=\"fa fa-spinner fa-spin\"/> <strong>Идёт синхронизация</strong>"
 
 #. module: rteam_prozorro
 #: model:ir.model.fields,field_description:rteam_prozorro.field_res_config_settings__prozorro_last_started_at
@@ -1245,21 +1264,33 @@ msgstr "Запущена"
 
 #. module: rteam_prozorro
 #: model:ir.model.fields,field_description:rteam_prozorro.field_res_config_settings__prozorro_last_sync_at
-#: model_terms:ir.ui.view,arch_db:rteam_prozorro.res_config_settings_view_form_inherit_prozorro
 msgid "Last finished"
 msgstr "Завершена"
 
 #. module: rteam_prozorro
-#: model:ir.model.fields,field_description:rteam_prozorro.field_res_config_settings__prozorro_last_pulled
 #: model_terms:ir.ui.view,arch_db:rteam_prozorro.res_config_settings_view_form_inherit_prozorro
+msgid "<strong>Last finished</strong>"
+msgstr "<strong>Завершена</strong>"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_res_config_settings__prozorro_last_pulled
 msgid "Pulled (last run)"
 msgstr "Загружено (за последний запуск)"
 
 #. module: rteam_prozorro
-#: model:ir.model.fields,field_description:rteam_prozorro.field_res_config_settings__prozorro_last_matched
 #: model_terms:ir.ui.view,arch_db:rteam_prozorro.res_config_settings_view_form_inherit_prozorro
+msgid "<strong>Pulled (last run)</strong>"
+msgstr "<strong>Загружено (за последний запуск)</strong>"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_res_config_settings__prozorro_last_matched
 msgid "Matched (last run)"
 msgstr "Совпадений (за последний запуск)"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.res_config_settings_view_form_inherit_prozorro
+msgid "<strong>Matched (last run)</strong>"
+msgstr "<strong>Совпадений (за последний запуск)</strong>"
 
 #. module: rteam_prozorro
 #: model:ir.model.fields,field_description:rteam_prozorro.field_res_config_settings__prozorro_last_error
@@ -1267,46 +1298,40 @@ msgid "Last error"
 msgstr "Последняя ошибка"
 
 # --- Subscription form: warning banners ---
+# These are extracted by Odoo as ONE msgid per <div class="alert"> with the
+# inline HTML preserved (<i/>, <strong>, <em>) and the source-XML indentation
+# preserved between elements. Translations MUST match the same HTML structure
+# for xml_term_adapter to apply them.
 
 #. module: rteam_prozorro
 #: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_subscription_view_form
-msgid "Auto-create lead is disabled by CRM settings."
-msgstr "Автосоздание лида отключено в настройках CRM."
+msgid ""
+"<i class=\"fa fa-exclamation-triangle\"/>\n"
+"                        <strong> Auto-create lead is disabled by CRM settings.</strong>\n"
+"                        CRM Leads are turned off globally, so this subscription\n"
+"                        will <strong>not</strong> create leads even though\n"
+"                        \"Auto-create lead\" is checked. Enable Leads in\n"
+"                        <em>Settings -&gt; Prozorro -&gt; CRM integration</em>\n"
+"                        first."
+msgstr ""
+"<i class=\"fa fa-exclamation-triangle\"/>\n"
+"                        <strong> Автосоздание лида отключено в настройках CRM.</strong>\n"
+"                        Лиды CRM отключены глобально, поэтому эта подписка\n"
+"                        <strong>не</strong> будет создавать лиды, даже если\n"
+"                        включён флаг \"Автосоздание лида\". Сначала включите Лиды в\n"
+"                        <em>Настройки -&gt; Prozorro -&gt; Интеграция с CRM</em>\n"
+"                        ."
 
 #. module: rteam_prozorro
 #: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_subscription_view_form
-msgid "CRM Leads are turned off globally, so this subscription will"
-msgstr "Лиды CRM отключены глобально, поэтому эта подписка"
-
-#. module: rteam_prozorro
-#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_subscription_view_form
-msgid "not"
-msgstr "не"
-
-#. module: rteam_prozorro
-#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_subscription_view_form
-msgid "create leads even though \"Auto-create lead\" is checked. Enable Leads in"
-msgstr "будет создавать лиды, даже если включён флаг \"Автосоздание лида\". Включите Лиды в"
-
-#. module: rteam_prozorro
-#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_subscription_view_form
-msgid "Settings -> Prozorro -> CRM integration"
-msgstr "Настройки -> Prozorro -> Интеграция с CRM"
-
-#. module: rteam_prozorro
-#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_subscription_view_form
-msgid "first."
-msgstr "сначала."
-
-#. module: rteam_prozorro
-#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_subscription_view_form
-msgid "Broad filter."
-msgstr "Слишком широкий фильтр."
-
-#. module: rteam_prozorro
-#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_subscription_view_form
-msgid "This subscription has no CPV codes and no keywords, so it matches every tender that meets the value range / region / status / procurement-method conditions. On the open Prozorro feed that is typically thousands of tenders. Add at least one CPV (DK 021:2015 chapter, e.g. \"33\" for medical) or a keyword to narrow it down."
-msgstr "В этой подписке не указано ни одного кода CPV и ни одного ключевого слова, поэтому она совпадает с каждым тендером, попадающим в диапазон сумм / регион / статус / метод закупки. В открытой ленте Prozorro это обычно тысячи тендеров. Добавьте хотя бы один код CPV (раздел ДК 021:2015, напр. \"33\" для медицины) или ключевое слово, чтобы сузить выборку."
+msgid ""
+"<i class=\"fa fa-exclamation-triangle\"/>\n"
+"                                <strong> Broad filter.</strong>\n"
+"                                This subscription has no CPV codes and no keywords, so it matches every tender that meets the value range / region / status / procurement-method conditions. On the open Prozorro feed that is typically thousands of tenders. Add at least one CPV (DK 021:2015 chapter, e.g. \"33\" for medical) or a keyword to narrow it down."
+msgstr ""
+"<i class=\"fa fa-exclamation-triangle\"/>\n"
+"                                <strong> Слишком широкий фильтр.</strong>\n"
+"                                В этой подписке не указано ни одного кода CPV и ни одного ключевого слова, поэтому она совпадает с каждым тендером, попадающим в диапазон сумм / регион / статус / метод закупки. В открытой ленте Prozorro это обычно тысячи тендеров. Добавьте хотя бы один код CPV (раздел ДК 021:2015, напр. \"33\" для медицины) или ключевое слово, чтобы сузить выборку."
 
 # --- prozorro.subscription new field: crm_use_leads_enabled ---
 

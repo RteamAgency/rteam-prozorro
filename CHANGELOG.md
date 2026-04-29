@@ -2,6 +2,41 @@
 
 All notable changes to `rteam_prozorro` are documented here.
 
+## [19.0.5.6.4] - 2026-04-29
+
+### Fixed
+- **Banner translations actually render now.** v5.6.3 added UK/RU
+  translations as separate fragments per `<strong>`/`<em>` chunk inside
+  the `<div class="alert">` warning banners (Broad filter, Auto-create
+  lead disabled by CRM, Leads disabled in Settings). Odoo's
+  `xml_translate` extracts each alert div as ONE msgid containing the
+  full inline HTML (`<i/>`, `<strong>`, `<em>`, `<code>`) plus the
+  source-XML indentation between tags. The fragments never matched, so
+  banners stayed in English on test19. Replaced with single multi-line
+  msgids per alert that preserve the exact HTML structure and
+  whitespace; `xml_term_adapter` now applies the translation since the
+  tag positions match.
+- Same fix for the inline-wrapped strings in the Settings panel that
+  were previously translated as plain text but extracted as
+  `<span>Run every</span>`, `<span>hour(s)</span>`,
+  `<i.../><strong>Sync running now</strong>`, `<strong>Last error:</strong>`,
+  `<strong>Last finished</strong>`, `<strong>Pulled (last run)</strong>`,
+  `<strong>Matched (last run)</strong>`. Each now has both a plain msgid
+  (for the field_description) AND a wrapped msgid (for the view).
+- Added two missing entries: `Ends:` (tender form key dates section) and
+  `<span class="o_stat_text">Prozorro</span>` (CRM lead smart button),
+  plus the `sum="Total"` attribute in the tender list view.
+
+### Notes
+- Lesson codified for future Rteam Apps: any `<div>` containing
+  `<strong>`/`<em>`/`<i>`/`<span>` inline children gets extracted as
+  one inline msgid by Odoo's `xml_translate` (per `TRANSLATED_ELEMENTS`
+  set in `odoo/tools/translate.py`). Translations must preserve the same
+  tag structure or `xml_term_adapter` rejects them and Odoo falls back
+  to source. Use `python3 /tmp/extract_msgids.py <view.xml>` (simulates
+  Odoo's extraction) to verify msgid format BEFORE writing translations
+  for any HTML-wrapping view content.
+
 ## [19.0.5.6.3] - 2026-04-29
 
 ### Added
