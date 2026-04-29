@@ -1,10 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo noupdate="1">
     <!--
-        Sync cron is inactive by default. Manual `Sync now` still works
-        (cron._trigger() processes pending triggers regardless of active).
-        Operators can flip auto-sync on from Settings -> Prozorro -> Schedule;
-        the toggle there writes back to this record's `active` field.
+        Sync cron is ALWAYS active=True so that `cron._trigger()` from a
+        manual `Sync now` click actually queues a trigger row. In Odoo 19
+        `ir.cron._trigger_list` filters out triggers on inactive crons
+        (`if not active: at_list = [at for at in at_list if at > now]`),
+        so an inactive cron + _trigger() is a no-op - the click would be
+        silently swallowed. We learned this on test19 v5.6.4 (build
+        31426538): sync click at 15:33 UTC, ir_cron_trigger empty, cron
+        worker never picked up.
+
+        The "Auto-sync on schedule" toggle in Settings now controls the
+        `nextcall` field, NOT `active`:
+            toggle ON  -> nextcall = now() + interval (recurring auto-sync)
+            toggle OFF -> nextcall = 2099-12-31 (effectively no auto-run)
+        Either way, manual Sync now via _trigger() works because the cron
+        is always active.
     -->
     <record id="ir_cron_prozorro_sync_feed" model="ir.cron">
         <field name="name">Prozorro: sync tender feed</field>
@@ -13,7 +24,8 @@
         <field name="code">model._cron_sync_feed()</field>
         <field name="interval_number">6</field>
         <field name="interval_type">hours</field>
-        <field name="active" eval="False"/>
+        <field name="active" eval="True"/>
+        <field name="nextcall" eval="'2099-12-31 00:00:00'"/>
         <field name="priority">10</field>
     </record>
 

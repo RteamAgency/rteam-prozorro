@@ -1438,3 +1438,93 @@ msgstr "Синхронизация Prozorro завершена: загружен
 #: code:addons/rteam_prozorro/models/prozorro_tender.py:0
 msgid "A background sync was scheduled. Open any active subscription to follow progress in its chatter."
 msgstr "Запланирована фоновая синхронизация. Откройте любую активную подписку, чтобы наблюдать за ходом в её чате."
+
+# --- v5.6.5 additions: visible sync-status banners on subscription form ---
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_subscription_view_form
+msgid ""
+"<i class=\"fa fa-spinner fa-spin\"/>\n"
+"                        <strong> Sync in progress...</strong>\n"
+"                        Pull from Prozorro takes 1-30 minutes depending on the\n"
+"                        feed depth. Reload the page to see new matches as they\n"
+"                        come in, or check the chatter below for milestone\n"
+"                        posts."
+msgstr ""
+"<i class=\"fa fa-spinner fa-spin\"/>\n"
+"                        <strong> Синхронизация идёт...</strong>\n"
+"                        Загрузка из ленты Prozorro занимает от 1 до 30 минут\n"
+"                        в зависимости от глубины. Обновите страницу, чтобы увидеть\n"
+"                        новые совпадения, или следите за сообщениями в чате\n"
+"                        ниже."
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_subscription_view_form
+msgid ""
+"<i class=\"fa fa-times-circle\"/>\n"
+"                        <strong> Last sync failed.</strong>\n"
+"                        Reload the page to clear this once the next run\n"
+"                        succeeds. See chatter below for the full traceback."
+msgstr ""
+"<i class=\"fa fa-times-circle\"/>\n"
+"                        <strong> Последняя синхронизация завершилась ошибкой.</strong>\n"
+"                        Обновите страницу, когда следующий запуск пройдёт успешно,\n"
+"                        чтобы скрыть это сообщение. Полный traceback - в чате ниже."
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_subscription_view_form
+msgid ""
+"<i class=\"fa fa-check-circle\"/>\n"
+"                        <strong> Last sync OK.</strong>\n"
+"                        Pulled / matched counts and the finish timestamp are\n"
+"                        on the Stats tab. Click <em>Sync now</em> to refresh."
+msgstr ""
+"<i class=\"fa fa-check-circle\"/>\n"
+"                        <strong> Последняя синхронизация успешна.</strong>\n"
+"                        Количество загруженных / совпадений и время завершения\n"
+"                        на вкладке Статистика. Нажмите <em>Синхронизировать</em>, чтобы обновить."
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_subscription_view_form
+msgid "This subscription"
+msgstr "Эта подписка"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_subscription_view_form
+msgid "Last global sync run"
+msgstr "Последний глобальный запуск синхронизации"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_subscription__sync_is_running
+msgid "Sync running"
+msgstr "Идёт синхронизация"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,help:rteam_prozorro.field_prozorro_subscription__sync_is_running
+msgid "True while the global Prozorro feed sync is in flight (for any subscription, not just this one)."
+msgstr "Истина, пока идёт глобальная синхронизация ленты Prozorro (для любой подписки, не только этой)."
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_subscription__sync_last_started_at
+msgid "Sync started at"
+msgstr "Синхронизация запущена"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_subscription__sync_last_finished_at
+msgid "Sync finished at"
+msgstr "Синхронизация завершена"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_subscription__sync_last_pulled
+msgid "Sync last pulled"
+msgstr "Загружено за последний запуск"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_subscription__sync_last_matched
+msgid "Sync last matched"
+msgstr "Совпадений за последний запуск"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_subscription__sync_last_error
+msgid "Sync last error"
+msgstr "Последняя ошибка синхронизации"

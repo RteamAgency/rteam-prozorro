@@ -92,6 +92,30 @@
                         <em>Settings -&gt; Prozorro -&gt; CRM integration</em>
                         first.
                     </div>
+                    <field name="sync_is_running" invisible="1"/>
+                    <div class="alert alert-info" role="status"
+                         invisible="not sync_is_running">
+                        <i class="fa fa-spinner fa-spin"/>
+                        <strong> Sync in progress...</strong>
+                        Pull from Prozorro takes 1-30 minutes depending on the
+                        feed depth. Reload the page to see new matches as they
+                        come in, or check the chatter below for milestone
+                        posts.
+                    </div>
+                    <div class="alert alert-danger" role="alert"
+                         invisible="sync_is_running or not sync_last_error">
+                        <i class="fa fa-times-circle"/>
+                        <strong> Last sync failed.</strong>
+                        Reload the page to clear this once the next run
+                        succeeds. See chatter below for the full traceback.
+                    </div>
+                    <div class="alert alert-success" role="status"
+                         invisible="sync_is_running or sync_last_error or not sync_last_finished_at">
+                        <i class="fa fa-check-circle"/>
+                        <strong> Last sync OK.</strong>
+                        Pulled / matched counts and the finish timestamp are
+                        on the Stats tab. Click <em>Sync now</em> to refresh.
+                    </div>
                     <notebook>
                         <page string="Filters">
                             <div class="alert alert-warning" role="alert"
@@ -134,8 +158,18 @@
                         </page>
                         <page string="Stats">
                             <group>
-                                <field name="matched_count" readonly="1"/>
-                                <field name="last_match" readonly="1"/>
+                                <group string="This subscription">
+                                    <field name="matched_count" readonly="1"/>
+                                    <field name="last_match" readonly="1"/>
+                                </group>
+                                <group string="Last global sync run">
+                                    <field name="sync_last_started_at" readonly="1"/>
+                                    <field name="sync_last_finished_at" readonly="1"/>
+                                    <field name="sync_last_pulled" readonly="1"/>
+                                    <field name="sync_last_matched" readonly="1"/>
+                                    <field name="sync_last_error" readonly="1"
+                                           invisible="not sync_last_error"/>
+                                </group>
                             </group>
                         </page>
                     </notebook>

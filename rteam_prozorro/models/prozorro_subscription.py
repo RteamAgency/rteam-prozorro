@@ -83,11 +83,56 @@ class ProzorroSubscription(models.Model):
         "the Leads pool is hidden.",
     )
 
+    # Sync-status mirror of `prozorro.sync.cursor` singleton, exposed on
+    # every subscription so the user gets immediate feedback right where
+    # they click Sync now (without scrolling chatter or hopping over to
+    # Settings -> Prozorro -> Status). All fields are computed and
+    # non-stored: they recompute on every form load against the current
+    # cursor state.
+    sync_is_running = fields.Boolean(
+        string="Sync running",
+        compute="_compute_sync_status",
+        help="True while the global Prozorro feed sync is in flight (for "
+        "any subscription, not just this one).",
+    )
+    sync_last_started_at = fields.Datetime(
+        string="Sync started at",
+        compute="_compute_sync_status",
+    )
+    sync_last_finished_at = fields.Datetime(
+        string="Sync finished at",
+        compute="_compute_sync_status",
+    )
+    sync_last_pulled = fields.Integer(
+        string="Sync last pulled",
+        compute="_compute_sync_status",
+    )
+    sync_last_matched = fields.Integer(
+        string="Sync last matched",
+        compute="_compute_sync_status",
+    )
+    sync_last_error = fields.Text(
+        string="Sync last error",
+        compute="_compute_sync_status",
+    )
+
     @api.depends_context("uid")
     def _compute_crm_use_leads_enabled(self):
         enabled = self.env.user.has_group("crm.group_use_lead")
         for rec in self:
             rec.crm_use_leads_enabled = enabled
+
+    @api.depends_context("uid")
+    def _compute_sync_status(self):
+        Cursor = self.env["prozorro.sync.cursor"].sudo()
+        cursor = Cursor.search([("name", "=", "main")], limit=1)
+        for rec in self:
+            rec.sync_is_running = bool(cursor and cursor.is_running)
+            rec.sync_last_started_at = cursor.last_started_at if cursor else False
+            rec.sync_last_finished_at = cursor.last_sync if cursor else False
+            rec.sync_last_pulled = cursor.last_pulled if cursor else 0
+            rec.sync_last_matched = cursor.last_matched if cursor else 0
+            rec.sync_last_error = cursor.last_error if cursor else False
 
     @api.model
     def _default_status_ids(self):

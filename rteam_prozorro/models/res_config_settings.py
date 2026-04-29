@@ -1,4 +1,12 @@
+from datetime import datetime, timedelta
+
 from odoo import api, fields, models
+
+# Sentinel "never auto-run" value for ir.cron.nextcall when the user has
+# the Schedule toggle OFF. Far enough in the future that the cron worker
+# treats it as "never ready" but still allows manual `_trigger()` to
+# create a trigger row that bypasses nextcall.
+NEVER_NEXTCALL = datetime(2099, 12, 31)
 
 
 class ResConfigSettings(models.TransientModel):
@@ -25,11 +33,20 @@ class ResConfigSettings(models.TransientModel):
     )
 
     # ------------------------------------------------------------------
-    # Schedule (binds directly to ir.cron.active / interval_number)
-    # Default behaviour: cron is INACTIVE, sync only runs when an
-    # operator clicks Sync now (which fires `cron._trigger()` and runs
-    # the cron once regardless of `active`). When the toggle below is
-    # flipped on, the cron also runs on its scheduled cadence.
+    # Schedule (binds to ir.cron.nextcall, NOT active).
+    #
+    # The cron is ALWAYS active=True - that is required for manual
+    # `Sync now` clicks (which call `cron._trigger()`) to actually
+    # queue a trigger row. Odoo 19's `_trigger_list` filters out
+    # triggers on inactive crons, so an inactive cron + _trigger() is
+    # a silent no-op. We learned this the hard way on v5.6.4 (test19,
+    # build 31426538: click at 15:33 UTC produced no in-progress /
+    # done chatter; ir_cron_trigger was empty).
+    #
+    # The Schedule toggle below now drives `nextcall` instead:
+    #     ON  -> nextcall = now() + interval (recurring auto-sync)
+    #     OFF -> nextcall = 2099-12-31 (effectively no auto-run)
+    # Either way `_trigger()` works because active=True.
     # ------------------------------------------------------------------
     prozorro_auto_sync_active = fields.Boolean(
         string="Auto-sync on schedule",
@@ -80,10 +97,13 @@ class ResConfigSettings(models.TransientModel):
     @api.depends_context("uid")
     def _compute_prozorro_cron(self):
         cron = self.env.ref("rteam_prozorro.ir_cron_prozorro_sync_feed", raise_if_not_found=False)
-        active = bool(cron and cron.sudo().active)
-        # Normalise to hours - cron stores interval_type separately, but
-        # we expose a single hours field for simplicity. Days/minutes
-        # values still display correctly as a rounded hour count.
+        # The user's intent is stored in `prozorro.auto_sync_enabled`
+        # config_parameter (source of truth). The cron's nextcall mirrors
+        # that intent (real time vs 2099 sentinel) but Odoo overwrites
+        # nextcall after each run, so config_parameter is the canonical
+        # state.
+        Param = self.env["ir.config_parameter"].sudo()
+        enabled = Param.get_param("prozorro.auto_sync_enabled", "False") == "True"
         hours = 0
         if cron:
             cron_s = cron.sudo()
@@ -100,15 +120,28 @@ class ResConfigSettings(models.TransientModel):
             else:
                 hours = n
         for rec in self:
-            rec.prozorro_auto_sync_active = active
+            rec.prozorro_auto_sync_active = enabled
             rec.prozorro_sync_interval_hours = hours
 
     def _inverse_prozorro_auto_sync_active(self):
         cron = self.env.ref("rteam_prozorro.ir_cron_prozorro_sync_feed", raise_if_not_found=False)
-        if not cron:
-            return
+        Param = self.env["ir.config_parameter"].sudo()
         for rec in self:
-            cron.sudo().active = bool(rec.prozorro_auto_sync_active)
+            enabled = bool(rec.prozorro_auto_sync_active)
+            Param.set_param("prozorro.auto_sync_enabled", "True" if enabled else "False")
+            if not cron:
+                continue
+            cron_s = cron.sudo()
+            if enabled:
+                hours = max(1, int(rec.prozorro_sync_interval_hours or 6))
+                cron_s.write(
+                    {
+                        "active": True,
+                        "nextcall": fields.Datetime.now() + timedelta(hours=hours),
+                    }
+                )
+            else:
+                cron_s.write({"active": True, "nextcall": NEVER_NEXTCALL})
 
     def _inverse_prozorro_sync_interval_hours(self):
         cron = self.env.ref("rteam_prozorro.ir_cron_prozorro_sync_feed", raise_if_not_found=False)
@@ -116,12 +149,14 @@ class ResConfigSettings(models.TransientModel):
             return
         for rec in self:
             hours = max(1, int(rec.prozorro_sync_interval_hours or 1))
-            cron.sudo().write(
-                {
-                    "interval_number": hours,
-                    "interval_type": "hours",
-                }
-            )
+            vals = {
+                "interval_number": hours,
+                "interval_type": "hours",
+                "active": True,
+            }
+            if rec.prozorro_auto_sync_active:
+                vals["nextcall"] = fields.Datetime.now() + timedelta(hours=hours)
+            cron.sudo().write(vals)
 
     @api.depends_context("uid")
     def _compute_prozorro_status(self):

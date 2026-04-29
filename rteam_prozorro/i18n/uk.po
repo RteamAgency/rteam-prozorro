@@ -1438,3 +1438,93 @@ msgstr "Синхронізацію Prozorro завершено: завантаж
 #: code:addons/rteam_prozorro/models/prozorro_tender.py:0
 msgid "A background sync was scheduled. Open any active subscription to follow progress in its chatter."
 msgstr "Заплановано фонову синхронізацію. Відкрийте будь-яку активну підписку, щоб слідкувати за прогресом у її чаті."
+
+# --- v5.6.5 additions: visible sync-status banners on subscription form ---
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_subscription_view_form
+msgid ""
+"<i class=\"fa fa-spinner fa-spin\"/>\n"
+"                        <strong> Sync in progress...</strong>\n"
+"                        Pull from Prozorro takes 1-30 minutes depending on the\n"
+"                        feed depth. Reload the page to see new matches as they\n"
+"                        come in, or check the chatter below for milestone\n"
+"                        posts."
+msgstr ""
+"<i class=\"fa fa-spinner fa-spin\"/>\n"
+"                        <strong> Синхронізація триває...</strong>\n"
+"                        Завантаження зі стрічки Prozorro займає від 1 до 30 хвилин\n"
+"                        залежно від глибини. Оновіть сторінку, щоб побачити нові\n"
+"                        збіги, або слідкуйте за повідомленнями в чаті\n"
+"                        нижче."
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_subscription_view_form
+msgid ""
+"<i class=\"fa fa-times-circle\"/>\n"
+"                        <strong> Last sync failed.</strong>\n"
+"                        Reload the page to clear this once the next run\n"
+"                        succeeds. See chatter below for the full traceback."
+msgstr ""
+"<i class=\"fa fa-times-circle\"/>\n"
+"                        <strong> Остання синхронізація завершилася помилкою.</strong>\n"
+"                        Оновіть сторінку, коли наступний запуск пройде успішно,\n"
+"                        щоб приховати це повідомлення. Повний traceback - у чаті нижче."
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_subscription_view_form
+msgid ""
+"<i class=\"fa fa-check-circle\"/>\n"
+"                        <strong> Last sync OK.</strong>\n"
+"                        Pulled / matched counts and the finish timestamp are\n"
+"                        on the Stats tab. Click <em>Sync now</em> to refresh."
+msgstr ""
+"<i class=\"fa fa-check-circle\"/>\n"
+"                        <strong> Остання синхронізація успішна.</strong>\n"
+"                        Кількість завантажених / збігів та час завершення\n"
+"                        у вкладці Статистика. Натисніть <em>Синхронізувати</em>, щоб оновити."
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_subscription_view_form
+msgid "This subscription"
+msgstr "Ця підписка"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_subscription_view_form
+msgid "Last global sync run"
+msgstr "Останній глобальний запуск синхронізації"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_subscription__sync_is_running
+msgid "Sync running"
+msgstr "Синхронізація триває"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,help:rteam_prozorro.field_prozorro_subscription__sync_is_running
+msgid "True while the global Prozorro feed sync is in flight (for any subscription, not just this one)."
+msgstr "Істина, поки триває глобальна синхронізація стрічки Prozorro (для будь-якої підписки, не лише цієї)."
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_subscription__sync_last_started_at
+msgid "Sync started at"
+msgstr "Синхронізацію розпочато"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_subscription__sync_last_finished_at
+msgid "Sync finished at"
+msgstr "Синхронізацію завершено"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_subscription__sync_last_pulled
+msgid "Sync last pulled"
+msgstr "Завантажено за останній запуск"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_subscription__sync_last_matched
+msgid "Sync last matched"
+msgstr "Збігів за останній запуск"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_subscription__sync_last_error
+msgid "Sync last error"
+msgstr "Остання помилка синхронізації"

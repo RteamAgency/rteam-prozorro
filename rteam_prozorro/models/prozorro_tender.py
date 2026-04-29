@@ -7,6 +7,12 @@ from datetime import datetime, timedelta
 
 from odoo import SUPERUSER_ID, _, api, fields, models
 
+# Sentinel "never auto-run" value for ir.cron.nextcall when the Schedule
+# toggle is OFF. Far enough in the future that the cron worker treats
+# it as "never ready" but `_trigger()` from a manual Sync now click
+# still creates a trigger row that bypasses nextcall.
+SYNC_CRON_NEVER_NEXTCALL = datetime(2099, 12, 31)
+
 _logger = logging.getLogger(__name__)
 
 DEFAULT_API_URL = "https://public.api.openprocurement.org/api/2.5/tenders"
@@ -189,6 +195,7 @@ class ProzorroTender(models.Model):
         subs = Subscription._get_active_subscriptions()
         if not subs:
             _logger.info("Prozorro: no active subscriptions, skipping sync")
+            self._reschedule_cron_after_run()
             return {"pulled": 0, "matched": 0, "error": None, "skipped": True}
 
         # Sync started: post a one-line chatter note on each active
@@ -268,10 +275,12 @@ class ProzorroTender(models.Model):
                 _("Prozorro sync failed: %s", str(e)[:200]),
             )
             self._notify_sync_result(pulled, matched, error=str(e))
+            self._reschedule_cron_after_run()
             return {"pulled": pulled, "matched": matched, "error": str(e), "skipped": False}
 
         cursor._record_success(pulled, matched)
         _logger.info("Prozorro: sync done. pulled=%d, matched=%d", pulled, matched)
+        self._reschedule_cron_after_run()
         # Per-subscription chatter line with the run's outcome FOR THIS
         # subscription. Posted via isolated cursor so it survives any
         # late-stage rollback (e.g. lead-creation failure on retry).
@@ -289,16 +298,39 @@ class ProzorroTender(models.Model):
         return {"pulled": pulled, "matched": matched, "error": None, "skipped": False}
 
     @api.model
+    def _reschedule_cron_after_run(self):
+        """Park the sync cron's nextcall in 2099 if the user's Schedule
+        toggle is OFF.
+
+        Odoo's cron framework auto-sets `nextcall = now() + interval`
+        after a successful run. That's correct when the Schedule toggle
+        is ON. But we also want manual `Sync now` to work when the
+        toggle is OFF, which requires the cron to be `active=True`. To
+        prevent the cron from auto-running every <interval> hours when
+        the user doesn't want it, we re-park nextcall to 2099 right
+        after each run, so the cron worker only picks it up again when
+        a user explicitly clicks Sync now (which inserts a trigger row
+        that bypasses nextcall).
+        """
+        Param = self.env["ir.config_parameter"].sudo()
+        enabled = Param.get_param("prozorro.auto_sync_enabled", "False") == "True"
+        if enabled:
+            return  # Odoo already scheduled the next run normally
+        cron = self.env.ref("rteam_prozorro.ir_cron_prozorro_sync_feed", raise_if_not_found=False)
+        if not cron:
+            return
+        cron.sudo().write({"nextcall": SYNC_CRON_NEVER_NEXTCALL})
+
+    @api.model
     def _notify_sync_result(self, pulled, matched, error=None):
         """Push a real-time toast to Prozorro managers when a sync run finishes.
 
         Sent over `bus.bus` so users get feedback even when the sync ran in
-        the background (cron / `_trigger()` path) instead of inline. Skipped
-        when nothing useful happened (no error, no new matches): hourly crons
-        finding 0 matches would otherwise spam the UI.
+        the background (cron / `_trigger()` path) instead of inline. Always
+        notifies on completion so the user knows the run actually finished;
+        v5.6.4 silenced 0-match runs and broke the "click Sync now -> see
+        result" feedback loop, leaving operators staring at an empty page.
         """
-        if error is None and not matched:
-            return
         group = self.env.ref("rteam_prozorro.group_prozorro_manager", raise_if_not_found=False)
         if not group:
             _logger.warning(
@@ -318,7 +350,7 @@ class ProzorroTender(models.Model):
                 "Pulled %(pulled)s tenders, %(matched)s matched. "
                 "Refresh the Tenders list to see new results."
             ) % {"pulled": pulled, "matched": matched}
-            ntype = "success"
+            ntype = "success" if matched else "info"
             sticky = False
         Bus = self.env["bus.bus"].sudo()
         for partner in group.user_ids.partner_id:

@@ -2,6 +2,69 @@
 
 All notable changes to `rteam_prozorro` are documented here.
 
+## [19.0.5.6.5] - 2026-04-29
+
+### Fixed (the silence-after-Sync-now bug)
+- **Manual `Sync now` actually triggers the cron now.** v5.5.0 made
+  `ir_cron_prozorro_sync_feed` `active=False` by default, on the
+  premise that `cron._trigger()` would still fire it on manual click.
+  Wrong premise: in Odoo 19 `ir.cron._trigger_list` filters out
+  triggers on inactive crons (`if not active: at_list = [at for at
+  in at_list if at > now]`). So `_trigger()` was a silent no-op when
+  the cron was inactive. Confirmed live on test19 v5.6.4 (build
+  31426538) - click at 15:33 UTC produced no in-progress / done
+  chatter; `ir_cron_trigger` empty; cron worker only ran retention.
+- Cron is now ALWAYS `active=True`. The "Auto-sync on schedule"
+  toggle in Settings drives `ir.cron.nextcall` instead:
+    toggle ON  -> nextcall = now() + interval (recurring auto-sync)
+    toggle OFF -> nextcall = 2099-12-31 (effectively no auto-run)
+  Either way `_trigger()` works because active=True.
+- Added `prozorro.auto_sync_enabled` ir.config_parameter as the
+  canonical "did the user want auto-sync?" boolean. The Settings
+  toggle reads/writes it AND mirrors to `cron.nextcall`. After every
+  cron run, `_reschedule_cron_after_run()` re-parks `nextcall` to 2099
+  if the parameter is False (Odoo would otherwise set
+  `nextcall = now + interval` automatically and start auto-running).
+- Migration `19.0.5.6.5/post-migrate.py` for existing installs:
+  preserves prior `cron.active` state into the new
+  `prozorro.auto_sync_enabled` config_parameter, then forces
+  `active=True` and rewrites `nextcall` accordingly.
+
+### Fixed (the silent-completion bug)
+- `_notify_sync_result` no longer silently swallows runs with 0
+  matches. v5.6.4's `if error is None and not matched: return`
+  guard meant a sync that finished successfully but with 0 new
+  matches produced NOTHING visible to the user - no toast, only a
+  chatter line they had to scroll for. Now every completion sends a
+  `bus.bus` toast (success/info/danger by outcome), so the user
+  knows the run finished even if it found nothing.
+
+### Added (sync-status visibility on subscription form)
+- Three live alert banners on the subscription form, driven by
+  computed `sync_is_running` / `sync_last_started_at` /
+  `sync_last_finished_at` / `sync_last_pulled` /
+  `sync_last_matched` / `sync_last_error` fields that mirror the
+  `prozorro.sync.cursor` singleton:
+    `<i fa-spinner fa-spin/>` Sync in progress... (info, while running)
+    `<i fa-times-circle/>` Last sync failed (danger, when last_error set)
+    `<i fa-check-circle/>` Last sync OK (success, when last finish was clean)
+  Auto-recompute on every form load so the user gets immediate
+  feedback right where they click Sync now, without having to scroll
+  through chatter or hop to Settings -> Prozorro -> Status.
+- Stats tab now shows the global sync run details (started /
+  finished / pulled / matched / last_error) alongside the per-
+  subscription matched_count / last_match counters.
+
+### Notes for future Apps
+- Do NOT rely on `cron._trigger()` for inactive crons. Either keep
+  the cron active and gate auto-sync via a different mechanism
+  (config_parameter checked in handler, or nextcall sentinel) OR run
+  manual sync inline in the user's RPC transaction (with the usual
+  browser-freeze caveat).
+- Always verify a "manual click should fire" path against
+  `ir_cron_trigger` table before trusting it: if no row is created,
+  the worker won't pick it up regardless of how clean the toast looks.
+
 ## [19.0.5.6.4] - 2026-04-29
 
 ### Fixed

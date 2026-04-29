@@ -95,7 +95,6 @@ if __name__ == '__main__':
                 process(child)
 
     for kind, msg in extracted:
-        if 'alert' in msg or 'Broad' in msg or 'CRM settings' in msg or 'disabled' in msg or 'Leads' in msg or 'Schedule' in msg or kind.startswith('ATTR'):
-            # show interesting ones
-            print(f"\n--- {kind} ---")
-            print(repr(msg))
+        # show all TEXT and ATTR entries
+        print(f"\n--- {kind} ---")
+        print(repr(msg))
