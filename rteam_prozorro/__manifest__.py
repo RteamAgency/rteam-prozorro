@@ -1,25 +1,26 @@
 {
     "name": "Prozorro Connector",
-    "version": "19.0.5.4.2",
+    "version": "19.0.5.5.0",
     "category": "Sales/CRM",
-    "summary": "Monitor Ukrainian Prozorro tenders, auto-create matching CRM opportunities",
+    "summary": "Monitor Ukrainian Prozorro tenders, match them to your CRM",
     "description": """
 Prozorro Connector for Odoo
 ===========================
 
 Free Odoo module that watches the Ukrainian Prozorro public-procurement feed,
-matches new tenders against your CPV / keyword / region rules, and auto-creates
-CRM opportunities. Targeted at Ukrainian SMBs participating as suppliers.
+matches new tenders against your CPV / keyword / region rules, and surfaces
+them as Tenders ready for review (manual conversion to CRM lead). Targeted at
+Ukrainian SMBs participating as suppliers.
 
 Features (L0 free)
 ------------------
-* Hourly sync of the Prozorro public API feed (`/api/2.5/tenders`)
+* On-demand sync of the Prozorro public API feed (`/api/2.5/tenders`),
+  optional auto-sync schedule (off by default)
 * Subscription rules: filter by CPV codes, keywords (contains / regex / negate),
   region, value range, status
-* Auto-creation of `crm.lead` for matched tenders, with team / user / tag /
-  stage assignment
-* New-match Discuss notification + email alert
-* Daily digest email (one per subscription, grouped)
+* Optional auto-creation of `crm.lead` for matched tenders (off by default,
+  always creates Leads not Opportunities so they go through manual triage)
+* Live sync status panel in Settings + per-subscription chatter trail
 * Tender form view with deep-link to prozorro.gov.ua, key dates, items, CPV chips
 
 Paid tier `rteam_prozorro_sales` (separate module, OPL-1, EUR 299) adds tender

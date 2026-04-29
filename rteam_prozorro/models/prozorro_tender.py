@@ -15,17 +15,23 @@ DEFAULT_PAGES_PER_RUN = 20  # safety cap so a single cron run can't loop forever
 DEFAULT_RETENTION_DAYS = 60
 DEFAULT_HTTP_TIMEOUT = 25
 
+# Mirror prozorro.tender.status master data (data/prozorro_tender_status_data.xml).
+# Keep in sync: missing codes here = sync run aborts when API returns the new
+# status. As of 2026-04-29 Prozorro publishes these eleven values.
 PROZORRO_STATUS = [
     ("draft", "Draft"),
     ("active.enquiries", "Enquiries"),
     ("active.tendering", "Tendering"),
+    ("active.pre-qualification", "Pre-qualification"),
+    ("active.pre-qualification.stand-still", "Pre-qualification stand-still"),
     ("active.auction", "Auction"),
     ("active.qualification", "Qualification"),
-    ("active.awarded", "Awarded (active)"),
+    ("active.awarded", "Awarded"),
     ("complete", "Complete"),
     ("cancelled", "Cancelled"),
     ("unsuccessful", "Unsuccessful"),
 ]
+PROZORRO_STATUS_CODES = {code for code, _label in PROZORRO_STATUS}
 
 
 class ProzorroTender(models.Model):
@@ -146,9 +152,23 @@ class ProzorroTender(models.Model):
                     subtype_xmlid="mail.mt_note",
                 )
         except Exception:
-            _logger.exception(
-                "Prozorro: failed to post chatter line to subscriptions %s", sub_ids
-            )
+            _logger.exception("Prozorro: failed to post chatter line to subscriptions %s", sub_ids)
+
+    def _mark_cursor_isolated(self, cursor_id, **vals):
+        """Update prozorro.sync.cursor in an independent transaction.
+
+        Used to flip `is_running` on/off so the Settings status block
+        reflects state IN REAL TIME, even though the cron's main
+        transaction is still inside the long HTTP loop.
+        """
+        if not cursor_id or not vals:
+            return
+        try:
+            with self.pool.cursor() as new_cr:
+                env = api.Environment(new_cr, SUPERUSER_ID, {})
+                env["prozorro.sync.cursor"].browse(cursor_id).write(vals)
+        except Exception:
+            _logger.exception("Prozorro: failed to update cursor %s with %s", cursor_id, vals)
 
     # ------------------------------------------------------------------ Cron
 
@@ -177,7 +197,16 @@ class ProzorroTender(models.Model):
         # / hits a container restart. Without isolation, the operator
         # sees nothing in chatter despite clicking Sync now.
         self._post_chatter_isolated(
-            subs.ids, _("Prozorro sync in progress..."),
+            subs.ids,
+            _("Prozorro sync in progress..."),
+        )
+        # Flip the running flag in an isolated cursor so the Settings
+        # status block (and any future polling banner) sees it instantly,
+        # not when the cron transaction commits ~tens of minutes later.
+        self._mark_cursor_isolated(
+            cursor.id,
+            is_running=True,
+            last_started_at=fields.Datetime.now(),
         )
 
         base_url = self._get_api_base_url()
@@ -212,7 +241,14 @@ class ProzorroTender(models.Model):
                         continue
                     matches = subs.filtered(lambda s, tp=tender_payload: s._matches(tp))
                     if matches:
-                        self._upsert_tender(tender_payload, matches, base_url)
+                        try:
+                            self._upsert_tender(tender_payload, matches, base_url)
+                        except Exception:
+                            _logger.exception(
+                                "Prozorro: failed to upsert tender %s, skipping",
+                                tender_uuid,
+                            )
+                            continue
                         matched += 1
                         for sub in matches:
                             per_sub_matched[sub.id] += 1
@@ -228,7 +264,8 @@ class ProzorroTender(models.Model):
             _logger.exception("Prozorro: sync failed")
             cursor._record_error(str(e))
             self._post_chatter_isolated(
-                subs.ids, _("Prozorro sync failed: %s", str(e)[:200]),
+                subs.ids,
+                _("Prozorro sync failed: %s", str(e)[:200]),
             )
             self._notify_sync_result(pulled, matched, error=str(e))
             return {"pulled": pulled, "matched": matched, "error": str(e), "skipped": False}
@@ -303,6 +340,25 @@ class ProzorroTender(models.Model):
         later (Odoo.sh webhook poll cadence) and posts its own
         "in progress" / "done" lines once it actually runs.
         """
+        # Guard: don't queue if a sync is already in flight. Operators
+        # double-clicking Sync now would otherwise stack triggers and
+        # generate duplicate chatter posts.
+        cursor = self.env["prozorro.sync.cursor"].sudo()._get_singleton("main")
+        if cursor.is_running:
+            return {
+                "type": "ir.actions.client",
+                "tag": "display_notification",
+                "params": {
+                    "title": _("Sync already running"),
+                    "message": _(
+                        "A Prozorro sync is in progress (started %s). "
+                        "Wait for it to finish before queueing another."
+                    )
+                    % (cursor.last_started_at or _("just now")),
+                    "type": "warning",
+                    "sticky": False,
+                },
+            }
         cron = self.env.ref("rteam_prozorro.ir_cron_prozorro_sync_feed", raise_if_not_found=False)
         if not cron:
             _logger.warning(
@@ -450,12 +506,26 @@ class ProzorroTender(models.Model):
                 )
             cls_ids.append(cls.id)
 
+        # Defensive: Prozorro adds new statuses occasionally. If the API
+        # returns a code we have not whitelisted in PROZORRO_STATUS, store
+        # False rather than raise ValueError (Selection write rejection)
+        # which would abort the whole sync run.
+        raw_status = payload.get("status")
+        if raw_status and raw_status not in PROZORRO_STATUS_CODES:
+            _logger.warning(
+                "Prozorro: unknown tender status %r on %s, storing empty. "
+                "Add it to PROZORRO_STATUS and prozorro_tender_status_data.xml.",
+                raw_status,
+                payload.get("id"),
+            )
+            raw_status = False
+
         return {
             "name": payload.get("tenderID") or payload.get("id"),
             "uuid": payload.get("id"),
             "title": payload.get("title"),
             "description": payload.get("description"),
-            "status": payload.get("status"),
+            "status": raw_status,
             "procurement_method": payload.get("procurementMethod"),
             "procurement_method_type": payload.get("procurementMethodType"),
             "value_amount": value.get("amount") or 0.0,
@@ -514,9 +584,15 @@ class ProzorroTender(models.Model):
             body_lines.append("")
             body_lines.append(f"Open in Prozorro: {self.url}")
 
+        # type='lead' lands in the Leads pool (Generation Leads) for manual
+        # triage; type='opportunity' would skip triage and dump straight
+        # into the Pipeline / Kanban. With auto-create enabled and a broad
+        # subscription this can be thousands of records, polluting the
+        # pipeline. Always create as a Lead - operators promote to
+        # opportunity after review via standard Odoo CRM flow.
         vals = {
             "name": "[Prozorro] %s" % (title[:80] if len(title) > 80 else title),
-            "type": "opportunity",
+            "type": "lead",
             "description": "\n".join(body_lines),
             "expected_revenue": self.value_amount or 0.0,
             "prozorro_tender_id": self.id,

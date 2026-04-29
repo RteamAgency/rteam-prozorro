@@ -7,6 +7,56 @@
         <field name="arch" type="xml">
             <xpath expr="//form" position="inside">
                 <app data-string="Prozorro" string="Prozorro" name="rteam_prozorro" groups="rteam_prozorro.group_prozorro_user">
+                    <block title="Schedule" name="prozorro_schedule">
+                        <setting string="Auto-sync on schedule"
+                                 help="If on, the feed sync runs automatically on the interval below. If off, sync only runs when you click 'Sync now'. Manual sync works regardless.">
+                            <field name="prozorro_auto_sync_active"/>
+                            <div class="content-group" invisible="not prozorro_auto_sync_active">
+                                <div class="mt8">
+                                    <span>Run every</span>
+                                    <field name="prozorro_sync_interval_hours" class="oe_inline" style="width: 60px;"/>
+                                    <span>hour(s)</span>
+                                </div>
+                            </div>
+                        </setting>
+                    </block>
+                    <block title="Status" name="prozorro_status">
+                        <setting string="Sync status" help="Live status of the Prozorro feed sync.">
+                            <div>
+                                <div class="alert alert-info mb8" role="status" invisible="not prozorro_is_running">
+                                    <i class="fa fa-spinner fa-spin"/> <strong>Sync running now</strong>
+                                    <span invisible="not prozorro_last_started_at">
+                                        - started <field name="prozorro_last_started_at" class="oe_inline" widget="datetime"/>
+                                    </span>
+                                </div>
+                                <div class="alert alert-danger mb8" role="alert" invisible="not prozorro_last_error">
+                                    <strong>Last error:</strong>
+                                    <field name="prozorro_last_error" class="oe_inline"/>
+                                </div>
+                                <table class="table table-sm">
+                                    <tr>
+                                        <td><strong>Last finished</strong></td>
+                                        <td><field name="prozorro_last_sync_at"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Pulled (last run)</strong></td>
+                                        <td><field name="prozorro_last_pulled"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Matched (last run)</strong></td>
+                                        <td><field name="prozorro_last_matched"/></td>
+                                    </tr>
+                                </table>
+                                <button name="action_prozorro_sync_now" type="object"
+                                        string="Sync now" class="btn btn-primary"
+                                        groups="rteam_prozorro.group_prozorro_manager"/>
+                                <button name="action_prozorro_reset_cursor" type="object"
+                                        string="Reset cursor" class="btn btn-link"
+                                        confirm="Rewind the feed cursor so the next sync pulls latest tenders. Continue?"
+                                        groups="rteam_prozorro.group_prozorro_manager"/>
+                            </div>
+                        </setting>
+                    </block>
                     <block title="Feed" name="prozorro_feed">
                         <setting string="API base URL" help="Public read endpoint of the Prozorro / OpenProcurement API.">
                             <field name="prozorro_api_url"/>

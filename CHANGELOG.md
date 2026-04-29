@@ -2,6 +2,41 @@
 
 All notable changes to `rteam_prozorro` are documented here.
 
+## [19.0.5.5.0] - 2026-04-29
+
+### Fixed
+- `prozorro.tender.status` Selection was missing `active.pre-qualification`
+  and `active.pre-qualification.stand-still`, so any tender in those
+  states aborted the entire sync run with `ValueError: Wrong value for
+  prozorro.tender.status`. Selection now mirrors the master data XML
+  one-to-one (11 codes). Unknown future codes now log a warning and
+  store empty status instead of crashing.
+- Per-tender upsert is wrapped in a try/except so a single bad payload
+  no longer aborts the whole run; the sync logs and continues.
+
+### Changed (behaviour)
+- **Auto-created CRM records are now Leads, not Opportunities.**
+  `_create_lead` had `type='opportunity'`, which dumped matched tenders
+  straight into the Pipeline / Kanban (3000+ records on a broad rule).
+  They now land in the Leads pool (Generation / Triage) where operators
+  promote them manually. Existing opportunities created by previous
+  versions stay where they are; cleanup is a one-off operator decision.
+- **Hourly cron disabled by default.** The sync cron ships with
+  `active=False`. Manual `Sync now` still works (cron `_trigger()`
+  processes pending triggers regardless of `active`). Enable auto-sync
+  from Settings -> Prozorro -> Schedule; default cadence when enabled
+  is 6 hours, configurable in the same panel.
+
+### Added
+- Settings -> Prozorro now has **Schedule** (toggle + interval hours)
+  and **Status** (live `Sync running` banner, last finished, pulled,
+  matched, last error, Sync now / Reset cursor buttons) blocks.
+- `prozorro.sync.cursor` gained `is_running` and `last_started_at`,
+  written via an isolated cursor so the Settings status reflects state
+  in real time even mid-sync.
+- `action_sync_now` guards against double-clicks: returns a warning
+  toast if a sync is already in flight.
+
 ## [19.0.5.4.2] - 2026-04-29
 
 ### Changed

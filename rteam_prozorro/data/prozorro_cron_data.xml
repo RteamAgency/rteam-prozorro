@@ -1,13 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo noupdate="1">
+    <!--
+        Sync cron is inactive by default. Manual `Sync now` still works
+        (cron._trigger() processes pending triggers regardless of active).
+        Operators can flip auto-sync on from Settings -> Prozorro -> Schedule;
+        the toggle there writes back to this record's `active` field.
+    -->
     <record id="ir_cron_prozorro_sync_feed" model="ir.cron">
         <field name="name">Prozorro: sync tender feed</field>
         <field name="model_id" ref="model_prozorro_tender"/>
         <field name="state">code</field>
         <field name="code">model._cron_sync_feed()</field>
-        <field name="interval_number">1</field>
+        <field name="interval_number">6</field>
         <field name="interval_type">hours</field>
-        <field name="active" eval="True"/>
+        <field name="active" eval="False"/>
         <field name="priority">10</field>
     </record>
 
