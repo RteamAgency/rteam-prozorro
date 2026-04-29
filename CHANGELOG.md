@@ -2,6 +2,15 @@
 
 All notable changes to `rteam_prozorro` are documented here.
 
+## [19.0.5.6.1] - 2026-04-29
+
+### Fixed
+- 19.0.5.6.0 referenced `crm_use_leads` in res_config_settings_views.xml,
+  which does not exist on `res.config.settings` in Odoo 19's `crm`
+  module - the field is named `group_use_lead`. Build 31562449 failed
+  with `Field "crm_use_leads" does not exist in model
+  "res.config.settings"` during view validation. Renamed all references.
+
 ## [19.0.5.6.0] - 2026-04-29
 
 ### Added

@@ -10,8 +10,8 @@
                     <block title="CRM integration" name="prozorro_crm_integration">
                         <setting string="Enable CRM Leads"
                                  help="Auto-created tenders are stored as Leads (type='lead'). The Leads pool is hidden in CRM unless this is enabled. Required for the 'Auto-create lead' option on subscriptions to surface anything in the UI.">
-                            <field name="crm_use_leads"/>
-                            <div class="alert alert-warning mt8" role="alert" invisible="crm_use_leads">
+                            <field name="group_use_lead"/>
+                            <div class="alert alert-warning mt8" role="alert" invisible="group_use_lead">
                                 <i class="fa fa-exclamation-triangle"/>
                                 <strong> Leads are disabled.</strong>
                                 Subscriptions with "Auto-create lead" still create records, but you will not see them anywhere until you enable Leads above. After enabling, save settings - the existing leads appear in CRM &gt; Leads.
