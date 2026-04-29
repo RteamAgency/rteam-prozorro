@@ -9,12 +9,19 @@
                 <app data-string="Prozorro" string="Prozorro" name="rteam_prozorro" groups="rteam_prozorro.group_prozorro_user">
                     <block title="CRM integration" name="prozorro_crm_integration">
                         <setting string="Enable CRM Leads"
-                                 help="Auto-created tenders are stored as Leads (type='lead'). The Leads pool is hidden in CRM unless this is enabled. Required for the 'Auto-create lead' option on subscriptions to surface anything in the UI.">
+                                 help="Standard CRM 'Leads' toggle (same setting as Settings -> CRM -> Leads). When ON, the 'Auto-create lead' option on subscriptions actively creates Leads in the CRM Leads pool. When OFF, the Leads pool is hidden AND Prozorro will not create leads at all - subscriptions with 'Auto-create lead' checked will silently skip lead creation (warning logged). Tenders themselves are still synced and visible under Tenders.">
                             <field name="group_use_lead"/>
                             <div class="alert alert-warning mt8" role="alert" invisible="group_use_lead">
                                 <i class="fa fa-exclamation-triangle"/>
                                 <strong> Leads are disabled.</strong>
-                                Subscriptions with "Auto-create lead" still create records, but you will not see them anywhere until you enable Leads above. After enabling, save settings - the existing leads appear in CRM &gt; Leads.
+                                With this off, Prozorro syncs tenders normally
+                                but <strong>will not create CRM leads</strong>,
+                                even if a subscription has "Auto-create lead"
+                                checked. Turn this on to activate lead
+                                creation. (Saving the toggle adds the
+                                <code>crm.group_use_lead</code> group to all
+                                internal users; it is the same toggle as
+                                Settings -&gt; CRM -&gt; Leads.)
                             </div>
                         </setting>
                     </block>

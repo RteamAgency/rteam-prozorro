@@ -2,6 +2,29 @@
 
 All notable changes to `rteam_prozorro` are documented here.
 
+## [19.0.5.6.2] - 2026-04-29
+
+### Changed (behaviour)
+- **The "Enable CRM Leads" toggle in Prozorro Settings is now a real
+  gate, not just a visibility hint.** Previously, subscriptions with
+  `create_lead=True` created `crm.lead` records regardless of the
+  global `crm.group_use_lead` state - those records existed in the DB
+  but were invisible because the Leads pool/menu was hidden, leaking
+  silently. With 5.6.2: when `crm.group_use_lead` is OFF, the sync
+  loop skips lead creation entirely and logs a warning per skipped
+  subscription. Tenders are still mirrored and visible under
+  `Prozorro > Tenders`. Operators must turn the toggle ON in
+  `Settings -> Prozorro -> CRM integration` for auto-creation to
+  actually run.
+- Subscription form shows an inline warning when `create_lead=True`
+  AND CRM Leads are globally disabled, so the gate is visible at the
+  point of intent (not only on the Settings page).
+
+### Added
+- New computed `crm_use_leads_enabled` field on `prozorro.subscription`
+  (mirrors `env.user.has_group('crm.group_use_lead')`); used by the
+  form's invisible/visible expressions.
+
 ## [19.0.5.6.1] - 2026-04-29
 
 ### Fixed

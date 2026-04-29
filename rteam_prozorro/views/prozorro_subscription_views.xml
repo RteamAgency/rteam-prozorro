@@ -76,11 +76,22 @@
                         </group>
                         <group>
                             <field name="create_lead"/>
+                            <field name="crm_use_leads_enabled" invisible="1"/>
                             <field name="assign_to_user_id" invisible="not create_lead"/>
                             <field name="stage_id" invisible="not create_lead"/>
                             <field name="tag_ids" widget="many2many_tags" invisible="not create_lead"/>
                         </group>
                     </group>
+                    <div class="alert alert-warning" role="alert"
+                         invisible="not create_lead or crm_use_leads_enabled">
+                        <i class="fa fa-exclamation-triangle"/>
+                        <strong> Auto-create lead is disabled by CRM settings.</strong>
+                        CRM Leads are turned off globally, so this subscription
+                        will <strong>not</strong> create leads even though
+                        "Auto-create lead" is checked. Enable Leads in
+                        <em>Settings -&gt; Prozorro -&gt; CRM integration</em>
+                        first.
+                    </div>
                     <notebook>
                         <page string="Filters">
                             <div class="alert alert-warning" role="alert"

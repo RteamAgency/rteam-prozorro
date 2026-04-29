@@ -75,6 +75,20 @@ class ProzorroSubscription(models.Model):
     matched_count = fields.Integer(compute="_compute_match_stats")
     last_match = fields.Datetime(compute="_compute_match_stats")
 
+    crm_use_leads_enabled = fields.Boolean(
+        string="CRM Leads enabled",
+        compute="_compute_crm_use_leads_enabled",
+        help="Reflects the global crm.group_use_lead toggle. Read-only "
+        "indicator used to warn on the form when create_lead is on but "
+        "the Leads pool is hidden.",
+    )
+
+    @api.depends_context("uid")
+    def _compute_crm_use_leads_enabled(self):
+        enabled = self.env.user.has_group("crm.group_use_lead")
+        for rec in self:
+            rec.crm_use_leads_enabled = enabled
+
     @api.model
     def _default_status_ids(self):
         active_tendering = self.env.ref(

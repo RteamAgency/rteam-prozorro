@@ -445,10 +445,28 @@ class ProzorroTender(models.Model):
             return existing
 
         rec = self.create(vals)
-        # lead creation only on first match
+        # Lead creation only on first match. Also gated by the global
+        # `crm.group_use_lead` toggle: if Leads are disabled in CRM
+        # Settings, the Leads pool/menu is hidden and any record we
+        # create would be invisible. Skip creation entirely in that
+        # case rather than silently piling up unreachable records;
+        # operators surface the gate via the "Enable CRM Leads" toggle
+        # in Settings -> Prozorro -> CRM integration.
+        leads_enabled = self.env.user.has_group("crm.group_use_lead")
         for sub in matched_subscriptions.filtered(lambda s: s.create_lead):
-            if not rec.lead_id:
-                rec._create_lead(sub)
+            if rec.lead_id:
+                break
+            if not leads_enabled:
+                _logger.warning(
+                    "Prozorro: subscription %s has create_lead=True but "
+                    "crm.group_use_lead is disabled - skipping lead creation "
+                    "for tender %s. Enable CRM Leads in Prozorro Settings to "
+                    "activate auto-creation.",
+                    sub.id,
+                    rec.name,
+                )
+                break
+            rec._create_lead(sub)
         return rec
 
     @api.model

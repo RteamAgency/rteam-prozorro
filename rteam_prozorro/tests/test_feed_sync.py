@@ -47,6 +47,27 @@ class TestFeedSync(TransactionCase):
         cls.Cursor = cls.env["prozorro.sync.cursor"]
         cls.Keyword = cls.env["prozorro.subscription.keyword"]
         cls.cpv_lasers = cls.env.ref("rteam_prozorro.cpv_42610000_5")
+        # Lead creation is gated by crm.group_use_lead (5.6.2+); enable
+        # it for the whole test class so existing assertions about
+        # auto-created leads keep passing. The "Leads disabled" branch
+        # has its own dedicated test below.
+        cls._enable_crm_leads(cls.env)
+
+    @classmethod
+    def _enable_crm_leads(cls, env):
+        leads_group = env.ref("crm.group_use_lead", raise_if_not_found=False)
+        employee_group = env.ref("base.group_user", raise_if_not_found=False)
+        if leads_group and employee_group:
+            employee_group.sudo().write({"implied_ids": [(4, leads_group.id)]})
+            env.user.sudo().write({"groups_id": [(4, leads_group.id)]})
+
+    @classmethod
+    def _disable_crm_leads(cls, env):
+        leads_group = env.ref("crm.group_use_lead", raise_if_not_found=False)
+        employee_group = env.ref("base.group_user", raise_if_not_found=False)
+        if leads_group and employee_group:
+            employee_group.sudo().write({"implied_ids": [(3, leads_group.id)]})
+            env.user.sudo().write({"groups_id": [(3, leads_group.id)]})
 
     def test_no_active_subscriptions_skips(self):
         # ensure no subscription is active
@@ -84,6 +105,45 @@ class TestFeedSync(TransactionCase):
         self.assertIn(sub, tender.matched_subscription_ids)
         self.assertTrue(tender.lead_id, "Subscription with create_lead=True must create a lead")
         self.assertEqual(tender.lead_id.prozorro_tender_id, tender)
+
+    def test_lead_creation_gated_by_crm_use_leads(self):
+        """When crm.group_use_lead is OFF, sync mirrors tenders but skips
+        lead creation - even with create_lead=True on the subscription."""
+        self._disable_crm_leads(self.env)
+        try:
+            status_active_tendering = self.env.ref("rteam_prozorro.status_active_tendering")
+            sub = self.Subscription.create(
+                {
+                    "name": "Lasers gated",
+                    "active": True,
+                    "create_lead": True,
+                    "classification_ids": [(6, 0, [self.cpv_lasers.id])],
+                    "status_ids": [(6, 0, [status_active_tendering.id])],
+                }
+            )
+            self.Subscription.search([("id", "!=", sub.id)]).write({"active": False})
+
+            feed_payload = {
+                "data": [{"id": "gated-1", "dateModified": "2026-04-28T10:30:00+03:00"}],
+                "next_page": {"offset": "off-2"},
+            }
+            single = {"data": make_tender(id="gated-1")}
+            base_url = self.Tender._get_api_base_url()
+            with fake_urlopen({base_url + "?": feed_payload, "/gated-1": single}):
+                self.Tender._cron_sync_feed()
+
+            tender = self.Tender.search([("uuid", "=", "gated-1")], limit=1)
+            self.assertTrue(tender, "Tender must still be mirrored when leads are gated off")
+            self.assertFalse(
+                tender.lead_id,
+                "Lead must NOT be created when crm.group_use_lead is disabled",
+            )
+        finally:
+            # Restore the class-level state so subsequent tests still see
+            # leads enabled. TransactionCase rolls back DB changes but
+            # group membership writes via .sudo() may persist within the
+            # cursor depending on Odoo internals.
+            self._enable_crm_leads(self.env)
 
     def test_sync_unmatched_not_persisted(self):
         sub = self.Subscription.create(
