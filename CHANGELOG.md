@@ -2,6 +2,23 @@
 
 All notable changes to `rteam_prozorro` are documented here.
 
+## [19.0.5.6.0] - 2026-04-29
+
+### Added
+- Settings -> Prozorro now opens with a "CRM integration" block exposing
+  `crm_use_leads` (the standard CRM "Leads" toggle that gates the Leads
+  pool / Generation menu). Fresh Odoo databases ship with this OFF.
+  Without it, type='lead' records still get created by 5.5.0's
+  auto-creation flow but are invisible in the UI; the new block warns
+  loudly and lets the user flip the toggle without leaving the Prozorro
+  app.
+- Subscription form shows an inline warning "Broad filter - no CPV
+  codes and no keywords, will match almost every tender" when both
+  `classification_ids` and `keyword_ids` are empty. The Test wizard
+  remains the authoritative per-filter explainer; the warning prevents
+  users from creating a subscription whose name implies a narrow scope
+  but whose filters do not enforce it.
+
 ## [19.0.5.5.0] - 2026-04-29
 
 ### Fixed

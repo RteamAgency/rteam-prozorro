@@ -83,6 +83,12 @@
                     </group>
                     <notebook>
                         <page string="Filters">
+                            <div class="alert alert-warning" role="alert"
+                                 invisible="classification_ids or keyword_ids">
+                                <i class="fa fa-exclamation-triangle"/>
+                                <strong> Broad filter.</strong>
+                                This subscription has no CPV codes and no keywords, so it matches every tender that meets the value range / region / status / procurement-method conditions. On the open Prozorro feed that is typically thousands of tenders. Add at least one CPV (DK 021:2015 chapter, e.g. "33" for medical) or a keyword to narrow it down.
+                            </div>
                             <group>
                                 <group string="Region / Status / Method">
                                     <field name="region_ids" widget="many2many_tags"
