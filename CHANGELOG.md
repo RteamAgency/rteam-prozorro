@@ -2,6 +2,29 @@
 
 All notable changes to `rteam_prozorro` are documented here.
 
+## [19.0.5.6.3] - 2026-04-29
+
+### Added
+- High-quality UK and RU translations for the v5.6.x additions:
+  Settings panel blocks (CRM integration, Schedule, Status, Feed),
+  the "Auto-create lead is disabled by CRM settings" and "Broad filter"
+  warning banners on the subscription form, the keyword filter selectors
+  (Field, Match Mode, Exclude when matched, Title only / Description only
+  / Items only / Any text, Contains / Regex), and all sync-flow chatter
+  / toast messages ("Prozorro sync queued by ...", "Prozorro sync in
+  progress...", "Prozorro sync done: pulled X, matched Y", "Sync already
+  running", "A background sync was scheduled. Open any active
+  subscription...", and the "Leads are disabled" Settings banner with
+  the explanation body).
+
+### Fixed
+- `i18n/uk.po` and `i18n/ru.po` no longer carry stale partial-string
+  msgids left behind by older Odoo extractor runs ("Pulled %(pulled)s
+  tenders, %(matched)s matched. " / "A background sync was scheduled.
+  Refresh the Tenders list "). Reference for the regex error message
+  switched from `code:rteam_prozorro/...:52` to the canonical
+  `code:addons/rteam_prozorro/...:0` form.
+
 ## [19.0.5.6.2] - 2026-04-29
 
 ### Changed (behaviour)

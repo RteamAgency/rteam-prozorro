@@ -1109,16 +1109,307 @@ msgid "3af829c1a9af4812a5c2c4bf090f2b44 or full prozorro.gov.ua URL"
 msgstr "3af829c1a9af4812a5c2c4bf090f2b44 або повний URL prozorro.gov.ua"
 
 #. module: rteam_prozorro
-#: code:rteam_prozorro/models/prozorro_subscription_keyword.py:52
+#: code:addons/rteam_prozorro/models/prozorro_subscription_keyword.py:0
 msgid "Invalid regex %r: %s"
 msgstr "Невірний регулярний вираз %r: %s"
 
-#. module: rteam_prozorro
-#: code:rteam_prozorro/models/prozorro_tender.py:241
-msgid "Pulled %(pulled)s tenders, %(matched)s matched. "
-msgstr "Отримано %(pulled)s тендерів, збігів: %(matched)s. "
+# ---------------------------------------------------------------------------
+# v5.6.x additions: Settings panel (CRM integration / Schedule / Status / Feed),
+# subscription form warning banners, keyword filter selectors, sync
+# notifications and chatter messages.
+# ---------------------------------------------------------------------------
 
 #. module: rteam_prozorro
-#: code:rteam_prozorro/models/prozorro_tender.py:282
-msgid "A background sync was scheduled. Refresh the Tenders list "
-msgstr "Заплановано фонову синхронізацію. Оновіть список тендерів "
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.res_config_settings_view_form_inherit_prozorro
+msgid "CRM integration"
+msgstr "Інтеграція з CRM"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.res_config_settings_view_form_inherit_prozorro
+msgid "Schedule"
+msgstr "Розклад"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.res_config_settings_view_form_inherit_prozorro
+msgid "Enable CRM Leads"
+msgstr "Увімкнути CRM-ліди"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.res_config_settings_view_form_inherit_prozorro
+msgid "Standard CRM 'Leads' toggle (same setting as Settings -> CRM -> Leads). When ON, the 'Auto-create lead' option on subscriptions actively creates Leads in the CRM Leads pool. When OFF, the Leads pool is hidden AND Prozorro will not create leads at all - subscriptions with 'Auto-create lead' checked will silently skip lead creation (warning logged). Tenders themselves are still synced and visible under Tenders."
+msgstr "Стандартний перемикач 'Ліди' з модуля CRM (та сама опція, що й Налаштування -> CRM -> Ліди). Коли УВІМКНЕНО, опція 'Автостворення ліда' у підписках реально створює лідів у пулі CRM Leads. Коли ВИМКНЕНО, пул лідів приховано і Prozorro не створює лідів узагалі: підписки з позначкою 'Автостворення ліда' тихо пропускають створення (у журналі лишається попередження). Самі тендери синхронізуються і доступні в розділі Тендери."
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.res_config_settings_view_form_inherit_prozorro
+msgid "Leads are disabled."
+msgstr "Ліди вимкнено."
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.res_config_settings_view_form_inherit_prozorro
+msgid "With this off, Prozorro syncs tenders normally but"
+msgstr "Коли цей перемикач вимкнено, Prozorro синхронізує тендери як зазвичай, але"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.res_config_settings_view_form_inherit_prozorro
+msgid "will not create CRM leads"
+msgstr "не створюватиме CRM-лідів"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.res_config_settings_view_form_inherit_prozorro
+msgid ", even if a subscription has \"Auto-create lead\" checked. Turn this on to activate lead creation. (Saving the toggle adds the"
+msgstr ", навіть якщо в підписці увімкнено \"Автостворення ліда\". Увімкніть, щоб активувати створення лідів. (Збереження перемикача додає групу"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.res_config_settings_view_form_inherit_prozorro
+msgid "group to all internal users; it is the same toggle as Settings -> CRM -> Leads.)"
+msgstr "усім внутрішнім користувачам; це той самий перемикач, що й Налаштування -> CRM -> Ліди.)"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.res_config_settings_view_form_inherit_prozorro
+msgid "If on, the feed sync runs automatically on the interval below. If off, sync only runs when you click 'Sync now'. Manual sync works regardless."
+msgstr "Якщо увімкнено, синхронізація стрічки запускається автоматично з інтервалом, заданим нижче. Якщо вимкнено, синхронізація запускається лише натисканням 'Синхронізувати'. Ручна синхронізація працює завжди."
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.res_config_settings_view_form_inherit_prozorro
+msgid "Run every"
+msgstr "Запускати кожні"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.res_config_settings_view_form_inherit_prozorro
+msgid "hour(s)"
+msgstr "год."
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.res_config_settings_view_form_inherit_prozorro
+msgid "Sync status"
+msgstr "Стан синхронізації"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.res_config_settings_view_form_inherit_prozorro
+msgid "Live status of the Prozorro feed sync."
+msgstr "Поточний стан синхронізації стрічки Prozorro."
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.res_config_settings_view_form_inherit_prozorro
+msgid "- started"
+msgstr "- розпочато"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.res_config_settings_view_form_inherit_prozorro
+msgid "Last error:"
+msgstr "Остання помилка:"
+
+# --- res.config.settings field labels and helps (Python side) ---
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_res_config_settings__prozorro_api_url
+msgid "Prozorro API URL"
+msgstr "URL API Prozorro"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,help:rteam_prozorro.field_res_config_settings__prozorro_pages_per_run
+msgid "Safety cap. Each page returns up to 100 tenders."
+msgstr "Запобіжний ліміт. Кожна сторінка повертає до 100 тендерів."
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_res_config_settings__prozorro_auto_sync_active
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.res_config_settings_view_form_inherit_prozorro
+msgid "Auto-sync on schedule"
+msgstr "Автосинхронізація за розкладом"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,help:rteam_prozorro.field_res_config_settings__prozorro_auto_sync_active
+msgid "If on, the feed sync runs automatically on the interval below. If off, sync only runs when you click 'Sync now' on the Tenders or Subscriptions list. Manual sync works regardless of this toggle."
+msgstr "Якщо увімкнено, синхронізація стрічки запускається автоматично з інтервалом, заданим нижче. Якщо вимкнено, синхронізація запускається лише натисканням 'Синхронізувати' у списку Тендери або Підписки. Ручна синхронізація працює незалежно від цього перемикача."
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_res_config_settings__prozorro_sync_interval_hours
+msgid "Auto-sync interval (hours)"
+msgstr "Інтервал автосинхронізації (год.)"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,help:rteam_prozorro.field_res_config_settings__prozorro_sync_interval_hours
+msgid "How often the cron pulls new tenders from Prozorro. Only used when 'Auto-sync on schedule' is on."
+msgstr "Як часто крон-задача отримує нові тендери з Prozorro. Використовується лише коли увімкнено 'Автосинхронізація за розкладом'."
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_res_config_settings__prozorro_is_running
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.res_config_settings_view_form_inherit_prozorro
+msgid "Sync running now"
+msgstr "Синхронізація триває"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_res_config_settings__prozorro_last_started_at
+msgid "Last started"
+msgstr "Розпочато"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_res_config_settings__prozorro_last_sync_at
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.res_config_settings_view_form_inherit_prozorro
+msgid "Last finished"
+msgstr "Завершено"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_res_config_settings__prozorro_last_pulled
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.res_config_settings_view_form_inherit_prozorro
+msgid "Pulled (last run)"
+msgstr "Завантажено (за останній запуск)"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_res_config_settings__prozorro_last_matched
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.res_config_settings_view_form_inherit_prozorro
+msgid "Matched (last run)"
+msgstr "Збігів (за останній запуск)"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_res_config_settings__prozorro_last_error
+msgid "Last error"
+msgstr "Остання помилка"
+
+# --- Subscription form: warning banners ---
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_subscription_view_form
+msgid "Auto-create lead is disabled by CRM settings."
+msgstr "Автостворення ліда вимкнено в налаштуваннях CRM."
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_subscription_view_form
+msgid "CRM Leads are turned off globally, so this subscription will"
+msgstr "Ліди CRM вимкнено глобально, тож ця підписка"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_subscription_view_form
+msgid "not"
+msgstr "не"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_subscription_view_form
+msgid "create leads even though \"Auto-create lead\" is checked. Enable Leads in"
+msgstr "створюватиме лідів, навіть якщо стоїть позначка \"Автостворення ліда\". Увімкніть Ліди в"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_subscription_view_form
+msgid "Settings -> Prozorro -> CRM integration"
+msgstr "Налаштування -> Prozorro -> Інтеграція з CRM"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_subscription_view_form
+msgid "first."
+msgstr "спочатку."
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_subscription_view_form
+msgid "Broad filter."
+msgstr "Загальний фільтр."
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.prozorro_subscription_view_form
+msgid "This subscription has no CPV codes and no keywords, so it matches every tender that meets the value range / region / status / procurement-method conditions. On the open Prozorro feed that is typically thousands of tenders. Add at least one CPV (DK 021:2015 chapter, e.g. \"33\" for medical) or a keyword to narrow it down."
+msgstr "У цій підписці не вказано жодного коду CPV та жодного ключового слова, тож вона збігається з кожним тендером, який потрапляє в діапазон сум / регіон / статус / метод закупівлі. У відкритій стрічці Prozorro це зазвичай тисячі тендерів. Додайте принаймні один код CPV (розділ ДК 021:2015, напр. \"33\" для медицини) або ключове слово, щоб звузити вибірку."
+
+# --- prozorro.subscription new field: crm_use_leads_enabled ---
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_subscription__crm_use_leads_enabled
+msgid "CRM Leads enabled"
+msgstr "Ліди CRM увімкнено"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,help:rteam_prozorro.field_prozorro_subscription__crm_use_leads_enabled
+msgid "Reflects the global crm.group_use_lead toggle. Read-only indicator used to warn on the form when create_lead is on but the Leads pool is hidden."
+msgstr "Відображає глобальний перемикач crm.group_use_lead. Технічна позначка лише для читання: дозволяє формі попереджати про випадок, коли create_lead увімкнено, а пул лідів приховано."
+
+# --- prozorro.subscription.keyword: field labels and selection options ---
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_subscription_keyword__keyword
+msgid "Keyword"
+msgstr "Ключове слово"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_subscription_keyword__field
+msgid "Field"
+msgstr "Поле"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_subscription_keyword__match_mode
+msgid "Match Mode"
+msgstr "Режим збігу"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_subscription_keyword__negate
+msgid "Exclude when matched"
+msgstr "Виключати при збігу"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields.selection,name:rteam_prozorro.selection__prozorro_subscription_keyword__field__title
+msgid "Title only"
+msgstr "Лише назва"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields.selection,name:rteam_prozorro.selection__prozorro_subscription_keyword__field__description
+msgid "Description only"
+msgstr "Лише опис"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields.selection,name:rteam_prozorro.selection__prozorro_subscription_keyword__field__items
+msgid "Items only"
+msgstr "Лише позиції"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields.selection,name:rteam_prozorro.selection__prozorro_subscription_keyword__field__any
+msgid "Any text"
+msgstr "Будь-який текст"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields.selection,name:rteam_prozorro.selection__prozorro_subscription_keyword__match_mode__contains
+msgid "Contains (case-insensitive)"
+msgstr "Містить (без урахування регістру)"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields.selection,name:rteam_prozorro.selection__prozorro_subscription_keyword__match_mode__regex
+msgid "Regex"
+msgstr "Регулярний вираз"
+
+# --- Sync notifications and chatter messages ---
+
+#. module: rteam_prozorro
+#: code:addons/rteam_prozorro/models/prozorro_tender.py:0
+msgid "Sync already running"
+msgstr "Синхронізація вже триває"
+
+#. module: rteam_prozorro
+#: code:addons/rteam_prozorro/models/prozorro_tender.py:0
+msgid "A Prozorro sync is in progress (started %s). Wait for it to finish before queueing another."
+msgstr "Синхронізація Prozorro вже виконується (розпочата %s). Дочекайтеся завершення, перш ніж ставити в чергу наступну."
+
+#. module: rteam_prozorro
+#: code:addons/rteam_prozorro/models/prozorro_tender.py:0
+msgid "just now"
+msgstr "щойно"
+
+#. module: rteam_prozorro
+#: code:addons/rteam_prozorro/models/prozorro_tender.py:0
+msgid "Prozorro sync queued by %s..."
+msgstr "Синхронізацію Prozorro поставив у чергу %s..."
+
+#. module: rteam_prozorro
+#: code:addons/rteam_prozorro/models/prozorro_tender.py:0
+msgid "Prozorro sync in progress..."
+msgstr "Синхронізація Prozorro триває..."
+
+#. module: rteam_prozorro
+#: code:addons/rteam_prozorro/models/prozorro_tender.py:0
+msgid "Prozorro sync failed: %s"
+msgstr "Помилка синхронізації Prozorro: %s"
+
+#. module: rteam_prozorro
+#: code:addons/rteam_prozorro/models/prozorro_tender.py:0
+msgid "Prozorro sync done: pulled %(pulled)s tenders, %(matched)s matched this subscription."
+msgstr "Синхронізацію Prozorro завершено: завантажено %(pulled)s тендерів, у цій підписці збіглося %(matched)s."
+
+#. module: rteam_prozorro
+#: code:addons/rteam_prozorro/models/prozorro_tender.py:0
+msgid "A background sync was scheduled. Open any active subscription to follow progress in its chatter."
+msgstr "Заплановано фонову синхронізацію. Відкрийте будь-яку активну підписку, щоб слідкувати за прогресом у її чаті."
