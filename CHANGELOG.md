@@ -2,6 +2,34 @@
 
 All notable changes to `rteam_prozorro` are documented here.
 
+## [19.0.5.6.9] - 2026-04-30
+
+### Added
+- New OWL service `rteam_prozorro.sync_reload`
+  (`static/src/js/sync_reload_listener.js`) subscribes to bus
+  notifications of type `prozorro.sync.done` and triggers
+  `browser.location.reload()` so any open backend tab of a Prozorro
+  manager refreshes after a background sync run finishes.
+- `_notify_sync_result` now pushes a second bus message of type
+  `prozorro.sync.done` alongside the existing `simple_notification`
+  toast. Payload carries `pulled`, `matched`, `error` for future
+  selective filtering (current listener reloads unconditionally).
+- Manifest gains an `assets` block declaring the listener under
+  `web.assets_backend`.
+
+### Why
+- v5.6.8 reloaded the form on click, which fixed the
+  "queued -> in progress" banner transition. But the cron finishes
+  30-60 seconds later in the background. `matched_count`,
+  `last_match`, `sync_last_finished_at`, and the in-progress / OK
+  banners were still stale from the click-time render until the
+  user manually refreshed. The bus push closes that loop.
+- Tradeoff: every Prozorro manager with a backend tab open
+  reloads, regardless of which view they are on. Acceptable for
+  the current debug cycle; gated to be replaced with a view-
+  conditional `soft_reload` (Option C) before apps.odoo.com
+  submission polish.
+
 ## [19.0.5.6.8] - 2026-04-30
 
 ### Changed

@@ -1,6 +1,6 @@
 {
     "name": "Prozorro Connector",
-    "version": "19.0.5.6.8",
+    "version": "19.0.5.6.9",
     "category": "Sales/CRM",
     "summary": "Monitor Ukrainian Prozorro tenders, match them to your CRM",
     "description": """
@@ -55,6 +55,11 @@ Targeted at Odoo 17 / 18 / 19 (Community + Enterprise).
         "views/res_config_settings_views.xml",
         "views/menus.xml",
     ],
+    "assets": {
+        "web.assets_backend": [
+            "rteam_prozorro/static/src/js/sync_reload_listener.js",
+        ],
+    },
     "images": ["static/description/banner.png"],
     "installable": True,
     "application": False,

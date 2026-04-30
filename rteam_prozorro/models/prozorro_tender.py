@@ -428,12 +428,29 @@ class ProzorroTender(models.Model):
             ntype = "success" if matched else "info"
             sticky = False
         Bus = self.env["bus.bus"].sudo()
+        # Payload mirrored on both notifications so the JS reload listener
+        # can short-circuit (e.g. skip reload on `error=True` if we ever
+        # decide not to refresh on failure). For now, the listener always
+        # reloads regardless of payload.
+        reload_payload = {
+            "pulled": pulled,
+            "matched": matched,
+            "error": error,
+        }
         for partner in group.user_ids.partner_id:
             Bus._sendone(
                 partner,
                 "simple_notification",
                 {"title": title, "message": message, "type": ntype, "sticky": sticky},
             )
+            # Trigger a hard reload in any open backend tab of this
+            # manager. Picked up by `prozorroSyncReloadService` in
+            # static/src/js/sync_reload_listener.js. This is what
+            # finally brings `matched_count` and the status banners
+            # in sync after a background cron finishes - chatter posts
+            # alone do not retrigger record reads on already-rendered
+            # forms (see CHANGELOG 5.6.9).
+            Bus._sendone(partner, "prozorro.sync.done", reload_payload)
 
     def action_sync_now(self):
         """Schedule the feed-sync cron for immediate background execution.
