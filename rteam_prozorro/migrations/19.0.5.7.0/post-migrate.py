@@ -14,6 +14,7 @@ After this migration:
 
 Idempotent: safe to re-run.
 """
+
 import logging
 from datetime import datetime, timedelta
 
@@ -24,13 +25,9 @@ _logger = logging.getLogger(__name__)
 
 def migrate(cr, version):
     env = api.Environment(cr, SUPERUSER_ID, {})
-    cron = env.ref(
-        "rteam_prozorro.ir_cron_prozorro_sync_feed", raise_if_not_found=False
-    )
+    cron = env.ref("rteam_prozorro.ir_cron_prozorro_sync_feed", raise_if_not_found=False)
     if not cron:
-        _logger.warning(
-            "Prozorro 5.7.0 migration: cron xmlid missing, nothing to migrate"
-        )
+        _logger.warning("Prozorro 5.7.0 migration: cron xmlid missing, nothing to migrate")
         return
     Param = env["ir.config_parameter"].sudo()
 
@@ -82,9 +79,7 @@ def migrate(cr, version):
         "DELETE FROM ir_cron_trigger WHERE cron_id = %s AND call_at > NOW()",
         (cron.id,),
     )
-    _logger.info(
-        "Prozorro 5.7.0: cleared %s future trigger row(s)", cr.rowcount or 0
-    )
+    _logger.info("Prozorro 5.7.0: cleared %s future trigger row(s)", cr.rowcount or 0)
 
     # 4. If the user had auto-sync enabled before the upgrade, queue the
     # next run trigger so they don't lose their schedule.
@@ -97,9 +92,7 @@ def migrate(cr, version):
             )
         except ValueError:
             hours = 6
-        cron.sudo()._trigger(
-            at=fields.Datetime.now() + timedelta(hours=hours)
-        )
+        cron.sudo()._trigger(at=fields.Datetime.now() + timedelta(hours=hours))
         _logger.info(
             "Prozorro 5.7.0: queued next auto-run trigger at +%dh "
             "(Schedule toggle was ON before migration)",
