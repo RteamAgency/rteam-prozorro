@@ -2,6 +2,52 @@
 
 All notable changes to `rteam_prozorro` are documented here.
 
+## [19.0.5.7.1] - 2026-04-30
+
+### Fixed (banner-vs-chatter contradiction)
+- "Sync running" banner now appears immediately on click instead of
+  30-60 seconds later when the cron worker picks up the trigger.
+  `action_sync_now` flips `is_running=True` via isolated cursor
+  BEFORE queuing the trigger; the cron handler sets it idempotently
+  on entry. Banner and chatter no longer disagree.
+- Removed the v5.6.8 `next: reload` chain on the action_sync_now
+  toast (heavy, lost scroll). The bus.bus push from the new helper
+  `_push_state_changed_to_managers` does the same job lighter.
+
+### Added (Force stop = real stop)
+- New field `prozorro.sync.cursor.cancel_requested`. Cron handler
+  reads it via direct SQL (bypassing ORM cache) at start and after
+  each tender; clean exit within ~1-3 seconds when set.
+- `action_force_clear_running` rewired: instead of just clearing
+  `is_running` (a UI-only lie), it now sets `cancel_requested=True`
+  via isolated cursor + drops click-spammed immediate trigger rows
+  + posts chatter "cancellation requested" + bus push. Cron handler
+  picks it up and exits cleanly. Toast wording changed from "Sync
+  state cleared" to "Stopping sync...".
+- On clean cancel exit, handler posts "cancelled by user (pulled N,
+  matched M)" chatter and records `last_error="Cancelled by user
+  (pulled N, matched M)"`.
+- `finally` block in `_cron_sync_feed` now resets BOTH `is_running`
+  and `cancel_requested` so next run starts from clean state.
+
+### Migration
+- `migrations/19.0.5.7.1/post-migrate.py`:
+  1. Drops ALL `ir_cron_trigger` rows for the sync cron, not just
+     future ones. The 5.7.0 migration's `call_at > NOW()` filter
+     left past-due rows that fired post-upgrade (observed live on
+     test19: 3 stale triggers re-firing the cron with toggle OFF).
+  2. Clears stuck `is_running` and `cancel_requested` flags.
+  3. The `cancel_requested` column is auto-added by the ORM on
+     field declaration; no explicit ALTER TABLE.
+
+### Followups (deliberately out of scope)
+- Memory profile: cron handler's full-tender-body in-memory list
+  triggered SIGKILL on test19 trial container at 11:47 UTC. Real
+  fix is processing in pages with explicit dropping of seen-tender
+  payloads; tracked separately.
+- Cursor-design rethink (per-run descending walk from head):
+  unchanged from 5.6.x.
+
 ## [19.0.5.7.0] - 2026-04-30
 
 ### Architectural change: trigger-based scheduling

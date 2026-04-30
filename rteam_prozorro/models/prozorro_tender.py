@@ -176,37 +176,88 @@ class ProzorroTender(models.Model):
         except Exception:
             _logger.exception("Prozorro: failed to update cursor %s with %s", cursor_id, vals)
 
+    @api.model
+    def _is_cancel_requested(self, cursor_id):
+        """Direct-SQL read of cancel_requested, bypassing ORM cache.
+
+        action_force_clear_running writes cancel_requested=True via an
+        isolated cursor that commits immediately. The cron's main
+        transaction would otherwise serve a cached False from when it
+        first read the cursor record. SELECT in READ COMMITTED isolation
+        returns the latest committed value across transactions.
+        """
+        self.env.cr.execute(
+            "SELECT cancel_requested FROM prozorro_sync_cursor WHERE id = %s",
+            (cursor_id,),
+        )
+        row = self.env.cr.fetchone()
+        return bool(row and row[0])
+
+    @api.model
+    def _push_state_changed_to_managers(self):
+        """Push a bus.bus event so any open Prozorro view in the
+        managers' tabs refreshes against the latest cursor state.
+
+        Reuses the `prozorro.sync.done` event type (see 5.6.9) - the
+        OWL service in static/src/js/sync_reload_listener.js triggers
+        a reload on receipt regardless of payload.
+        """
+        group = self.env.ref("rteam_prozorro.group_prozorro_manager", raise_if_not_found=False)
+        if not group or not group.user_ids:
+            return
+        Bus = self.env["bus.bus"].sudo()
+        for partner in group.user_ids.partner_id:
+            Bus._sendone(partner, "prozorro.sync.done", {})
+
     # ------------------------------------------------------------------ Cron
 
     @api.model
     def _cron_sync_feed(self):
         """Cron entry point. Always returns a result dict for the manual UI button to render.
 
-        Walks the Prozorro feed in descending order (latest tenders first). The
-        cursor stores the offset returned after the last walked page so the
-        next run continues backward from where the previous one stopped.
-        `descending=1` is preserved across pages within a single run (without
-        it the API switches to ascending and we'd skip past the latest tail).
-
-        Wrapped in try/except/finally so the `is_running` flag on the
-        cursor singleton is ALWAYS reset, even on uncaught exceptions
-        (UserError from Odoo internals, container restart mid-run,
-        memory error, etc.). v5.6.5's `_reschedule_cron_after_run`
-        raised UserError mid-handler; the rollback wiped
-        `_record_success` but the isolated-cursor write of
-        `is_running=True` had already committed, leaving the flag
-        stuck for 16+ hours until manually cleared. The finally block
-        below uses an isolated cursor too, so the reset survives
-        any rollback path.
+        State machine (v5.7.1):
+        - is_running flips to True at CLICK time (action_sync_now sets
+          it via isolated cursor BEFORE queuing the trigger). When this
+          handler runs, idempotent re-set is a no-op.
+        - cancel_requested is checked at start (skip whole run) and
+          between tenders (clean exit mid-loop). Cancel is set by
+          action_force_clear_running via isolated cursor; we read it
+          via direct SQL to bypass ORM cache (cron's long-running
+          transaction would otherwise see the stale cached False).
+        - finally block resets is_running=False and clears
+          cancel_requested via isolated cursor so state is clean for
+          the next run, even on uncaught exception / OOM / container
+          kill.
         """
         Cursor = self.env["prozorro.sync.cursor"]
         Subscription = self.env["prozorro.subscription"]
         cursor = Cursor._get_singleton("main")
 
+        # Cancel-before-start: user hit Force stop after clicking Sync
+        # now but before the worker picked up the trigger. Skip the
+        # whole run, clean the cursor, and broadcast state change.
+        if self._is_cancel_requested(cursor.id):
+            _logger.info("Prozorro: cancel_requested set, skipping cron run")
+            self._mark_cursor_isolated(cursor.id, is_running=False, cancel_requested=False)
+            self._post_chatter_isolated(
+                Subscription._get_active_subscriptions().ids,
+                _("Prozorro sync cancelled before start."),
+            )
+            self._push_state_changed_to_managers()
+            return {
+                "pulled": 0,
+                "matched": 0,
+                "error": None,
+                "skipped": True,
+                "cancelled": True,
+            }
+
         subs = Subscription._get_active_subscriptions()
         if not subs:
             _logger.info("Prozorro: no active subscriptions, skipping sync")
             self._reschedule_cron_after_run()
+            self._mark_cursor_isolated(cursor.id, is_running=False)
+            self._push_state_changed_to_managers()
             return {"pulled": 0, "matched": 0, "error": None, "skipped": True}
 
         # Sync started: post a one-line chatter note on each active
@@ -218,14 +269,16 @@ class ProzorroTender(models.Model):
             subs.ids,
             _("Prozorro sync in progress..."),
         )
-        # Flip the running flag in an isolated cursor so the Settings
-        # status block (and any future polling banner) sees it instantly,
-        # not when the cron transaction commits ~tens of minutes later.
+        # Idempotent re-set: action_sync_now already flipped is_running
+        # to True at click time. For cron-driven (auto-schedule) runs
+        # this is the first time the flag flips. Either way we also
+        # broadcast state changed so any open form refreshes.
         self._mark_cursor_isolated(
             cursor.id,
             is_running=True,
             last_started_at=fields.Datetime.now(),
         )
+        self._push_state_changed_to_managers()
 
         base_url = self._get_api_base_url()
         max_pages = self._get_pages_per_run()
@@ -240,6 +293,7 @@ class ProzorroTender(models.Model):
         url = _page_url(cursor.offset)
 
         pulled, matched = 0, 0
+        cancelled = False
         # Outer try/finally guarantees is_running gets reset even on
         # an uncaught exception (UserError from Odoo internals,
         # container kill, OOM, etc.). Without this, the isolated-cursor
@@ -248,9 +302,21 @@ class ProzorroTender(models.Model):
         # v5.6.5 (test19 build 31426538).
         try:
             for _page in range(max_pages):
+                # Cancel-mid-loop: user clicked Force stop. Bail out
+                # before issuing another HTTP page request.
+                if self._is_cancel_requested(cursor.id):
+                    cancelled = True
+                    break
                 data = self._http_get_json(url)
                 records = data.get("data") or []
                 for record in records:
+                    # Per-tender cancel check. ~1-3s reaction time
+                    # since each tender body fetch + match takes that
+                    # long. Direct SQL read so isolated-cursor writes
+                    # from action_force_clear_running are visible.
+                    if self._is_cancel_requested(cursor.id):
+                        cancelled = True
+                        break
                     pulled += 1
                     tender_uuid = record.get("id")
                     if not tender_uuid:
@@ -276,6 +342,8 @@ class ProzorroTender(models.Model):
                         matched += 1
                         for sub in matches:
                             per_sub_matched[sub.id] += 1
+                if cancelled:
+                    break
 
                 next_page = data.get("next_page") or {}
                 next_offset = next_page.get("offset")
@@ -309,10 +377,37 @@ class ProzorroTender(models.Model):
             )
             raise
         finally:
-            # Always reset is_running, even on early-return / re-raise
-            # paths. Idempotent: writing False on an already-False row
-            # is a no-op write.
-            self._mark_cursor_isolated(cursor.id, is_running=False)
+            # Always reset is_running AND cancel_requested, even on
+            # early-return / re-raise paths. Idempotent. Without this
+            # cancel_requested would stick True and the next click
+            # would skip-before-start. Writing False to both via
+            # isolated cursor so the reset survives any rollback path.
+            self._mark_cursor_isolated(cursor.id, is_running=False, cancel_requested=False)
+
+        if cancelled:
+            cursor._record_error(_("Cancelled by user (pulled %s, matched %s)") % (pulled, matched))
+            _logger.info(
+                "Prozorro: sync cancelled by user. pulled=%d, matched=%d",
+                pulled,
+                matched,
+            )
+            self._post_chatter_isolated(
+                subs.ids,
+                _(
+                    "Prozorro sync cancelled by user: pulled %(pulled)s, matched %(matched)s.",
+                    pulled=pulled,
+                    matched=matched,
+                ),
+            )
+            self._notify_sync_result(pulled, matched, error=_("Cancelled by user"))
+            self._push_state_changed_to_managers()
+            return {
+                "pulled": pulled,
+                "matched": matched,
+                "error": "cancelled",
+                "skipped": False,
+                "cancelled": True,
+            }
 
         cursor._record_success(pulled, matched)
         _logger.info("Prozorro: sync done. pulled=%d, matched=%d", pulled, matched)
@@ -470,8 +565,7 @@ class ProzorroTender(models.Model):
             stale_after = fields.Datetime.now() - timedelta(minutes=STALE_RUN_MINUTES)
             if cursor.last_started_at < stale_after:
                 _logger.warning(
-                    "Prozorro: clearing stale is_running=True flag "
-                    "(started %s, > %d minutes ago)",
+                    "Prozorro: clearing stale is_running=True flag (started %s, > %d minutes ago)",
                     cursor.last_started_at,
                     STALE_RUN_MINUTES,
                 )
@@ -494,17 +588,11 @@ class ProzorroTender(models.Model):
                     "title": _("Sync already running"),
                     "message": _(
                         "A Prozorro sync is in progress (started %s). "
-                        "Wait for it to finish before queueing another."
+                        "Wait for it to finish or click Force stop."
                     )
                     % (cursor.last_started_at or _("just now")),
                     "type": "warning",
                     "sticky": False,
-                    # Force a hard page reload after the toast so the
-                    # subscription / Settings status banners refresh from
-                    # the cursor singleton. Computed sync_is_running and
-                    # related fields are read at form-load time and do
-                    # not auto-refresh on toast-only action results.
-                    "next": {"type": "ir.actions.client", "tag": "reload"},
                 },
             }
         cron = self.env.ref("rteam_prozorro.ir_cron_prozorro_sync_feed", raise_if_not_found=False)
@@ -522,6 +610,21 @@ class ProzorroTender(models.Model):
                     "sticky": True,
                 },
             }
+        # Flip is_running to True NOW, at click time, via isolated
+        # cursor. This is what makes the form's "Sync running" banner
+        # appear immediately on click instead of 30-60s later when the
+        # cron worker actually picks up the trigger. Also clear any
+        # leftover cancel_requested from a previous run. The bus push
+        # below tells open Prozorro tabs to refresh against this new
+        # state.
+        self._mark_cursor_isolated(
+            cursor.id,
+            is_running=True,
+            last_started_at=fields.Datetime.now(),
+            cancel_requested=False,
+            last_error=False,
+        )
+
         # Instant chatter feedback. The user's RPC transaction commits as
         # soon as this action returns, so a plain message_post is fine
         # here (no need for the isolated-cursor pattern that protects
@@ -534,22 +637,22 @@ class ProzorroTender(models.Model):
                 subtype_xmlid="mail.mt_note",
             )
         cron.sudo()._trigger()
+        # Tell every open Prozorro tab to refresh and pick up the
+        # is_running=True we just wrote. Replaces the v5.6.8 hard-reload-
+        # via-toast `next` chain (which was a heavier hammer). Now both
+        # click and cron-end go through the same single bus channel.
+        self._push_state_changed_to_managers()
         return {
             "type": "ir.actions.client",
             "tag": "display_notification",
             "params": {
                 "title": _("Sync queued"),
                 "message": _(
-                    "A background sync was scheduled. Open any active subscription "
-                    "to follow progress in its chatter."
+                    "A background sync was scheduled. The status panel "
+                    "will update as the run progresses."
                 ),
                 "type": "success",
                 "sticky": False,
-                # See note on the "Sync already running" branch above:
-                # banners read sync state at form-load time, so we trigger
-                # a reload after the toast to flip them to "in progress"
-                # without forcing the user to refresh manually.
-                "next": {"type": "ir.actions.client", "tag": "reload"},
             },
         }
 
@@ -574,39 +677,68 @@ class ProzorroTender(models.Model):
         }
 
     def action_force_clear_running(self):
-        """Force-clear the `is_running` flag on the sync cursor.
+        """Request cancellation of the running sync (real stop, not
+        just clearing the UI flag).
 
-        Emergency button surfaced on the Settings status panel when
-        `is_running=True` and `last_started_at` is more than
-        `STALE_RUN_MINUTES` minutes ago. Runs the same self-heal that
-        `action_sync_now` does automatically, but as an explicit user
-        action so the user can clear stuck state without first having
-        to wait for the next click attempt.
+        Writes `cancel_requested=True` on the cursor singleton via an
+        isolated cursor that commits immediately. The cron handler
+        polls `_is_cancel_requested` after each tender (direct SQL
+        bypassing ORM cache) and exits cleanly within ~1-3 seconds.
+        On exit the handler clears cancel_requested in its finally
+        block so the next run starts from a clean state.
 
-        Use case from v5.6.5: cron handler crashed mid-run with
-        UserError from `cron.write({nextcall:...})` while ir.cron held
-        a lock_for_update. The transaction rolled back wiping
-        `_record_success`, but the isolated-cursor `is_running=True`
-        had already committed and stayed stuck for 16+ hours.
+        Also drops any IMMEDIATE pending trigger rows (`call_at <=
+        now()+5s`) so a click-spammed duplicate doesn't fire right
+        after we cancel. Future scheduled triggers (auto-sync) are
+        left alone - they reflect the user's separate Schedule
+        choice.
+
+        If no sync is currently running (is_running=False), this still
+        sets cancel_requested=True so a queued-but-not-started trigger
+        will skip-on-pickup. Idempotent.
         """
         cursor = self.env["prozorro.sync.cursor"].sudo()._get_singleton("main")
-        cursor.write(
-            {
-                "is_running": False,
-                "last_error": _("Force-cleared stuck running state by user."),
-                "last_error_at": fields.Datetime.now(),
-            }
-        )
+        was_running = cursor.is_running
+        # Isolated-cursor write so the cron's main txn sees cancel via
+        # SELECT in READ COMMITTED. ORM's cached read on cursor record
+        # would otherwise serve stale False.
+        self._mark_cursor_isolated(cursor.id, cancel_requested=True)
+        # Drop click-queued immediate triggers; preserve auto-schedule.
+        cron = self.env.ref("rteam_prozorro.ir_cron_prozorro_sync_feed", raise_if_not_found=False)
+        if cron:
+            self.env.cr.execute(
+                "DELETE FROM ir_cron_trigger "
+                "WHERE cron_id = %s AND call_at <= NOW() + INTERVAL '5 seconds'",
+                (cron.id,),
+            )
+        # Chatter feedback so the user has a paper trail of the cancel.
+        subs = self.env["prozorro.subscription"]._get_active_subscriptions()
+        if subs:
+            subs.message_post(
+                body=_(
+                    "Prozorro sync cancellation requested by %s...",
+                    self.env.user.name,
+                ),
+                subtype_xmlid="mail.mt_note",
+            )
+        # Push state change to refresh open Prozorro tabs.
+        self._push_state_changed_to_managers()
+        if was_running:
+            title = _("Stopping sync...")
+            message = _("Cancellation requested. The current run will exit within a few seconds.")
+        else:
+            title = _("Cancellation queued")
+            message = _(
+                "No sync was running. Any pending trigger that arrives "
+                "before the flag clears will skip itself."
+            )
         return {
             "type": "ir.actions.client",
             "tag": "display_notification",
             "params": {
-                "title": _("Sync state cleared"),
-                "message": _(
-                    "The stuck 'sync running' flag has been reset. "
-                    "Click Sync now to start a fresh run."
-                ),
-                "type": "success",
+                "title": title,
+                "message": message,
+                "type": "warning",
                 "sticky": False,
             },
         }

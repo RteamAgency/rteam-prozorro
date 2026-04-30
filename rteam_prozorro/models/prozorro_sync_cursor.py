@@ -27,6 +27,12 @@ class ProzorroSyncCursor(models.Model):
     last_matched = fields.Integer(string="Matched (last run)")
     is_running = fields.Boolean(string="Currently syncing")
     last_started_at = fields.Datetime(string="Last started at")
+    cancel_requested = fields.Boolean(
+        string="Cancel requested",
+        help="Set to True by the Force stop action; the cron handler "
+        "checks this between tenders and exits cleanly when set. "
+        "Cleared at the end of a run (cancelled or otherwise).",
+    )
 
     _sql_constraints = [
         ("prozorro_sync_cursor_name_uniq", "unique(name)", "Cursor name must be unique."),
