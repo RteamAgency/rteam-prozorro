@@ -489,6 +489,12 @@ class ProzorroTender(models.Model):
                     % (cursor.last_started_at or _("just now")),
                     "type": "warning",
                     "sticky": False,
+                    # Force a hard page reload after the toast so the
+                    # subscription / Settings status banners refresh from
+                    # the cursor singleton. Computed sync_is_running and
+                    # related fields are read at form-load time and do
+                    # not auto-refresh on toast-only action results.
+                    "next": {"type": "ir.actions.client", "tag": "reload"},
                 },
             }
         cron = self.env.ref("rteam_prozorro.ir_cron_prozorro_sync_feed", raise_if_not_found=False)
@@ -529,6 +535,11 @@ class ProzorroTender(models.Model):
                 ),
                 "type": "success",
                 "sticky": False,
+                # See note on the "Sync already running" branch above:
+                # banners read sync state at form-load time, so we trigger
+                # a reload after the toast to flip them to "in progress"
+                # without forcing the user to refresh manually.
+                "next": {"type": "ir.actions.client", "tag": "reload"},
             },
         }
 

@@ -2,6 +2,20 @@
 
 All notable changes to `rteam_prozorro` are documented here.
 
+## [19.0.5.6.8] - 2026-04-30
+
+### Changed
+- `Sync now` toasts now chain a hard `reload` action so subscription
+  and Settings status banners refresh immediately after click. The
+  in-progress / success / error banners are driven by computed fields
+  on `prozorro.sync.cursor`, which Odoo reads at form-load time only
+  and does not auto-refresh on toast-only action results, leaving the
+  user staring at a stale "last sync OK" banner while a fresh sync
+  was already queued. Hard reload trades scroll/state preservation
+  for correctness during the debug loop. To revisit with a bus.bus
+  push pattern (option 3 in the design conversation) when polishing
+  for apps.odoo.com submission.
+
 ## [19.0.5.6.7] - 2026-04-30
 
 ### Changed
