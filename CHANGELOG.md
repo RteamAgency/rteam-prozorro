@@ -2,6 +2,19 @@
 
 All notable changes to `rteam_prozorro` are documented here.
 
+## [19.0.5.7.2] - 2026-04-30
+
+### Fixed
+- Force stop now also clears `is_running` immediately. v5.7.1 only
+  set `cancel_requested=True`, so the user clicked Force stop, the
+  cancellation was correctly recorded in chatter, but the form
+  banner still showed "Sync running" because `is_running` was only
+  cleared when the cron handler eventually finished. Verified live
+  on test19 with Alex: clicked Force stop -> chatter shows
+  "cancellation requested" but banner stuck on running. Now both
+  flags clear on Force stop click; cron handler's finally block
+  re-clears them idempotently if it was actually running.
+
 ## [19.0.5.7.1] - 2026-04-30
 
 ### Fixed (banner-vs-chatter contradiction)

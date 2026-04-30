@@ -702,7 +702,24 @@ class ProzorroTender(models.Model):
         # Isolated-cursor write so the cron's main txn sees cancel via
         # SELECT in READ COMMITTED. ORM's cached read on cursor record
         # would otherwise serve stale False.
-        self._mark_cursor_isolated(cursor.id, cancel_requested=True)
+        #
+        # Also clear is_running so the form banner reflects "stopped"
+        # IMMEDIATELY. Two scenarios:
+        #
+        # (a) Cron is in mid-HTTP-loop: handler hits its next cancel
+        #     check within 1-3s, exits cleanly, finally block sets
+        #     both flags to False (idempotent).
+        #
+        # (b) Cron has not yet picked up the trigger (test19 cron
+        #     worker polls slowly, real prod ~1min): no handler is
+        #     actually running, so clearing is_running is honest.
+        #     cancel_requested may linger True until the next Sync
+        #     now click clears it (action_sync_now does that), or
+        #     until the cron handler eventually picks up the trigger
+        #     and skips-before-start.
+        self._mark_cursor_isolated(
+            cursor.id, cancel_requested=True, is_running=False
+        )
         # Drop click-queued immediate triggers; preserve auto-schedule.
         cron = self.env.ref("rteam_prozorro.ir_cron_prozorro_sync_feed", raise_if_not_found=False)
         if cron:
