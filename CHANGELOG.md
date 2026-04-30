@@ -2,6 +2,22 @@
 
 All notable changes to `rteam_prozorro` are documented here.
 
+## [19.0.5.6.7] - 2026-04-30
+
+### Changed
+- `Force stop` button on Settings -> Prozorro -> Sync status now shows
+  whenever a sync is in progress (parent alert gates on `is_running`),
+  instead of only after the 60-minute stale threshold. Removed the
+  unused `prozorro_can_force_clear` computed field. Confirm dialog text
+  softened to reflect that any in-flight HTTP request continues to
+  completion regardless.
+- Same `Force stop` button mirrored on the subscription form, inside
+  the existing "Sync in progress..." alert. Calls the same underlying
+  `prozorro.tender.action_force_clear_running` via a thin proxy on
+  `prozorro.subscription`. Both buttons now use `btn btn-danger` for
+  visual consistency and to signal the destructive nature of clearing
+  system state.
+
 ## [19.0.5.6.6] - 2026-04-30
 
 ### Fixed (the stuck-is_running bug)

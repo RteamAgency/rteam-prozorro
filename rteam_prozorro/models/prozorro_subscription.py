@@ -299,3 +299,6 @@ class ProzorroSubscription(models.Model):
         a fresh pull while they are tuning rules.
         """
         return self.env["prozorro.tender"].action_sync_now()
+
+    def action_force_clear_running(self):
+        return self.env["prozorro.tender"].action_force_clear_running()

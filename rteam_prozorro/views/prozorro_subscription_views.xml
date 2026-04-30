@@ -101,6 +101,12 @@
                         feed depth. Reload the page to see new matches as they
                         come in, or check the chatter below for milestone
                         posts.
+                        <button name="action_force_clear_running"
+                                type="object"
+                                string="Force stop"
+                                class="btn btn-danger btn-sm ms-2"
+                                confirm="Force-clear the 'sync running' flag? This resets the running indicator on the next refresh. Any in-flight HTTP request continues until it finishes. Continue?"
+                                groups="rteam_prozorro.group_prozorro_manager"/>
                     </div>
                     <div class="alert alert-danger" role="alert"
                          invisible="sync_is_running or not sync_last_error">
