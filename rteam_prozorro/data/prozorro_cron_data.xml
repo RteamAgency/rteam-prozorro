@@ -1,29 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo noupdate="1">
     <!--
-        Sync cron is ALWAYS active=True so that `cron._trigger()` from a
-        manual `Sync now` click actually queues a trigger row. In Odoo 19
-        `ir.cron._trigger_list` filters out triggers on inactive crons
-        (`if not active: at_list = [at for at in at_list if at > now]`),
-        so an inactive cron + _trigger() is a no-op - the click would be
-        silently swallowed. We learned this on test19 v5.6.4 (build
-        31426538): sync click at 15:33 UTC, ir_cron_trigger empty, cron
-        worker never picked up.
+        Sync cron is permanently kept in a "never auto-fires" shape:
+            active=True, nextcall=2099-12-31, interval=10000 days
 
-        The "Auto-sync on schedule" toggle in Settings now controls the
-        `nextcall` field, NOT `active`:
-            toggle ON  -> nextcall = now() + interval (recurring auto-sync)
-            toggle OFF -> nextcall = 2099-12-31 (effectively no auto-run)
-        Either way, manual Sync now via _trigger() works because the cron
-        is always active.
+        Why each field:
+        - active=True: required so `cron._trigger()` from a manual Sync
+          now click queues a trigger row that the worker actually picks
+          up. In Odoo 19, `_trigger_list` filters out triggers on
+          inactive crons (`if not active: at_list = [at for at in at_list
+          if at > now]`), so inactive cron + _trigger() = silent no-op
+          (burned us on v5.6.4 build 31426538).
+        - nextcall=2099-12-31 + interval=10000 days: Odoo's cron
+          framework auto-schedules nextcall = now() + interval after
+          every run. With interval=10000 days the auto-rescheduled
+          nextcall lands in 2055, far enough that we never have to
+          re-park it. This eliminates the v5.6.5/5.6.6 lock_for_update
+          dance where we wrote `cron.nextcall = 2099` from inside the
+          handler, hit `lock_for_update` on the cron row, raised
+          UserError, rolled back, and stuck `is_running=True` for hours.
+
+        All actual scheduling is done via `ir_cron_trigger` rows
+        inserted by `cron._trigger(at=...)`:
+        - action_sync_now             -> trigger immediately
+        - _reschedule_cron_after_run  -> trigger at now()+interval if
+                                          Auto-sync toggle is ON
+        - _inverse_prozorro_auto_sync_active / _inverse_prozorro_sync_interval_hours
+                                       -> queue / requeue trigger when
+                                          user changes Schedule settings
+
+        Canonical user intent is stored in ir.config_parameter:
+        - prozorro.auto_sync_enabled      ("True" / "False")
+        - prozorro.sync_interval_hours    (int as string)
+        ir.cron is never written to from regular code paths. _trigger()
+        writes to ir_cron_trigger (a different table), so there is no
+        lock_for_update conflict with the running cron handler.
     -->
     <record id="ir_cron_prozorro_sync_feed" model="ir.cron">
         <field name="name">Prozorro: sync tender feed</field>
         <field name="model_id" ref="model_prozorro_tender"/>
         <field name="state">code</field>
         <field name="code">model._cron_sync_feed()</field>
-        <field name="interval_number">6</field>
-        <field name="interval_type">hours</field>
+        <field name="interval_number">10000</field>
+        <field name="interval_type">days</field>
         <field name="active" eval="True"/>
         <field name="nextcall" eval="'2099-12-31 00:00:00'"/>
         <field name="priority">10</field>

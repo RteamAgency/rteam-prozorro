@@ -7,12 +7,6 @@ from datetime import datetime, timedelta
 
 from odoo import SUPERUSER_ID, _, api, fields, models
 
-# Sentinel "never auto-run" value for ir.cron.nextcall when the Schedule
-# toggle is OFF. Far enough in the future that the cron worker treats
-# it as "never ready" but `_trigger()` from a manual Sync now click
-# still creates a trigger row that bypasses nextcall.
-SYNC_CRON_NEVER_NEXTCALL = datetime(2099, 12, 31)
-
 # After this many minutes of `is_running=True` on the cursor singleton,
 # we consider the previous run dead (container kill, OOM, Odoo.sh
 # rebuild mid-run, etc.) and self-heal so the user is not stuck. Real
@@ -341,60 +335,59 @@ class ProzorroTender(models.Model):
 
     @api.model
     def _reschedule_cron_after_run(self):
-        """Park the sync cron's nextcall in 2099 if the user's Schedule
-        toggle is OFF.
+        """Queue the next auto-run trigger if the user's Schedule
+        toggle is ON. No-op otherwise.
 
-        Odoo's cron framework auto-sets `nextcall = now() + interval`
-        after a successful run. That's correct when the Schedule toggle
-        is ON. But we also want manual `Sync now` to work when the
-        toggle is OFF, which requires the cron to be `active=True`. To
-        prevent the cron from auto-running every <interval> hours when
-        the user doesn't want it, we re-park nextcall to 2099 right
-        after each run, so the cron worker only picks it up again when
-        a user explicitly clicks Sync now (which inserts a trigger row
-        that bypasses nextcall).
+        Architectural note (5.7.0):
+        Scheduling is now done by inserting rows into `ir_cron_trigger`
+        via `cron._trigger(at=...)`, NOT by writing to `ir.cron`. The
+        cron row itself is permanently parked (active=True,
+        nextcall=2099, interval=10000 days) so Odoo's framework never
+        auto-fires it. This avoids the `lock_for_update` UserError
+        that previously bit us when writing to the cron row from
+        inside the running handler (v5.6.5 build 31426538, see
+        CHANGELOG 5.6.6 / 5.7.0 for the gory history).
 
-        IMPORTANT: this MUST be deferred to a postcommit hook. While
-        the cron is executing, Odoo holds `lock_for_update` on the
-        ir.cron row, and any `cron.write()` from inside the handler
-        raises:
-
-            UserError: Record cannot be modified right now: This cron
-            task is currently being executed and may not be modified
-
-        That UserError propagates through `_run_action_code_multi`,
-        the cron framework rolls back the transaction, and is_running
-        sticks at True forever (the isolated-cursor write committed
-        before the rollback). We hit this exact bug live on test19
-        v5.6.5 build 31426538 (2026-04-29 18:10 UTC).
-
-        Postcommit fires AFTER the cron transaction commits and the
-        FOR-NO-KEY-UPDATE lock is released, so writing to ir.cron
-        succeeds. The deferred work uses an independent cursor (not
-        the now-closed cron cursor).
+        We use an independent cursor so the queued trigger SURVIVES
+        a rollback of the main cron transaction (uncaught exception,
+        OOM, container kill). Auto-sync therefore continues to fire
+        on schedule even after a bad run, instead of silently
+        stalling forever.
         """
+        from odoo import sql_db
+
         Param = self.env["ir.config_parameter"].sudo()
         enabled = Param.get_param("prozorro.auto_sync_enabled", "False") == "True"
-        if enabled:
-            return  # Odoo already schedules the next run normally
+        if not enabled:
+            return
+        try:
+            hours = max(1, int(Param.get_param("prozorro.sync_interval_hours", "6") or "6"))
+        except ValueError:
+            hours = 6
         dbname = self.env.cr.dbname
-
-        def _do_reschedule():
-            try:
-                from odoo import sql_db
-
-                with sql_db.db_connect(dbname).cursor() as new_cr:
-                    new_env = api.Environment(new_cr, SUPERUSER_ID, {})
-                    cron = new_env.ref(
-                        "rteam_prozorro.ir_cron_prozorro_sync_feed",
-                        raise_if_not_found=False,
-                    )
-                    if cron:
-                        cron.sudo().write({"nextcall": SYNC_CRON_NEVER_NEXTCALL})
-            except Exception:
-                _logger.exception("Prozorro: failed to re-park cron nextcall (postcommit)")
-
-        self.env.cr.postcommit.add(_do_reschedule)
+        try:
+            with sql_db.db_connect(dbname).cursor() as new_cr:
+                new_env = api.Environment(new_cr, SUPERUSER_ID, {})
+                cron = new_env.ref(
+                    "rteam_prozorro.ir_cron_prozorro_sync_feed",
+                    raise_if_not_found=False,
+                )
+                if not cron:
+                    return
+                # Replace any pending future triggers with one at the
+                # current interval. Without the DELETE, a Sync now
+                # click in the middle of a schedule cycle would leave
+                # behind an obsolete future trigger and we'd run extra
+                # times.
+                new_cr.execute(
+                    "DELETE FROM ir_cron_trigger WHERE cron_id = %s AND call_at > %s",
+                    (cron.id, fields.Datetime.now()),
+                )
+                cron.sudo()._trigger(at=fields.Datetime.now() + timedelta(hours=hours))
+        except Exception:
+            _logger.exception(
+                "Prozorro: failed to schedule next auto-run trigger (isolated cursor)"
+            )
 
     @api.model
     def _notify_sync_result(self, pulled, matched, error=None):

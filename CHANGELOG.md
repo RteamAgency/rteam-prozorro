@@ -2,6 +2,91 @@
 
 All notable changes to `rteam_prozorro` are documented here.
 
+## [19.0.5.7.0] - 2026-04-30
+
+### Architectural change: trigger-based scheduling
+
+Replaces the entire `ir.cron.nextcall` mirroring pattern (5.5.x-5.6.x)
+with permanent "never auto-fire" state plus on-demand
+`ir_cron_trigger` rows. Eliminates the lock_for_update bug class
+that surfaced in 5.6.5 (cron stuck for hours), 5.6.6 (its postcommit
+fix), and the v5.6.9 follow-up (Force stop crashing settings save
+mid-run, plus the auto-restart at 14:18 on test19).
+
+### Why this fixes everything at once
+
+The old design wrote to `ir.cron` from three different code paths:
+`_inverse_*` methods on settings save, `_reschedule_cron_after_run`
+in the cron handler, and the `_inverse_prozorro_sync_interval_hours`
+when interval was changed. Any of these colliding with a running
+cron raised
+    UserError: This cron task is currently being executed and
+    may not be modified
+because Odoo 19's `ir.cron.write` does `lock_for_update` on the cron
+row while the cron handler holds it. Workarounds (postcommit defer,
+isolated cursors) helped for one path but not the others; settings
+save still failed when a sync was in flight.
+
+### What changed
+
+- Cron row is now permanently parked in `data/prozorro_cron_data.xml`:
+  `active=True, nextcall=2099-12-31, interval_number=10000,
+  interval_type='days'`. Odoo's framework auto-reschedule after each
+  run lands ~27 years out, so the cron will never fire on its own.
+- All scheduling moved to `ir_cron_trigger` (a separate table, no
+  lock conflict with the running cron):
+    * `action_sync_now` -> `cron._trigger()` (immediate)
+    * `_reschedule_cron_after_run` -> `cron._trigger(at=now()+interval)`
+       if Schedule toggle is ON, else no-op. Uses an isolated cursor
+       so the trigger survives a rollback of the cron transaction
+       (uncaught exception, OOM, container kill). Auto-sync therefore
+       no longer silently stalls after a bad run.
+    * `_inverse_prozorro_auto_sync_active` -> queues first trigger on
+       OFF -> ON, deletes pending triggers on ON -> OFF.
+    * `_inverse_prozorro_sync_interval_hours` -> requeues with new
+       interval if Schedule is ON.
+- User intent moved fully to `ir.config_parameter`:
+    * `prozorro.auto_sync_enabled` ("True" / "False")
+    * `prozorro.sync_interval_hours` (int as string)
+- `_inverse_*` methods NEVER write to `ir.cron`. Settings save while
+  a sync is running no longer crashes (the original Force stop UX
+  bug from this session).
+- `_compute_prozorro_cron` reads interval from config_parameter, not
+  from the cron row.
+- Removed dead `SYNC_CRON_NEVER_NEXTCALL` and `NEVER_NEXTCALL`
+  constants (no callers after the rewrite).
+
+### Migration
+
+`migrations/19.0.5.7.0/post-migrate.py` runs on upgrade:
+
+1. Seeds `prozorro.sync_interval_hours` from the existing cron's
+   `interval_number` if not already in config_parameter.
+2. Forces the cron row into the permanent never-auto shape.
+3. Clears any pending future triggers from the legacy state.
+4. If the user had auto-sync enabled, queues the first new-style
+   trigger at the configured interval so the schedule is preserved
+   end-to-end across the upgrade.
+5. Clears any stuck `is_running=True` on the sync cursor singleton
+   (the container restart that triggered the migration killed the
+   in-flight sync).
+
+### Tradeoffs / followups
+
+- The old `_reschedule_cron_after_run` was idempotent in that it
+  always wrote nextcall=2099 on OFF state. The new version simply
+  does nothing when Schedule is OFF. If somehow a future trigger
+  exists in `ir_cron_trigger` (manual SQL, partial migration, etc.)
+  it will fire once after upgrade. The `_inverse_*` OFF-path's
+  DELETE handles this when the user re-saves settings, but no
+  automatic cleanup runs at module load. If this becomes a real
+  problem we can add a defensive DELETE in the cron handler entry.
+- Auto-sync continuity now depends on isolated-cursor commit being
+  reliable. If the isolated cursor itself fails (DB connection lost
+  mid-handler), auto-sync will stall until the user clicks Sync now
+  or re-saves the toggle. Logged with full traceback so we can spot
+  it.
+
 ## [19.0.5.6.9] - 2026-04-30
 
 ### Added
