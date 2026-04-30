@@ -46,6 +46,13 @@
                                     <span invisible="not prozorro_last_started_at">
                                         - started <field name="prozorro_last_started_at" class="oe_inline" widget="datetime"/>
                                     </span>
+                                    <button name="action_prozorro_force_clear_running"
+                                            type="object"
+                                            string="Force stop"
+                                            class="btn btn-link btn-sm"
+                                            confirm="Force-clear the 'sync running' flag? Use this only if a sync has been stuck for more than an hour. Continue?"
+                                            invisible="not prozorro_can_force_clear"
+                                            groups="rteam_prozorro.group_prozorro_manager"/>
                                 </div>
                                 <div class="alert alert-danger mb8" role="alert" invisible="not prozorro_last_error">
                                     <strong>Last error:</strong>

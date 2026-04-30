@@ -91,6 +91,14 @@ class ResConfigSettings(models.TransientModel):
         string="Last error",
         compute="_compute_prozorro_status",
     )
+    # True only if `is_running=True` AND `last_started_at` is older than
+    # the stale threshold. Drives the visibility of the "Force stop"
+    # button so the user does not see (or mash) it during a healthy
+    # in-flight sync.
+    prozorro_can_force_clear = fields.Boolean(
+        string="Can force-clear stuck sync",
+        compute="_compute_prozorro_status",
+    )
 
     # ------------------------------------------------------------------ Compute / inverse
 
@@ -160,8 +168,11 @@ class ResConfigSettings(models.TransientModel):
 
     @api.depends_context("uid")
     def _compute_prozorro_status(self):
+        from .prozorro_tender import STALE_RUN_MINUTES
+
         Cursor = self.env["prozorro.sync.cursor"].sudo()
         cursor = Cursor.search([("name", "=", "main")], limit=1)
+        stale_after = fields.Datetime.now() - timedelta(minutes=STALE_RUN_MINUTES)
         for rec in self:
             rec.prozorro_is_running = bool(cursor and cursor.is_running)
             rec.prozorro_last_started_at = cursor.last_started_at if cursor else False
@@ -169,6 +180,12 @@ class ResConfigSettings(models.TransientModel):
             rec.prozorro_last_pulled = cursor.last_pulled if cursor else 0
             rec.prozorro_last_matched = cursor.last_matched if cursor else 0
             rec.prozorro_last_error = cursor.last_error if cursor else False
+            rec.prozorro_can_force_clear = bool(
+                cursor
+                and cursor.is_running
+                and cursor.last_started_at
+                and cursor.last_started_at < stale_after
+            )
 
     # ------------------------------------------------------------------ Actions
 
@@ -178,3 +195,6 @@ class ResConfigSettings(models.TransientModel):
 
     def action_prozorro_reset_cursor(self):
         return self.env["prozorro.tender"].action_reset_sync_cursor()
+
+    def action_prozorro_force_clear_running(self):
+        return self.env["prozorro.tender"].action_force_clear_running()

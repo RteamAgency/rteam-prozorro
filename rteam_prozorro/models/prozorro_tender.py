@@ -13,6 +13,12 @@ from odoo import SUPERUSER_ID, _, api, fields, models
 # still creates a trigger row that bypasses nextcall.
 SYNC_CRON_NEVER_NEXTCALL = datetime(2099, 12, 31)
 
+# After this many minutes of `is_running=True` on the cursor singleton,
+# we consider the previous run dead (container kill, OOM, Odoo.sh
+# rebuild mid-run, etc.) and self-heal so the user is not stuck. Real
+# runs in production take 5-30 minutes; 60 is a safe upper bound.
+STALE_RUN_MINUTES = 60
+
 _logger = logging.getLogger(__name__)
 
 DEFAULT_API_URL = "https://public.api.openprocurement.org/api/2.5/tenders"
@@ -187,6 +193,17 @@ class ProzorroTender(models.Model):
         next run continues backward from where the previous one stopped.
         `descending=1` is preserved across pages within a single run (without
         it the API switches to ascending and we'd skip past the latest tail).
+
+        Wrapped in try/except/finally so the `is_running` flag on the
+        cursor singleton is ALWAYS reset, even on uncaught exceptions
+        (UserError from Odoo internals, container restart mid-run,
+        memory error, etc.). v5.6.5's `_reschedule_cron_after_run`
+        raised UserError mid-handler; the rollback wiped
+        `_record_success` but the isolated-cursor write of
+        `is_running=True` had already committed, leaving the flag
+        stuck for 16+ hours until manually cleared. The finally block
+        below uses an isolated cursor too, so the reset survives
+        any rollback path.
         """
         Cursor = self.env["prozorro.sync.cursor"]
         Subscription = self.env["prozorro.subscription"]
@@ -229,6 +246,12 @@ class ProzorroTender(models.Model):
         url = _page_url(cursor.offset)
 
         pulled, matched = 0, 0
+        # Outer try/finally guarantees is_running gets reset even on
+        # an uncaught exception (UserError from Odoo internals,
+        # container kill, OOM, etc.). Without this, the isolated-cursor
+        # `is_running=True` sticks forever and the Settings panel
+        # shows "Sync running" until manually cleared. Burned us on
+        # v5.6.5 (test19 build 31426538).
         try:
             for _page in range(max_pages):
                 data = self._http_get_json(url)
@@ -276,7 +299,26 @@ class ProzorroTender(models.Model):
             )
             self._notify_sync_result(pulled, matched, error=str(e))
             self._reschedule_cron_after_run()
+            self._mark_cursor_isolated(cursor.id, is_running=False)
             return {"pulled": pulled, "matched": matched, "error": str(e), "skipped": False}
+        except Exception as e:
+            # Uncaught (non-HTTP) exception. Best-effort isolated-cursor
+            # write of the error message + is_running=False so the user
+            # sees what went wrong instead of a stuck spinner. Re-raise
+            # so the cron framework records the failure properly.
+            _logger.exception("Prozorro: uncaught exception in cron handler")
+            self._mark_cursor_isolated(
+                cursor.id,
+                is_running=False,
+                last_error=str(e)[:500],
+                last_error_at=fields.Datetime.now(),
+            )
+            raise
+        finally:
+            # Always reset is_running, even on early-return / re-raise
+            # paths. Idempotent: writing False on an already-False row
+            # is a no-op write.
+            self._mark_cursor_isolated(cursor.id, is_running=False)
 
         cursor._record_success(pulled, matched)
         _logger.info("Prozorro: sync done. pulled=%d, matched=%d", pulled, matched)
@@ -311,15 +353,48 @@ class ProzorroTender(models.Model):
         after each run, so the cron worker only picks it up again when
         a user explicitly clicks Sync now (which inserts a trigger row
         that bypasses nextcall).
+
+        IMPORTANT: this MUST be deferred to a postcommit hook. While
+        the cron is executing, Odoo holds `lock_for_update` on the
+        ir.cron row, and any `cron.write()` from inside the handler
+        raises:
+
+            UserError: Record cannot be modified right now: This cron
+            task is currently being executed and may not be modified
+
+        That UserError propagates through `_run_action_code_multi`,
+        the cron framework rolls back the transaction, and is_running
+        sticks at True forever (the isolated-cursor write committed
+        before the rollback). We hit this exact bug live on test19
+        v5.6.5 build 31426538 (2026-04-29 18:10 UTC).
+
+        Postcommit fires AFTER the cron transaction commits and the
+        FOR-NO-KEY-UPDATE lock is released, so writing to ir.cron
+        succeeds. The deferred work uses an independent cursor (not
+        the now-closed cron cursor).
         """
         Param = self.env["ir.config_parameter"].sudo()
         enabled = Param.get_param("prozorro.auto_sync_enabled", "False") == "True"
         if enabled:
-            return  # Odoo already scheduled the next run normally
-        cron = self.env.ref("rteam_prozorro.ir_cron_prozorro_sync_feed", raise_if_not_found=False)
-        if not cron:
-            return
-        cron.sudo().write({"nextcall": SYNC_CRON_NEVER_NEXTCALL})
+            return  # Odoo already schedules the next run normally
+        dbname = self.env.cr.dbname
+
+        def _do_reschedule():
+            try:
+                from odoo import sql_db
+
+                with sql_db.db_connect(dbname).cursor() as new_cr:
+                    new_env = api.Environment(new_cr, SUPERUSER_ID, {})
+                    cron = new_env.ref(
+                        "rteam_prozorro.ir_cron_prozorro_sync_feed",
+                        raise_if_not_found=False,
+                    )
+                    if cron:
+                        cron.sudo().write({"nextcall": SYNC_CRON_NEVER_NEXTCALL})
+            except Exception:
+                _logger.exception("Prozorro: failed to re-park cron nextcall (postcommit)")
+
+        self.env.cr.postcommit.add(_do_reschedule)
 
     @api.model
     def _notify_sync_result(self, pulled, matched, error=None):
@@ -375,7 +450,32 @@ class ProzorroTender(models.Model):
         # Guard: don't queue if a sync is already in flight. Operators
         # double-clicking Sync now would otherwise stack triggers and
         # generate duplicate chatter posts.
+        #
+        # Self-heal: if `is_running=True` for more than `STALE_RUN_MINUTES`
+        # the previous run almost certainly crashed (container kill,
+        # uncaught exception, Odoo.sh rebuild mid-run). Reset the flag
+        # so the user is not stuck waiting for the system to time out.
         cursor = self.env["prozorro.sync.cursor"].sudo()._get_singleton("main")
+        if cursor.is_running and cursor.last_started_at:
+            stale_after = fields.Datetime.now() - timedelta(minutes=STALE_RUN_MINUTES)
+            if cursor.last_started_at < stale_after:
+                _logger.warning(
+                    "Prozorro: clearing stale is_running=True flag "
+                    "(started %s, > %d minutes ago)",
+                    cursor.last_started_at,
+                    STALE_RUN_MINUTES,
+                )
+                cursor.write(
+                    {
+                        "is_running": False,
+                        "last_error": (
+                            "Previous run did not finish cleanly (cleared after %d min)."
+                            % STALE_RUN_MINUTES
+                        ),
+                        "last_error_at": fields.Datetime.now(),
+                    }
+                )
+                cursor = cursor  # refresh local var; flag now False
         if cursor.is_running:
             return {
                 "type": "ir.actions.client",
@@ -447,6 +547,44 @@ class ProzorroTender(models.Model):
             "params": {
                 "title": _("Cursor reset"),
                 "message": _("The next sync will start from the latest tenders."),
+                "type": "success",
+                "sticky": False,
+            },
+        }
+
+    def action_force_clear_running(self):
+        """Force-clear the `is_running` flag on the sync cursor.
+
+        Emergency button surfaced on the Settings status panel when
+        `is_running=True` and `last_started_at` is more than
+        `STALE_RUN_MINUTES` minutes ago. Runs the same self-heal that
+        `action_sync_now` does automatically, but as an explicit user
+        action so the user can clear stuck state without first having
+        to wait for the next click attempt.
+
+        Use case from v5.6.5: cron handler crashed mid-run with
+        UserError from `cron.write({nextcall:...})` while ir.cron held
+        a lock_for_update. The transaction rolled back wiping
+        `_record_success`, but the isolated-cursor `is_running=True`
+        had already committed and stayed stuck for 16+ hours.
+        """
+        cursor = self.env["prozorro.sync.cursor"].sudo()._get_singleton("main")
+        cursor.write(
+            {
+                "is_running": False,
+                "last_error": _("Force-cleared stuck running state by user."),
+                "last_error_at": fields.Datetime.now(),
+            }
+        )
+        return {
+            "type": "ir.actions.client",
+            "tag": "display_notification",
+            "params": {
+                "title": _("Sync state cleared"),
+                "message": _(
+                    "The stuck 'sync running' flag has been reset. "
+                    "Click Sync now to start a fresh run."
+                ),
                 "type": "success",
                 "sticky": False,
             },

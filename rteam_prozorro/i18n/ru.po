@@ -1528,3 +1528,35 @@ msgstr "Совпадений за последний запуск"
 #: model:ir.model.fields,field_description:rteam_prozorro.field_prozorro_subscription__sync_last_error
 msgid "Sync last error"
 msgstr "Последняя ошибка синхронизации"
+
+# --- v5.6.6 additions: stuck-sync recovery ---
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.res_config_settings_view_form_inherit_prozorro
+msgid "Force stop"
+msgstr "Принудительно остановить"
+
+#. module: rteam_prozorro
+#: model_terms:ir.ui.view,arch_db:rteam_prozorro.res_config_settings_view_form_inherit_prozorro
+msgid "Force-clear the 'sync running' flag? Use this only if a sync has been stuck for more than an hour. Continue?"
+msgstr "Принудительно сбросить флаг 'синхронизация идёт'? Используйте только если синхронизация зависла более чем на час. Продолжить?"
+
+#. module: rteam_prozorro
+#: model:ir.model.fields,field_description:rteam_prozorro.field_res_config_settings__prozorro_can_force_clear
+msgid "Can force-clear stuck sync"
+msgstr "Можно принудительно сбросить зависшую синхронизацию"
+
+#. module: rteam_prozorro
+#: code:addons/rteam_prozorro/models/prozorro_tender.py:0
+msgid "Sync state cleared"
+msgstr "Состояние синхронизации сброшено"
+
+#. module: rteam_prozorro
+#: code:addons/rteam_prozorro/models/prozorro_tender.py:0
+msgid "The stuck 'sync running' flag has been reset. Click Sync now to start a fresh run."
+msgstr "Зависший флаг 'синхронизация идёт' сброшен. Нажмите Синхронизировать, чтобы запустить новый запуск."
+
+#. module: rteam_prozorro
+#: code:addons/rteam_prozorro/models/prozorro_tender.py:0
+msgid "Force-cleared stuck running state by user."
+msgstr "Пользователь принудительно сбросил зависшее состояние выполнения."

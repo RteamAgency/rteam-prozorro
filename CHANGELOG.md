@@ -2,6 +2,53 @@
 
 All notable changes to `rteam_prozorro` are documented here.
 
+## [19.0.5.6.6] - 2026-04-30
+
+### Fixed (the stuck-is_running bug)
+- v5.6.5's `_reschedule_cron_after_run` wrote to `ir.cron.nextcall`
+  from inside the cron handler. Odoo 19 protects `ir.cron.write` with
+  `lock_for_update(allow_referencing=True)` while the cron is running,
+  so any write from inside the handler raises:
+      UserError: Record cannot be modified right now: This cron task
+      is currently being executed and may not be modified
+  That UserError propagated through `_run_action_code_multi`, the cron
+  framework rolled back the transaction, but the isolated-cursor
+  `is_running=True` write had already committed. Result: `is_running`
+  stuck at True for 16+ hours on test19 (build 31426538, observed
+  2026-04-29 18:10 UTC -> 2026-04-30 08:17 UTC).
+- Fix: `_reschedule_cron_after_run` now defers via
+  `self.env.cr.postcommit.add(...)`, which fires after the cron
+  transaction commits and the FOR-NO-KEY-UPDATE lock is released. The
+  postcommit callback uses an independent cursor (the cron cursor is
+  closed by then). Writing to `ir.cron.nextcall` succeeds.
+
+### Fixed (defence-in-depth: stuck-flag self-heal)
+- `_cron_sync_feed` is now wrapped in try/except/finally so the
+  `is_running` flag is reset via isolated cursor even on uncaught
+  exceptions (container kill, OOM, future Odoo internal API changes).
+- `action_sync_now` self-heals if `is_running=True` AND
+  `last_started_at` is older than `STALE_RUN_MINUTES` (60 min). The
+  user can click Sync now and it auto-clears the stuck flag.
+
+### Added (Force stop button on Settings)
+- New `prozorro_can_force_clear` computed field + `Force stop`
+  button on the Settings status panel, visible only when a sync has
+  been "running" for more than 60 minutes (so the button does not
+  show during a healthy in-flight sync). Clicking it writes
+  `is_running=False` + a "force-cleared by user" note in `last_error`.
+  Manager-only.
+
+### Notes
+- Lesson codified for future Rteam Apps: NEVER write to `ir.cron`
+  from inside a cron handler. The cron's own row is locked. Use
+  `cr.postcommit.add(...)` to defer or write via an independent
+  cursor AFTER the cron's transaction commits.
+- Stuck-state hygiene: any flag set via `_mark_cursor_isolated` (or
+  any independent-cursor write) MUST have a corresponding reset path
+  in a `finally` block, NOT just in the success/error branches.
+  Otherwise an uncaught exception bypasses the reset and the flag
+  sticks.
+
 ## [19.0.5.6.5] - 2026-04-29
 
 ### Fixed (the silence-after-Sync-now bug)
