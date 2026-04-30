@@ -717,9 +717,7 @@ class ProzorroTender(models.Model):
         #     now click clears it (action_sync_now does that), or
         #     until the cron handler eventually picks up the trigger
         #     and skips-before-start.
-        self._mark_cursor_isolated(
-            cursor.id, cancel_requested=True, is_running=False
-        )
+        self._mark_cursor_isolated(cursor.id, cancel_requested=True, is_running=False)
         # Drop click-queued immediate triggers; preserve auto-schedule.
         cron = self.env.ref("rteam_prozorro.ir_cron_prozorro_sync_feed", raise_if_not_found=False)
         if cron:
