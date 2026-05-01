@@ -2,6 +2,19 @@
 
 All notable changes to `rteam_prozorro` are documented here.
 
+## [19.0.5.7.6] - 2026-05-01
+
+### Fixed (Sync now crashed with >1 active subscription)
+- Click on Sync now (or Force stop) raised
+  `ValueError: Expected singleton: prozorro.subscription(59, 39)`
+  as soon as a second active subscription existed. Cause:
+  `subs.message_post(...)` requires a singleton on Odoo 19; we were
+  calling it on the multi-record return of `_get_active_subscriptions()`.
+  Loop per-subscription instead. Same fix applied to
+  `_post_chatter_isolated` so the cron-side chatter posts also
+  survive multi-subscription state (previously they failed silently
+  in the wrapped try/except).
+
 ## [19.0.5.7.5] - 2026-05-01
 
 ### UX

@@ -153,10 +153,11 @@ class ProzorroTender(models.Model):
         try:
             with self.pool.cursor() as new_cr:
                 env = api.Environment(new_cr, SUPERUSER_ID, {})
-                env["prozorro.subscription"].browse(sub_ids).message_post(
-                    body=body,
-                    subtype_xmlid="mail.mt_note",
-                )
+                # message_post is singleton-only on Odoo 19; loop instead of
+                # browse(sub_ids).message_post (would raise Expected singleton
+                # the moment sub_ids has > 1 id and silently swallow the post).
+                for sub in env["prozorro.subscription"].browse(sub_ids):
+                    sub.message_post(body=body, subtype_xmlid="mail.mt_note")
         except Exception:
             _logger.exception("Prozorro: failed to post chatter line to subscriptions %s", sub_ids)
 
@@ -670,10 +671,12 @@ class ProzorroTender(models.Model):
         subs = self.env["prozorro.subscription"]._get_active_subscriptions()
         if subs:
             user_name = self.env.user.name
-            subs.message_post(
-                body=_("Prozorro sync queued by %s...", user_name),
-                subtype_xmlid="mail.mt_note",
-            )
+            # message_post is singleton-only on Odoo 19; loop instead of
+            # subs.message_post (the recordset call raises Expected singleton
+            # as soon as there is >1 active subscription).
+            body = _("Prozorro sync queued by %s...", user_name)
+            for sub in subs:
+                sub.message_post(body=body, subtype_xmlid="mail.mt_note")
         cron.sudo()._trigger()
         # Tell every open Prozorro tab to refresh and pick up the
         # is_running=True we just wrote. Replaces the v5.6.8 hard-reload-
@@ -765,15 +768,17 @@ class ProzorroTender(models.Model):
                 (cron.id,),
             )
         # Chatter feedback so the user has a paper trail of the cancel.
+        # message_post is singleton-only on Odoo 19; loop instead of
+        # subs.message_post (the recordset call raises Expected singleton
+        # as soon as there is >1 active subscription).
         subs = self.env["prozorro.subscription"]._get_active_subscriptions()
         if subs:
-            subs.message_post(
-                body=_(
-                    "Prozorro sync cancellation requested by %s...",
-                    self.env.user.name,
-                ),
-                subtype_xmlid="mail.mt_note",
+            body = _(
+                "Prozorro sync cancellation requested by %s...",
+                self.env.user.name,
             )
+            for sub in subs:
+                sub.message_post(body=body, subtype_xmlid="mail.mt_note")
         # Push state change to refresh open Prozorro tabs.
         self._push_state_changed_to_managers()
         if was_running:
