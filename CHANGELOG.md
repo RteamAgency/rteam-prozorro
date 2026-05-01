@@ -2,6 +2,51 @@
 
 All notable changes to `rteam_prozorro` are documented here.
 
+## [19.0.5.7.4] - 2026-05-01
+
+### Fixed (matched tenders silently dropped)
+- `prozorro.tender` rows and m2m matches were never persisted: every
+  successful cron run logged `pulled=N, matched=M` to chatter but the
+  whole transaction rolled back at the very end with
+  `ERROR: could not serialize access due to concurrent update` on
+  `prozorro_sync_cursor`. Subscriptions showed `Matches: 0` on the
+  form despite chatter saying the opposite. Lifetime counters drifted
+  (matched_total=4194 with zero rows in `prozorro_tender`).
+- Root cause: Odoo 19 cron runs at PostgreSQL REPEATABLE READ
+  isolation. The handler was mixing main-txn ORM writes
+  (`cursor.offset = next_offset` in the loop, `_record_success` /
+  `_record_error` at the end) with isolated-cursor writes
+  (`_mark_cursor_isolated` in the finally block to clear
+  `is_running`). The isolated finally committed first; the main txn's
+  later UPDATE saw a row modified since its snapshot and refused to
+  serialize, killing all the tender creates with it.
+- Fix: route every cron-handler cursor write through `_mark_cursor_isolated`.
+  Loop offset, success counters, error message, cancel state — all
+  isolated. Main txn now only writes to `prozorro_tender` and
+  `mail_message`, never to `prozorro_sync_cursor`. No more shared
+  row, no more conflict.
+- Side benefit: counters survive a tender-create rollback. If
+  `_upsert_tender` for a single tender fails mid-loop, the cron
+  still records its pulled/matched totals at the end instead of
+  losing the whole run.
+- The legacy `_record_success` / `_record_error` methods on
+  `prozorro.sync.cursor` are kept (other call sites may still use
+  them under short-lived RPC txns) but no longer invoked from the
+  cron path.
+
+## [19.0.5.7.3] - 2026-04-30
+
+### Fixed (HOTFIX, white screen)
+- `__manifest__.py` was still referencing
+  `static/src/js/sync_reload_listener.js` after the file was deleted
+  in the v5.6.9 cleanup. Backend pages rendered blank, SSH/shell
+  to the build container died with the worker. Removed the dead
+  asset block from the manifest and dropped the file.
+- Side effect: the bus.bus auto-reload after sync finishes (Option
+  B from 5.6.9) is gone for now. Users have to refresh the page to
+  see updated banner state. To be re-introduced under the Odoo 19
+  bus_service API in a follow-up.
+
 ## [19.0.5.7.2] - 2026-04-30
 
 ### Fixed

@@ -290,7 +290,13 @@ class ProzorroTender(models.Model):
                 params += f"&offset={offset}"
             return base_url + "?" + params
 
-        url = _page_url(cursor.offset)
+        # Track offset locally; persist via isolated cursor below. Reading
+        # cursor.offset from the ORM-cached main-txn snapshot would go stale
+        # the moment we issue an isolated write (and any main-txn write to
+        # this row triggers a REPEATABLE READ serialization conflict at
+        # commit time, see CHANGELOG 5.7.4).
+        current_offset = cursor.offset
+        url = _page_url(current_offset)
 
         pulled, matched = 0, 0
         cancelled = False
@@ -347,21 +353,30 @@ class ProzorroTender(models.Model):
 
                 next_page = data.get("next_page") or {}
                 next_offset = next_page.get("offset")
-                if not next_offset or next_offset == cursor.offset:
+                if not next_offset or next_offset == current_offset:
                     break
-                cursor.offset = next_offset
+                # Persist offset for the next cron run via isolated cursor.
+                # Main-txn writes to this row would conflict at commit; see
+                # _record_success isolated write below for the same reason.
+                self._mark_cursor_isolated(cursor.id, offset=next_offset)
+                current_offset = next_offset
                 url = _page_url(next_offset)
 
         except (urllib.error.HTTPError, urllib.error.URLError, ValueError) as e:
             _logger.exception("Prozorro: sync failed")
-            cursor._record_error(str(e))
+            self._mark_cursor_isolated(
+                cursor.id,
+                last_error=str(e),
+                last_error_at=fields.Datetime.now(),
+                is_running=False,
+                cancel_requested=False,
+            )
             self._post_chatter_isolated(
                 subs.ids,
                 _("Prozorro sync failed: %s", str(e)[:200]),
             )
             self._notify_sync_result(pulled, matched, error=str(e))
             self._reschedule_cron_after_run()
-            self._mark_cursor_isolated(cursor.id, is_running=False)
             return {"pulled": pulled, "matched": matched, "error": str(e), "skipped": False}
         except Exception as e:
             # Uncaught (non-HTTP) exception. Best-effort isolated-cursor
@@ -372,6 +387,7 @@ class ProzorroTender(models.Model):
             self._mark_cursor_isolated(
                 cursor.id,
                 is_running=False,
+                cancel_requested=False,
                 last_error=str(e)[:500],
                 last_error_at=fields.Datetime.now(),
             )
@@ -385,7 +401,13 @@ class ProzorroTender(models.Model):
             self._mark_cursor_isolated(cursor.id, is_running=False, cancel_requested=False)
 
         if cancelled:
-            cursor._record_error(_("Cancelled by user (pulled %s, matched %s)") % (pulled, matched))
+            self._mark_cursor_isolated(
+                cursor.id,
+                last_error=_("Cancelled by user (pulled %s, matched %s)") % (pulled, matched),
+                last_error_at=fields.Datetime.now(),
+                is_running=False,
+                cancel_requested=False,
+            )
             _logger.info(
                 "Prozorro: sync cancelled by user. pulled=%d, matched=%d",
                 pulled,
@@ -409,7 +431,23 @@ class ProzorroTender(models.Model):
                 "cancelled": True,
             }
 
-        cursor._record_success(pulled, matched)
+        # All cursor writes go through isolated cursor: a main-txn ORM
+        # write to prozorro_sync_cursor at this point would conflict with
+        # the isolated finally-block write of is_running=False above
+        # (Odoo 19 cron txn = REPEATABLE READ). The conflict rolled back
+        # the entire main txn (including all _upsert_tender records) on
+        # every successful run. See CHANGELOG 5.7.4.
+        self._mark_cursor_isolated(
+            cursor.id,
+            last_sync=fields.Datetime.now(),
+            pulled_total=(cursor.pulled_total or 0) + pulled,
+            matched_total=(cursor.matched_total or 0) + matched,
+            last_pulled=pulled,
+            last_matched=matched,
+            last_error=False,
+            is_running=False,
+            cancel_requested=False,
+        )
         _logger.info("Prozorro: sync done. pulled=%d, matched=%d", pulled, matched)
         self._reschedule_cron_after_run()
         # Per-subscription chatter line with the run's outcome FOR THIS
