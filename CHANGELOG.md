@@ -2,6 +2,15 @@
 
 All notable changes to `rteam_prozorro` are documented here.
 
+## [19.0.5.7.5] - 2026-05-01
+
+### UX
+- Hide the `match_mode` column on the keyword list. Default
+  ("Contains, case-insensitive") covers the 95% case for SMB users
+  and the dropdown was confusing without adding value. Existing
+  regex rows keep working - the field is just hidden from the form.
+  Power users can still flip mode via developer mode if needed.
+
 ## [19.0.5.7.4] - 2026-05-01
 
 ### Fixed (matched tenders silently dropped)

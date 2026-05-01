@@ -157,7 +157,7 @@
                                 <list editable="bottom">
                                     <field name="keyword"/>
                                     <field name="field"/>
-                                    <field name="match_mode"/>
+                                    <field name="match_mode" column_invisible="1"/>
                                     <field name="negate"/>
                                 </list>
                             </field>
