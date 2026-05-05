@@ -2,6 +2,48 @@
 
 All notable changes to `rteam_prozorro` are documented here.
 
+## [19.0.5.8.0] - 2026-05-05
+
+### Fixed (cron stopped picking up new tenders after enough runs)
+- The feed walker was hitting `/api/2.5/tenders?descending=1&offset=...`
+  and persisting `next_page.offset` as the resume point. With
+  descending=1 the offset advances toward OLDER history every run, so
+  once the cursor passed the operator's interest window, tenders
+  published after that point were never seen again. Sync looked
+  healthy in chatter (`pulled=N`) but `Pulled (last run)` on a real
+  install eventually drifted to records from months ago.
+
+### Changed (feed direction + required start date)
+- Switched the feed to ascending (the OpenProcurement default,
+  `descending` query parameter dropped). The offset is now a
+  watermark with long-poll replication semantics: after the cron
+  exhausts the feed, the same offset stays valid and subsequent
+  calls return only tenders published since.
+- Added `Sync from date` setting in Settings -> Prozorro -> Feed
+  (`ir.config_parameter prozorro.start_date`). The first sync (or
+  any sync after Reset cursor) seeds the watermark from midnight
+  Kyiv time on this date and walks forward. The field is REQUIRED:
+  with no value AND no existing cursor offset, the cron skips with
+  a clear error in the Settings status panel rather than backfill
+  the entire Prozorro history.
+- `Reset cursor` action now re-seeds from `Sync from date` instead
+  of "from the latest tenders" (consistent with the new direction).
+
+### Migration (5.7.x -> 5.8.0)
+- Wipes existing `prozorro_sync_cursor.offset` rows. Pre-5.8.0
+  values are descending-mode tokens and reusing them as ascending
+  watermarks would resume the walk forward from a random historical
+  point, likely re-pulling thousands of old tenders.
+- Seeds `prozorro.start_date = today - 7d` IF unset, so auto-sync
+  installs do not stop on upgrade. Operators should revisit
+  Settings to pick the real backfill horizon.
+
+### Tests
+- `test_sync_picks_up_new_tenders_after_exhaust`: three-run scenario
+  covering watermark advance -> stay-on-empty -> advance-on-new.
+- `test_sync_skips_when_start_date_missing`: verifies the "no
+  config + no cursor = skip with error" path.
+
 ## [19.0.5.7.6] - 2026-05-01
 
 ### Fixed (Sync now crashed with >1 active subscription)

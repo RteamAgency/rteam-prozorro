@@ -76,12 +76,23 @@
                                         groups="rteam_prozorro.group_prozorro_manager"/>
                                 <button name="action_prozorro_reset_cursor" type="object"
                                         string="Reset cursor" class="btn btn-link"
-                                        confirm="Rewind the feed cursor so the next sync pulls latest tenders. Continue?"
+                                        confirm="Rewind the feed cursor so the next sync re-seeds from the configured 'Sync from date'. Continue?"
                                         groups="rteam_prozorro.group_prozorro_manager"/>
                             </div>
                         </setting>
                     </block>
                     <block title="Feed" name="prozorro_feed">
+                        <setting string="Sync from date"
+                                 help="Watermark for the feed cursor. The first sync (or any sync after Reset cursor) starts from midnight Kyiv time on this date and walks forward as new tenders are published. Required: leaving it empty refuses to start the sync to prevent an accidental backfill of the entire Prozorro history. A reasonable default is 7-30 days back from go-live.">
+                            <field name="prozorro_start_date" required="1"/>
+                            <div class="alert alert-warning mt8" role="alert" invisible="prozorro_start_date">
+                                <i class="fa fa-exclamation-triangle"/>
+                                <strong> Sync from date is not set.</strong>
+                                The next sync run will skip with an error until
+                                you pick a date. Tenders published before this
+                                date are never pulled.
+                            </div>
+                        </setting>
                         <setting string="API base URL" help="Public read endpoint of the Prozorro / OpenProcurement API.">
                             <field name="prozorro_api_url"/>
                         </setting>

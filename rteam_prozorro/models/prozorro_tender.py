@@ -1,6 +1,7 @@
 import json
 import logging
 import urllib.error
+import urllib.parse
 import urllib.request
 from collections import Counter
 from datetime import datetime, timedelta
@@ -130,6 +131,26 @@ class ProzorroTender(models.Model):
     @api.model
     def _get_retention_days(self):
         return self._get_int_param("prozorro.retention_days", DEFAULT_RETENTION_DAYS)
+
+    @api.model
+    def _initial_offset_from_start_date(self):
+        """Build the OpenProcurement watermark string from the operator-set
+        `prozorro.start_date` config parameter.
+
+        Returns "" (falsy) if the parameter is unset, so the cron can
+        treat that as a misconfiguration and refuse to start. Format:
+        ISO-8601 datetime at midnight Kyiv time. The Prozorro feed is
+        UA-only; Kyiv offset (+02:00 winter / +03:00 summer) is hardcoded
+        to +02:00 because (a) the Prozorro market is UA-only and (b) being
+        an hour off the wall clock at most does not matter as a sync
+        starting point - the API treats it as a `dateModified` watermark
+        and we never miss tenders, only potentially re-pull ones from a
+        one-hour overlap on first run.
+        """
+        start_date = self.env["ir.config_parameter"].sudo().get_param("prozorro.start_date")
+        if not start_date:
+            return ""
+        return f"{start_date}T00:00:00.000000+02:00"
 
     # ------------------------------------------------------------------ HTTP
 
@@ -261,6 +282,30 @@ class ProzorroTender(models.Model):
             self._push_state_changed_to_managers()
             return {"pulled": 0, "matched": 0, "error": None, "skipped": True}
 
+        # Resolve the starting offset BEFORE flipping is_running. On a
+        # virgin cursor (offset is empty) we seed from the operator-set
+        # `prozorro.start_date`. Refusing to start without it prevents
+        # an accidental backfill of the entire Prozorro history (years
+        # of tenders, hours of HTTP traffic) on a fresh install.
+        current_offset = cursor.offset
+        if not current_offset:
+            current_offset = self._initial_offset_from_start_date()
+            if not current_offset:
+                msg = _(
+                    "Prozorro: 'Sync from date' is not configured. "
+                    "Set it in Settings -> Prozorro -> Feed before syncing."
+                )
+                _logger.warning(msg)
+                self._mark_cursor_isolated(
+                    cursor.id,
+                    is_running=False,
+                    last_error=msg,
+                    last_error_at=fields.Datetime.now(),
+                )
+                self._reschedule_cron_after_run()
+                self._push_state_changed_to_managers()
+                return {"pulled": 0, "matched": 0, "error": msg, "skipped": True}
+
         # Sync started: post a one-line chatter note on each active
         # subscription. Done in an independent cursor so the message
         # persists even if the HTTP loop below later crashes / times out
@@ -286,17 +331,23 @@ class ProzorroTender(models.Model):
         per_sub_matched = Counter()
 
         def _page_url(offset):
-            params = f"descending=1&limit={DEFAULT_PAGE_LIMIT}"
+            # Ascending (default): the OpenProcurement public feed treats
+            # the offset as a watermark. After we exhaust the feed, the
+            # next_page.offset stays equal to our request offset; the next
+            # cron run resumes from the same point and the API returns
+            # only tenders published since (long-poll replication
+            # semantics). descending=1 was used pre-5.8.0 and walked the
+            # cursor into deeper history every run, eventually missing
+            # all newly published tenders - see CHANGELOG 5.8.0.
+            params = f"limit={DEFAULT_PAGE_LIMIT}"
             if offset:
-                params += f"&offset={offset}"
+                params += f"&offset={urllib.parse.quote(offset)}"
             return base_url + "?" + params
 
-        # Track offset locally; persist via isolated cursor below. Reading
-        # cursor.offset from the ORM-cached main-txn snapshot would go stale
-        # the moment we issue an isolated write (and any main-txn write to
-        # this row triggers a REPEATABLE READ serialization conflict at
-        # commit time, see CHANGELOG 5.7.4).
-        current_offset = cursor.offset
+        # current_offset was resolved above (cursor.offset OR seeded
+        # from prozorro.start_date for a virgin cursor). Persisted via
+        # isolated cursor below; main-txn writes to this row would
+        # collide on REPEATABLE READ commit (CHANGELOG 5.7.4).
         url = _page_url(current_offset)
 
         pulled, matched = 0, 0
@@ -698,11 +749,12 @@ class ProzorroTender(models.Model):
         }
 
     def action_reset_sync_cursor(self):
-        """Rewind the feed cursor to the head so the next sync pulls latest tenders.
+        """Rewind the feed cursor so the next sync re-seeds from the
+        configured `Sync from date`.
 
-        Manager-only debug helper. Useful when iterating on subscription rules:
-        without this you have to wait until the cron walks far enough back to
-        re-encounter tenders you have just made matchable.
+        Manager-only debug helper. Useful when iterating on subscription
+        rules - without this you have to wait until the cron's natural
+        watermark advances past tenders you just made matchable.
         """
         cursor = self.env["prozorro.sync.cursor"]._get_singleton("main")
         cursor.sudo().write({"offset": False, "last_error": False})
@@ -711,7 +763,9 @@ class ProzorroTender(models.Model):
             "tag": "display_notification",
             "params": {
                 "title": _("Cursor reset"),
-                "message": _("The next sync will start from the latest tenders."),
+                "message": _(
+                    "The next sync will re-seed from the configured 'Sync from date' in Settings."
+                ),
                 "type": "success",
                 "sticky": False,
             },

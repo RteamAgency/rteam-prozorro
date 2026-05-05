@@ -52,6 +52,12 @@ class TestFeedSync(TransactionCase):
         # auto-created leads keep passing. The "Leads disabled" branch
         # has its own dedicated test below.
         cls._enable_crm_leads(cls.env)
+        # 5.8.0+ requires `prozorro.start_date` for any sync run that
+        # starts from a virgin cursor (refusing to do an unbounded
+        # backfill). Tests below reset the cursor between runs, so seed
+        # a default here for all tests except the dedicated
+        # "missing start_date is rejected" test.
+        cls.env["ir.config_parameter"].sudo().set_param("prozorro.start_date", "2026-04-01")
 
     @classmethod
     def _enable_crm_leads(cls, env):
@@ -193,3 +199,115 @@ class TestFeedSync(TransactionCase):
         cursor = self.Cursor._get_singleton("main")
         self.assertEqual(cursor.offset, "OFFSET-NEXT")
         self.assertGreaterEqual(cursor.last_pulled, 1)
+
+    def test_sync_skips_when_start_date_missing(self):
+        """Virgin cursor + no `prozorro.start_date` -> sync refuses to
+        start (would otherwise backfill the entire Prozorro history).
+        """
+        status_active_tendering = self.env.ref("rteam_prozorro.status_active_tendering")
+        sub = self.Subscription.create(
+            {
+                "name": "needs start date",
+                "active": True,
+                "status_ids": [(6, 0, [status_active_tendering.id])],
+            }
+        )
+        self.Subscription.search([("id", "!=", sub.id)]).write({"active": False})
+        # Cursor is virgin in this test (TransactionCase rolls back so
+        # the class-level seed of start_date persists across tests; we
+        # explicitly clear both here).
+        self.env["ir.config_parameter"].sudo().set_param("prozorro.start_date", "")
+        self.Cursor._get_singleton("main").sudo().write({"offset": False})
+
+        # No HTTP call should be issued. Empty mock asserts that.
+        with fake_urlopen({}):
+            result = self.Tender._cron_sync_feed()
+
+        self.assertTrue(result.get("skipped"))
+        cursor = self.Cursor._get_singleton("main")
+        self.assertFalse(cursor.is_running)
+        self.assertIn("Sync from date", cursor.last_error or "")
+        # Restore for any tests that may run later in the same module.
+        self.env["ir.config_parameter"].sudo().set_param("prozorro.start_date", "2026-04-01")
+
+    def test_sync_picks_up_new_tenders_after_exhaust(self):
+        """Three sync runs, ascending watermark semantics:
+          run 1 - virgin cursor, seeded from start_date, pulls t1 and
+                  advances watermark to W1.
+          run 2 - watermark W1, API has nothing new (returns same
+                  watermark), cron breaks immediately, watermark stays.
+          run 3 - watermark W1, API now has t2, watermark advances to W2.
+
+        This covers the pre-5.8.0 regression where a buried cursor stopped
+        seeing newly published tenders.
+        """
+        status_active_tendering = self.env.ref("rteam_prozorro.status_active_tendering")
+        sub = self.Subscription.create(
+            {
+                "name": "watermark test",
+                "active": True,
+                "status_ids": [(6, 0, [status_active_tendering.id])],
+            }
+        )
+        self.Subscription.search([("id", "!=", sub.id)]).write({"active": False})
+        # Start from a virgin cursor so run 1 exercises the start_date
+        # seeding path.
+        self.Cursor._get_singleton("main").sudo().write({"offset": False})
+
+        base_url = self.Tender._get_api_base_url()
+
+        # ------------------------------------------------------------------
+        # Run 1: API returns t1, advances watermark to "W1".
+        # ------------------------------------------------------------------
+        feed_run1 = {
+            "data": [{"id": "wm-t1", "dateModified": "2026-04-28T10:30:00+03:00"}],
+            "next_page": {"offset": "W1"},
+        }
+        with fake_urlopen(
+            {
+                base_url + "?": feed_run1,
+                "/wm-t1": {"data": make_tender(id="wm-t1")},
+            }
+        ):
+            self.Tender._cron_sync_feed()
+
+        cursor = self.Cursor._get_singleton("main")
+        self.assertEqual(cursor.offset, "W1", "Watermark must advance after first run")
+        self.assertTrue(self.Tender.search([("uuid", "=", "wm-t1")]))
+
+        # ------------------------------------------------------------------
+        # Run 2: API has nothing new. next_page.offset = current offset
+        # ("W1") signals end of feed; cron breaks without advancing.
+        # ------------------------------------------------------------------
+        feed_run2 = {"data": [], "next_page": {"offset": "W1"}}
+        with fake_urlopen({base_url + "?": feed_run2}):
+            self.Tender._cron_sync_feed()
+
+        cursor = self.Cursor._get_singleton("main")
+        self.assertEqual(
+            cursor.offset, "W1", "Watermark must NOT change when API returns no new data"
+        )
+
+        # ------------------------------------------------------------------
+        # Run 3: a new tender (t2) was published. API now returns it and
+        # advances the watermark. The cron must pick it up - this is the
+        # exact case the pre-5.8.0 descending=1 implementation missed.
+        # ------------------------------------------------------------------
+        feed_run3 = {
+            "data": [{"id": "wm-t2", "dateModified": "2026-04-29T11:00:00+03:00"}],
+            "next_page": {"offset": "W2"},
+        }
+        with fake_urlopen(
+            {
+                base_url + "?": feed_run3,
+                "/wm-t2": {"data": make_tender(id="wm-t2")},
+            }
+        ):
+            self.Tender._cron_sync_feed()
+
+        cursor = self.Cursor._get_singleton("main")
+        self.assertEqual(cursor.offset, "W2", "Watermark must advance once a new tender appears")
+        self.assertTrue(
+            self.Tender.search([("uuid", "=", "wm-t2")]),
+            "New tender published after the watermark must be persisted",
+        )
