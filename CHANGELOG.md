@@ -2,6 +2,11 @@
 
 All notable changes to `rteam_prozorro` are documented here.
 
+## [19.0.1.0.1] - 2026-05-09
+
+### Changed
+- Replace placeholder banner.png with branded Light Glass cover (P+ monogram in signature gradient + 4 feature tiles: TENDERS / CPV / LEADS / ALERTS) so the apps.odoo.com listing card stops showing an empty navy rectangle
+
 ## [19.0.1.0.0] - 2026-05-09
 
 Initial public release on apps.odoo.com.
