@@ -97,9 +97,10 @@ class ProzorroTender(models.Model):
         required=True,
     )
 
-    _sql_constraints = [
-        ("prozorro_tender_uuid_uniq", "unique(uuid)", "Tender UUID must be unique."),
-    ]
+    _uuid_uniq = models.Constraint(
+        "UNIQUE(uuid)",
+        "Tender UUID must be unique.",
+    )
 
     # ------------------------------------------------------------------ Compute
 
@@ -663,8 +664,7 @@ class ProzorroTender(models.Model):
                     {
                         "is_running": False,
                         "last_error": (
-                            "Previous run did not finish cleanly (cleared after %d min)."
-                            % STALE_RUN_MINUTES
+                            f"Previous run did not finish cleanly (cleared after {STALE_RUN_MINUTES} min)."
                         ),
                         "last_error_at": fields.Datetime.now(),
                     }

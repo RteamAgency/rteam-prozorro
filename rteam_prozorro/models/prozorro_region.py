@@ -27,13 +27,10 @@ class ProzorroRegion(models.Model):
     sequence = fields.Integer(default=10)
     active = fields.Boolean(default=True)
 
-    _sql_constraints = [
-        (
-            "prozorro_region_code_uniq",
-            "unique(code)",
-            "Region code must be unique.",
-        ),
-    ]
+    _code_uniq = models.Constraint(
+        "UNIQUE(code)",
+        "Region code must be unique.",
+    )
 
     @api.depends("name")
     def _compute_display_name(self):

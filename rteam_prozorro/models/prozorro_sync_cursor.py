@@ -34,9 +34,10 @@ class ProzorroSyncCursor(models.Model):
         "Cleared at the end of a run (cancelled or otherwise).",
     )
 
-    _sql_constraints = [
-        ("prozorro_sync_cursor_name_uniq", "unique(name)", "Cursor name must be unique."),
-    ]
+    _name_uniq = models.Constraint(
+        "UNIQUE(name)",
+        "Cursor name must be unique.",
+    )
 
     @api.model
     def _get_singleton(self, name="main"):

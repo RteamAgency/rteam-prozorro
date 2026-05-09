@@ -1,6 +1,6 @@
 {
     "name": "Prozorro Connector",
-    "version": "19.0.5.8.0",
+    "version": "19.0.1.0.0",
     "category": "Sales/CRM",
     "summary": "Monitor Ukrainian Prozorro tenders, match them to your CRM",
     "description": """
@@ -12,22 +12,22 @@ matches new tenders against your CPV / keyword / region rules, and surfaces
 them as Tenders ready for review (manual conversion to CRM lead). Targeted at
 Ukrainian SMBs participating as suppliers.
 
-Features (L0 free)
-------------------
+Features
+--------
 * On-demand sync of the Prozorro public API feed (`/api/2.5/tenders`),
   optional auto-sync schedule (off by default)
 * Subscription rules: filter by CPV codes, keywords (contains / regex / negate),
-  region, value range, status
+  region, value range, status, procurement method
 * Optional auto-creation of `crm.lead` for matched tenders (off by default,
   always creates Leads not Opportunities so they go through manual triage)
-* Live sync status panel in Settings + per-subscription chatter trail
+* Email alert per match with severity badge and one-click "View in Odoo"
+  deep-link, items collapsed inside `<details>`
+* Live sync status panel in Settings, Manager-only Force stop for stale runs
 * Tender form view with deep-link to prozorro.gov.ua, key dates, items, CPV chips
+* Test wizard: paste a tender UUID, get a per-filter verdict
+* 8 languages: English, Russian, Ukrainian, German, Spanish, Romanian, Polish, Arabic
 
-Paid tier `rteam_prozorro_sales` (separate module, OPL-1, EUR 299) adds tender
-to Quotation linkage, KP PDF generation, award status tracking, analytics
-dashboard.
-
-Targeted at Odoo 17 / 18 / 19 (Community + Enterprise).
+Targeted at Odoo 19 (Community and Enterprise).
 """,
     "author": "Rteam",
     "website": "https://rteam.agency",

@@ -20,13 +20,10 @@ class ProzorroTenderStatus(models.Model):
     sequence = fields.Integer(default=10)
     active = fields.Boolean(default=True)
 
-    _sql_constraints = [
-        (
-            "prozorro_tender_status_code_uniq",
-            "unique(code)",
-            "Tender status code must be unique.",
-        ),
-    ]
+    _code_uniq = models.Constraint(
+        "UNIQUE(code)",
+        "Tender status code must be unique.",
+    )
 
     @api.depends("code", "name")
     def _compute_display_name(self):

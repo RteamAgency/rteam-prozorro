@@ -20,13 +20,10 @@ class ProzorroProcurementMethod(models.Model):
     sequence = fields.Integer(default=10)
     active = fields.Boolean(default=True)
 
-    _sql_constraints = [
-        (
-            "prozorro_procurement_method_code_uniq",
-            "unique(code)",
-            "Procurement method code must be unique.",
-        ),
-    ]
+    _code_uniq = models.Constraint(
+        "UNIQUE(code)",
+        "Procurement method code must be unique.",
+    )
 
     @api.depends("code", "name")
     def _compute_display_name(self):

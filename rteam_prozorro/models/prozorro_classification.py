@@ -24,13 +24,10 @@ class ProzorroClassification(models.Model):
     active = fields.Boolean(default=True)
     display_name = fields.Char(compute="_compute_display_name", store=True)
 
-    _sql_constraints = [
-        (
-            "prozorro_classification_code_uniq",
-            "unique(code, scheme)",
-            "CPV code must be unique per scheme.",
-        ),
-    ]
+    _code_uniq = models.Constraint(
+        "UNIQUE(code, scheme)",
+        "CPV code must be unique per scheme.",
+    )
 
     @api.depends("code", "name")
     def _compute_display_name(self):

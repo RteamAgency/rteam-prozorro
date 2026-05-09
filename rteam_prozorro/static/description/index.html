@@ -1,0 +1,309 @@
+<section class="oe_container">
+  <div class="oe_row oe_spaced">
+    <div class="oe_span12" style="text-align:center;">
+      <h2 style="color:#0A1628;font-weight:700;letter-spacing:-0.02em;margin-top:24px;">
+        Ukrainian Prozorro tenders, matched and routed into your CRM
+      </h2>
+      <h3 class="oe_slogan" style="color:#90A4B8;font-weight:400;margin-top:8px;">
+        Watch the Prozorro public-procurement feed, filter by your CPV / keywords / region rules, and turn matches into CRM leads automatically.
+      </h3>
+      <p style="font-size:15px;color:#0A1628;font-weight:600;margin-top:18px;border:2px solid #00D4AA;border-radius:6px;display:inline-block;padding:8px 18px;">
+        Localized in 8 languages:
+        English &middot;
+        &#1056;&#1091;&#1089;&#1089;&#1082;&#1080;&#1081; &middot;
+        &#1059;&#1082;&#1088;&#1072;&#1111;&#1085;&#1089;&#1100;&#1082;&#1072; &middot;
+        Deutsch &middot;
+        Espa&#241;ol &middot;
+        Rom&#226;n&#259; &middot;
+        Polski &middot;
+        &#1575;&#1604;&#1593;&#1585;&#1576;&#1610;&#1577;
+      </p>
+    </div>
+  </div>
+</section>
+
+<section class="oe_container oe_dark">
+  <div class="oe_row oe_spaced">
+    <div class="oe_span12">
+      <h2 style="color:#0A1628;font-weight:700;">What it does</h2>
+      <p style="font-size:16px;line-height:1.6;color:#333;max-width:780px;margin:0 auto;">
+        Ukrainian businesses participating in public procurement read the
+        Prozorro feed manually every morning, copy interesting tender numbers
+        into a spreadsheet, and lose hours every week. <strong>Prozorro
+        Connector</strong> moves that workflow into Odoo: define your
+        subscription once (CPV codes, keywords, region, value range, status),
+        and the cron pulls the public feed hourly, persists only matches,
+        emails an alert, and optionally creates a CRM lead per match.
+      </p>
+      <p style="font-size:14px;color:#666;text-align:center;margin-top:18px;">
+        <span style="display:inline-block;padding:4px 12px;background:#0A1628;color:#fff;border-radius:3px;font-family:monospace;font-size:12px;margin:2px;">Odoo 19</span>
+        <span style="display:inline-block;padding:4px 12px;background:#00D4AA;color:#0A1628;border-radius:3px;font-weight:bold;font-size:12px;margin:2px;">LGPL-3</span>
+        <span style="display:inline-block;padding:4px 12px;background:#0A1628;color:#fff;border-radius:3px;font-size:12px;margin:2px;">Free</span>
+        <span style="display:inline-block;padding:4px 12px;background:#7C5CFC;color:#fff;border-radius:3px;font-size:12px;margin:2px;">No external dependencies</span>
+        <span style="display:inline-block;padding:4px 12px;background:#7C5CFC;color:#fff;border-radius:3px;font-size:12px;margin:2px;">Community &amp; Enterprise</span>
+      </p>
+    </div>
+  </div>
+</section>
+
+<section class="oe_container">
+  <div class="oe_row oe_spaced">
+    <div class="oe_span12" style="text-align:center;">
+      <h2 style="color:#0A1628;font-weight:700;">Matched tenders, grouped by status</h2>
+      <p style="font-size:15px;line-height:1.6;color:#333;max-width:780px;margin:0 auto 18px;">
+        Open the Tenders kanban and see every matched tender from the live
+        Prozorro feed, grouped by lifecycle status - active, awarded,
+        clarification period, qualification, complete. Cards show the tender
+        ID, title, expected value, and the deadline countdown. Drag is
+        intentionally disabled - status is owned by the Prozorro feed, not
+        by your sales team.
+      </p>
+    </div>
+    <div class="oe_span12" style="text-align:center;">
+      <img src="screenshots/01_dashboard.png" alt="Tenders kanban grouped by Prozorro status with real Ukrainian tender data"
+           style="max-width:100%;border:1px solid #e0e0e0;border-radius:4px;"/>
+    </div>
+  </div>
+</section>
+
+<section class="oe_container oe_dark">
+  <div class="oe_row oe_spaced">
+    <div class="oe_span12">
+      <h2 style="color:#0A1628;font-weight:700;">Key features</h2>
+    </div>
+  </div>
+
+  <div class="oe_row oe_spaced">
+    <div class="oe_span6">
+      <h3 style="color:#0A1628;">
+        <span style="display:inline-block;width:32px;height:32px;background:#00D4AA;color:#0A1628;border-radius:50%;text-align:center;line-height:32px;font-weight:bold;margin-right:8px;">1</span>
+        Subscription rules with five filter dimensions
+      </h3>
+      <p style="font-size:15px;line-height:1.6;color:#333;">
+        Each subscription combines <strong>CPV codes</strong> (DK021:2015), one
+        or more <strong>keywords</strong> (contains, regex, or negate),
+        <strong>regions</strong> (mapped to Ukrainian oblasts and cities of
+        special status), a <strong>value range</strong>, target
+        <strong>statuses</strong> (active.tendering, complete, cancelled, etc.),
+        and selected <strong>procurement methods</strong>. A tender matches
+        only when every active filter on the subscription accepts it.
+      </p>
+      <p style="font-size:15px;line-height:1.6;color:#333;">
+        A built-in form-view warning fires if a subscription has neither CPV
+        codes nor keywords - so a misconfigured subscription that would match
+        the entire feed never goes live by accident.
+      </p>
+    </div>
+    <div class="oe_span6">
+      <img src="screenshots/02_subscription_form.png" alt="Subscription form with CPV / keywords / region / status filters"
+           style="max-width:100%;border:1px solid #e0e0e0;border-radius:4px;"/>
+    </div>
+  </div>
+
+  <div class="oe_row oe_spaced">
+    <div class="oe_span6">
+      <img src="screenshots/03_tender_list.png" alt="Matched tenders list view"
+           style="max-width:100%;border:1px solid #e0e0e0;border-radius:4px;"/>
+    </div>
+    <div class="oe_span6">
+      <h3 style="color:#0A1628;">
+        <span style="display:inline-block;width:32px;height:32px;background:#00D4AA;color:#0A1628;border-radius:50%;text-align:center;line-height:32px;font-weight:bold;margin-right:8px;">2</span>
+        Filter-at-sync: only matched tenders persist
+      </h3>
+      <p style="font-size:15px;line-height:1.6;color:#333;">
+        The cron walks the Prozorro feed page by page (default 20 pages per
+        run, configurable). For each tender, the matcher evaluates every
+        active subscription. <strong>Only tenders that match at least one
+        subscription are stored</strong> - the rest are dropped immediately,
+        so the database stays small even on a busy feed.
+      </p>
+      <p style="font-size:15px;line-height:1.6;color:#333;">
+        A daily retention cron drops matched tenders 60 days after their
+        <code>tender_period_end</code> unless they were converted to a CRM
+        lead. The retention window is configurable from Settings.
+      </p>
+    </div>
+  </div>
+
+  <div class="oe_row oe_spaced">
+    <div class="oe_span6">
+      <h3 style="color:#0A1628;">
+        <span style="display:inline-block;width:32px;height:32px;background:#00D4AA;color:#0A1628;border-radius:50%;text-align:center;line-height:32px;font-weight:bold;margin-right:8px;">3</span>
+        Settings page: schedule, live status, force stop
+      </h3>
+      <p style="font-size:15px;line-height:1.6;color:#333;">
+        One screen controls everything: sync schedule (off by default,
+        configurable to any cron interval), API endpoint, pages per run,
+        retention days, and whether to auto-create CRM leads from matches.
+      </p>
+      <p style="font-size:15px;line-height:1.6;color:#333;">
+        A live status block shows whether a sync is currently running, the
+        timestamp of the last successful run, and the last error message if
+        any. A Manager-only <strong>Force stop</strong> button appears only
+        if a sync has been "running" for more than 60 minutes - clearing
+        stale flags without an Odoo restart.
+      </p>
+    </div>
+    <div class="oe_span6">
+      <img src="screenshots/04_settings.png" alt="Settings page with sync schedule, status block, and force-stop"
+           style="max-width:100%;border:1px solid #e0e0e0;border-radius:4px;"/>
+    </div>
+  </div>
+
+  <div class="oe_row oe_spaced">
+    <div class="oe_span12">
+      <h3 style="color:#0A1628;">
+        <span style="display:inline-block;width:32px;height:32px;background:#00D4AA;color:#0A1628;border-radius:50%;text-align:center;line-height:32px;font-weight:bold;margin-right:8px;">4</span>
+        Test wizard: paste a UUID, get a per-filter verdict
+      </h3>
+      <p style="font-size:15px;line-height:1.6;color:#333;max-width:780px;">
+        Want to know whether your subscription would match a specific tender?
+        Open the tender on <code>prozorro.gov.ua</code>, copy its UUID, paste
+        it into the Test wizard. The wizard fetches the live tender from the
+        API and prints a <strong>per-filter verdict</strong>: which filters
+        accepted it, which rejected it, and the final overall match. No more
+        guessing whether your CPV list was too narrow or your keyword regex
+        was too strict.
+      </p>
+    </div>
+  </div>
+
+  <div class="oe_row oe_spaced">
+    <div class="oe_span12">
+      <h3 style="color:#0A1628;">
+        <span style="display:inline-block;width:32px;height:32px;background:#00D4AA;color:#0A1628;border-radius:50%;text-align:center;line-height:32px;font-weight:bold;margin-right:8px;">5</span>
+        CRM leads created automatically (with audit trail)
+      </h3>
+      <p style="font-size:15px;line-height:1.6;color:#333;max-width:780px;">
+        Per-subscription opt-in: enable <strong>Auto-create CRM lead</strong>
+        and every match for that subscription becomes a <code>crm.lead</code>
+        linked back to the source tender. Leads are always created with
+        <code>type='lead'</code> (never Opportunity) so they go through your
+        normal manual triage. The lead's chatter shows the originating
+        subscription and the tender UUID for traceability.
+      </p>
+    </div>
+  </div>
+
+  <div class="oe_row oe_spaced">
+    <div class="oe_span12">
+      <h3 style="color:#0A1628;">
+        <span style="display:inline-block;width:32px;height:32px;background:#00D4AA;color:#0A1628;border-radius:50%;text-align:center;line-height:32px;font-weight:bold;margin-right:8px;">6</span>
+        Email alert per match with deep-link
+      </h3>
+      <p style="font-size:15px;line-height:1.6;color:#333;max-width:780px;">
+        On every successful sync that produces at least one match, the
+        subscribed users receive a per-tender alert email with a teal NEW
+        MATCH badge, the tender header (name, value, deadline), the tender
+        items collapsed inside a <code>&lt;details&gt;</code> block so the
+        inbox preview stays clean, and a one-click "View in Odoo" button
+        deep-linking into the tender form.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section class="oe_container">
+  <div class="oe_row oe_spaced">
+    <div class="oe_span12" style="text-align:center;">
+      <h2 style="color:#0A1628;font-weight:700;">Available in your language</h2>
+      <p style="font-size:15px;line-height:1.6;color:#333;max-width:780px;margin:0 auto 18px;">
+        Field labels, settings help text, search filters, action menus, cron
+        names, and the alert email body are translated to seven additional
+        languages. Translations apply automatically based on each user's Odoo
+        language preference - no extra configuration.
+      </p>
+      <p style="font-size:18px;line-height:2.0;color:#0A1628;font-weight:600;margin:18px 0 6px;">
+        English &middot;
+        &#1056;&#1091;&#1089;&#1089;&#1082;&#1080;&#1081; &middot;
+        &#1059;&#1082;&#1088;&#1072;&#1111;&#1085;&#1089;&#1100;&#1082;&#1072; &middot;
+        Deutsch &middot;
+        Espa&#241;ol &middot;
+        Rom&#226;n&#259; &middot;
+        Polski &middot;
+        &#1575;&#1604;&#1593;&#1585;&#1576;&#1610;&#1577;
+      </p>
+      <p style="font-size:13px;color:#666;margin-top:8px;">
+        en &middot; ru &middot; uk &middot; de &middot; es &middot; ro &middot; pl &middot; ar
+      </p>
+    </div>
+  </div>
+</section>
+
+<section class="oe_container">
+  <div class="oe_row oe_spaced">
+    <div class="oe_span12">
+      <h2 style="color:#0A1628;font-weight:700;">Configuration</h2>
+      <p style="font-size:15px;line-height:1.6;color:#333;max-width:780px;">
+        Open <strong>Prozorro &#8594; Settings</strong> after installation,
+        switch on <strong>Enable scheduled sync</strong>, pick an interval
+        (default off so you can sync manually first), and you are done. The
+        feed is public and unauthenticated - no API key, no token, no account
+        on prozorro.gov.ua required.
+      </p>
+      <ul style="font-size:15px;line-height:1.8;color:#333;max-width:780px;">
+        <li><strong>API URL</strong> - default `https://public.api.openprocurement.org/api/2.5/tenders`, override only for staging or load-balanced mirrors</li>
+        <li><strong>Pages per run</strong> - safety cap on the cron walker (default 20, raise carefully)</li>
+        <li><strong>Retention (days)</strong> - how long matched tenders stay in the database after `tender_period_end` (default 60, set 0 to disable retention)</li>
+        <li><strong>Enable CRM Leads</strong> - master toggle. Off = no leads ever created, regardless of per-subscription setting</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="oe_container oe_dark">
+  <div class="oe_row oe_spaced">
+    <div class="oe_span12">
+      <h2 style="color:#0A1628;font-weight:700;">Technical details</h2>
+      <ul style="font-size:15px;line-height:1.8;color:#333;max-width:780px;">
+        <li><strong>Targets:</strong> Odoo 19 Community and Enterprise. The module depends only on <code>base</code>, <code>mail</code>, and <code>crm</code>.</li>
+        <li><strong>License:</strong> LGPL-3, free.</li>
+        <li><strong>Security:</strong> all menus and operational records restricted to <code>base.group_user</code>; settings and force-stop restricted to <code>base.group_system</code>. No public HTTP endpoints exposed by this module.</li>
+        <li><strong>HTTP client:</strong> Python stdlib <code>urllib.request</code> only. No <code>requests</code> dependency, no third-party HTTP library required at install time.</li>
+        <li><strong>Storage:</strong> seven new tables (subscription, keyword, tender, classification, region, procurement method, status, sync cursor) - all small, all retention-bounded.</li>
+        <li><strong>Cron resilience:</strong> stale `is_running` self-heal after 60 min, postcommit-deferred reschedule writes (no `lock_for_update` UserError), isolated chatter cursor (cron rollback never erases the audit trail).</li>
+        <li><strong>Test coverage:</strong> 20 unit and integration tests covering subscription matching, feed sync with mocked HTTP, lead-creation gating, and cursor lifecycle.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="oe_container">
+  <div class="oe_row oe_spaced">
+    <div class="oe_span12">
+      <h2 style="color:#0A1628;font-weight:700;">What this module does <em>not</em> do</h2>
+      <ul style="font-size:15px;line-height:1.8;color:#333;max-width:780px;">
+        <li>It does not submit bids on Prozorro - this is a read-only mirror plus alerting</li>
+        <li>It does not authenticate to the Prozorro API - the public feed is unauthenticated and that is what we read</li>
+        <li>It does not download tender attachments - only the structured metadata exposed by the API</li>
+        <li>It does not generate quotations or sale orders from tenders - that is the scope of the paid sibling <code>rteam_prozorro_sales</code> module</li>
+      </ul>
+      <p style="font-size:14px;color:#666;margin-top:12px;">
+        Need any of the above? The paid extension <code>rteam_prozorro_sales</code> adds tender-to-quotation auto-conversion, full DK021:2015 dictionary, and a daily HTML digest. Get in touch.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section class="oe_container oe_dark">
+  <div class="oe_row oe_spaced">
+    <div class="oe_span12" style="text-align:center;">
+      <h2 style="color:#0A1628;font-weight:700;">Support</h2>
+      <p style="font-size:15px;line-height:1.6;color:#333;">
+        Source code, issues, and feature requests:
+        <a href="https://github.com/RteamAgency/rteam-prozorro"
+           style="color:#00D4AA;font-weight:600;text-decoration:none;">
+          github.com/RteamAgency/rteam-prozorro
+        </a>
+      </p>
+      <p style="font-size:15px;line-height:1.6;color:#333;">
+        Built and maintained by <strong>Rteam</strong>, an Odoo Enterprise
+        consulting agency.
+        <a href="https://rteam.agency"
+           style="color:#00D4AA;font-weight:600;text-decoration:none;">
+          rteam.agency
+        </a>
+      </p>
+    </div>
+  </div>
+</section>
