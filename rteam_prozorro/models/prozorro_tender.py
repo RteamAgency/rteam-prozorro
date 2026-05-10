@@ -151,7 +151,11 @@ class ProzorroTender(models.Model):
         start_date = self.env["ir.config_parameter"].sudo().get_param("prozorro.start_date")
         if not start_date:
             return ""
-        return f"{start_date}T00:00:00.000000+02:00"
+        # Accept both legacy "YYYY-MM-DD" (when the setting was a Date field
+        # in <= 19.0.1.0.1) and the current "YYYY-MM-DD HH:MM:SS" produced
+        # by the Datetime field. Either way we anchor the watermark at
+        # midnight Kyiv time.
+        return f"{start_date[:10]}T00:00:00.000000+02:00"
 
     # ------------------------------------------------------------------ HTTP
 

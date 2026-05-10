@@ -25,15 +25,16 @@ class ResConfigSettings(models.TransientModel):
         help="Drop matched tenders this many days after tender_period_end "
         "unless a CRM lead is linked.",
     )
-    prozorro_start_date = fields.Date(
+    prozorro_start_date = fields.Datetime(
         string="Sync from date",
         config_parameter="prozorro.start_date",
         help="Initial watermark for the feed cursor. The first sync (or "
         "any sync after Reset cursor) starts from midnight Kyiv time on "
-        "this date and walks forward; the cursor advances as new tenders "
-        "are pulled. Required - leaving this empty refuses to start the "
-        "sync to prevent an accidental backfill of the entire Prozorro "
-        "history. A reasonable default is 7-30 days back from go-live.",
+        "the date you pick (the time portion is ignored) and walks "
+        "forward; the cursor advances as new tenders are pulled. "
+        "Required - leaving this empty refuses to start the sync to "
+        "prevent an accidental backfill of the entire Prozorro history. "
+        "A reasonable default is 7-30 days back from go-live.",
     )
 
     # ------------------------------------------------------------------

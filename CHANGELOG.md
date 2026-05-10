@@ -2,6 +2,18 @@
 
 All notable changes to `rteam_prozorro` are documented here.
 
+## [19.0.1.0.2] - 2026-05-10
+
+### Fixed
+- `prozorro_start_date` setting was a `fields.Date`, which Odoo 19's
+  `res.config.settings` validator rejects (only boolean/integer/float/char/
+  selection/many2one/datetime are accepted). The whole Settings page failed
+  to render with `Field res.config.settings.prozorro_start_date must have
+  type ...`. Changed to `fields.Datetime`. The watermark builder now takes
+  the first 10 characters and anchors at midnight Kyiv time, so legacy
+  "YYYY-MM-DD" values stored in `ir.config_parameter` keep working without
+  a migration.
+
 ## [19.0.1.0.1] - 2026-05-09
 
 ### Changed
