@@ -1,0 +1,18 @@
+id,name,model_id,group_id/id,operation,domain
+access_prozorro_classification_user,prozorro.classification.user,prozorro.classification,rteam_prozorro.group_prozorro_user,r,
+access_prozorro_classification_manager,prozorro.classification.manager,prozorro.classification,rteam_prozorro.group_prozorro_manager,crud,
+access_prozorro_procurement_method_user,prozorro.procurement.method.user,prozorro.procurement.method,rteam_prozorro.group_prozorro_user,r,
+access_prozorro_procurement_method_manager,prozorro.procurement.method.manager,prozorro.procurement.method,rteam_prozorro.group_prozorro_manager,crud,
+access_prozorro_tender_status_user,prozorro.tender.status.user,prozorro.tender.status,rteam_prozorro.group_prozorro_user,r,
+access_prozorro_tender_status_manager,prozorro.tender.status.manager,prozorro.tender.status,rteam_prozorro.group_prozorro_manager,crud,
+access_prozorro_region_user,prozorro.region.user,prozorro.region,rteam_prozorro.group_prozorro_user,r,
+access_prozorro_region_manager,prozorro.region.manager,prozorro.region,rteam_prozorro.group_prozorro_manager,crud,
+access_prozorro_subscription_test_user,prozorro.subscription.test.user,prozorro.subscription.test,rteam_prozorro.group_prozorro_user,crud,
+prozorro_subscription_user_rule,Prozorro Subscription: own + global,prozorro.subscription,rteam_prozorro.group_prozorro_user,crud,"['|', ('user_id', '=', user.id), ('user_id', '=', False)]"
+prozorro_subscription_manager_rule,Prozorro Subscription: manager all,prozorro.subscription,rteam_prozorro.group_prozorro_manager,crud,
+access_prozorro_subscription_keyword_user,prozorro.subscription.keyword.user,prozorro.subscription.keyword,rteam_prozorro.group_prozorro_user,crud,
+access_prozorro_tender_user,prozorro.tender.user,prozorro.tender,rteam_prozorro.group_prozorro_user,r,
+access_prozorro_tender_manager,prozorro.tender.manager,prozorro.tender,rteam_prozorro.group_prozorro_manager,crud,
+prozorro_tender_company_rule,Prozorro Tender: multi-company,prozorro.tender,,crud,"['|', ('company_id', 'in', company_ids), ('company_id', '=', False)]"
+access_prozorro_sync_cursor_user,prozorro.sync.cursor.user,prozorro.sync.cursor,rteam_prozorro.group_prozorro_user,r,
+access_prozorro_sync_cursor_manager,prozorro.sync.cursor.manager,prozorro.sync.cursor,rteam_prozorro.group_prozorro_manager,crud,

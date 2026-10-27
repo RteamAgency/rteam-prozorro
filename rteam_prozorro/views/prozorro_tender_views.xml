@@ -20,8 +20,7 @@
                 <filter name="without_lead" string="No lead yet" domain="[('lead_id','=',False)]"/>
                 <separator/>
                 <filter name="ending_soon" string="Tendering ends in 7 days"
-                        domain="[('tender_period_end','&gt;=', context_today().strftime('%Y-%m-%d')),
-                                 ('tender_period_end','&lt;=', (context_today() + relativedelta(days=7)).strftime('%Y-%m-%d'))]"/>
+                        domain="[('tender_period_end', '&gt;=', 'today'), ('tender_period_end', '&lt;=', 'today +7d')]"/>
                 <group>
                     <filter name="group_status" string="Status" context="{'group_by':'status'}"/>
                     <filter name="group_subscription" string="Subscription" context="{'group_by':'matched_subscription_ids'}"/>
@@ -121,7 +120,7 @@
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
-                        <button class="oe_stat_button" type="object" name="action_open_in_prozorro" icon="fa-external-link">
+                        <button class="oe_stat_button" type="object" name="action_open_in_prozorro" icon="open_in_new">
                             <span class="o_stat_text">Prozorro</span>
                         </button>
                     </div>

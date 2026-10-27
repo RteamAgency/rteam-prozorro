@@ -12,7 +12,7 @@
                                  help="Standard CRM 'Leads' toggle (same setting as Settings -> CRM -> Leads). When ON, the 'Auto-create lead' option on subscriptions actively creates Leads in the CRM Leads pool. When OFF, the Leads pool is hidden AND Prozorro will not create leads at all - subscriptions with 'Auto-create lead' checked will silently skip lead creation (warning logged). Tenders themselves are still synced and visible under Tenders.">
                             <field name="group_use_lead"/>
                             <div class="alert alert-warning mt8" role="alert" invisible="group_use_lead">
-                                <i class="fa fa-exclamation-triangle"/>
+                                <i class="oi" data-icon="warning"/>
                                 <strong> Leads are disabled.</strong>
                                 With this off, Prozorro syncs tenders normally
                                 but <strong>will not create CRM leads</strong>,
@@ -42,7 +42,7 @@
                         <setting string="Sync status" help="Live status of the Prozorro feed sync.">
                             <div>
                                 <div class="alert alert-info mb8" role="status" invisible="not prozorro_is_running">
-                                    <i class="fa fa-spinner fa-spin"/> <strong>Sync running now</strong>
+                                    <i class="oi oi-spin" data-icon="progress_activity"/> <strong>Sync running now</strong>
                                     <span invisible="not prozorro_last_started_at">
                                         - started <field name="prozorro_last_started_at" class="oe_inline" widget="datetime"/>
                                     </span>
@@ -86,7 +86,7 @@
                                  help="Watermark for the feed cursor. The first sync (or any sync after Reset cursor) starts from midnight Kyiv time on this date and walks forward as new tenders are published. Required: leaving it empty refuses to start the sync to prevent an accidental backfill of the entire Prozorro history. A reasonable default is 7-30 days back from go-live.">
                             <field name="prozorro_start_date" required="1"/>
                             <div class="alert alert-warning mt8" role="alert" invisible="prozorro_start_date">
-                                <i class="fa fa-exclamation-triangle"/>
+                                <i class="oi" data-icon="warning"/>
                                 <strong> Sync from date is not set.</strong>
                                 The next sync run will skip with an error until
                                 you pick a date. Tenders published before this

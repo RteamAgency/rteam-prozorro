@@ -36,7 +36,6 @@ Targeted at Odoo 19 (Community and Enterprise).
     "external_dependencies": {"python": []},
     "data": [
         "security/prozorro_security.xml",
-        "security/ir.model.access.csv",
         "data/prozorro_classification_data.xml",
         "data/prozorro_procurement_method_data.xml",
         "data/prozorro_tender_status_data.xml",
@@ -54,6 +53,7 @@ Targeted at Odoo 19 (Community and Enterprise).
         "views/crm_lead_views.xml",
         "views/res_config_settings_views.xml",
         "views/menus.xml",
+        'security/ir.access.csv',
     ],
     "images": ["static/description/banner.png"],
     "installable": True,

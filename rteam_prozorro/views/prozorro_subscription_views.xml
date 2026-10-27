@@ -58,7 +58,7 @@
                 <sheet>
                     <div class="oe_button_box" name="button_box">
                         <button class="oe_stat_button" type="object"
-                                name="action_view_matched_tenders" icon="fa-flag">
+                                name="action_view_matched_tenders" icon="flag" icon_class="oi-filled">
                             <field string="Matches" name="matched_count" widget="statinfo"/>
                         </button>
                     </div>
@@ -84,7 +84,7 @@
                     </group>
                     <div class="alert alert-warning" role="alert"
                          invisible="not create_lead or crm_use_leads_enabled">
-                        <i class="fa fa-exclamation-triangle"/>
+                        <i class="oi" data-icon="warning"/>
                         <strong> Auto-create lead is disabled by CRM settings.</strong>
                         CRM Leads are turned off globally, so this subscription
                         will <strong>not</strong> create leads even though
@@ -95,7 +95,7 @@
                     <field name="sync_is_running" invisible="1"/>
                     <div class="alert alert-info" role="status"
                          invisible="not sync_is_running">
-                        <i class="fa fa-spinner fa-spin"/>
+                        <i class="oi oi-spin" data-icon="progress_activity"/>
                         <strong> Sync in progress...</strong>
                         Pull from Prozorro takes 1-30 minutes depending on the
                         feed depth. Reload the page to see new matches as they
@@ -110,14 +110,14 @@
                     </div>
                     <div class="alert alert-danger" role="alert"
                          invisible="sync_is_running or not sync_last_error">
-                        <i class="fa fa-times-circle"/>
+                        <i class="oi oi-filled" data-icon="cancel"/>
                         <strong> Last sync failed.</strong>
                         Reload the page to clear this once the next run
                         succeeds. See chatter below for the full traceback.
                     </div>
                     <div class="alert alert-success" role="status"
                          invisible="sync_is_running or sync_last_error or not sync_last_finished_at">
-                        <i class="fa fa-check-circle"/>
+                        <i class="oi oi-filled" data-icon="check_circle"/>
                         <strong> Last sync OK.</strong>
                         Pulled / matched counts and the finish timestamp are
                         on the Stats tab. Click <em>Sync now</em> to refresh.
@@ -126,7 +126,7 @@
                         <page string="Filters">
                             <div class="alert alert-warning" role="alert"
                                  invisible="classification_ids or keyword_ids">
-                                <i class="fa fa-exclamation-triangle"/>
+                                <i class="oi" data-icon="warning"/>
                                 <strong> Broad filter.</strong>
                                 This subscription has no CPV codes and no keywords, so it matches every tender that meets the value range / region / status / procurement-method conditions. On the open Prozorro feed that is typically thousands of tenders. Add at least one CPV (DK 021:2015 chapter, e.g. "33" for medical) or a keyword to narrow it down.
                             </div>
