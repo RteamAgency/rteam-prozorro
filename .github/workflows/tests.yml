@@ -1,0 +1,113 @@
+# Odoo tests: installs the module on a fresh database (no demo data) and
+# runs its tests; the Odoo series comes from the manifest version. From
+# RteamAgency/odoo-skills templates/odoo-tests.yml, the same rule as its
+# scripts/stand.sh.
+name: tests
+
+on:
+  push:
+    branches: [main, "19.0", "20.0"]
+  pull_request:
+    branches: [main, "19.0", "20.0"]
+
+env:
+  MODULE: rteam_prozorro
+  DEPENDS: ""
+
+jobs:
+  odoo:
+    name: Odoo tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: odoo
+          POSTGRES_PASSWORD: odoo
+          POSTGRES_DB: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          path: addons
+
+      - name: Read the Odoo series from the manifest
+        run: |
+          series=$(python3 -c "import ast; print(ast.literal_eval(open('addons/$MODULE/__manifest__.py').read())['version'][:4])")
+          echo "SERIES=$series" >> "$GITHUB_ENV"
+          echo "Odoo $series"
+
+      - name: Checkout Odoo
+        uses: actions/checkout@v5
+        with:
+          repository: odoo/odoo
+          ref: ${{ env.SERIES }}
+          path: odoo
+          fetch-depth: 1
+
+      - name: Checkout sibling apps
+        if: env.DEPENDS != ''
+        run: |
+          for repo in $DEPENDS; do
+            git clone --quiet --depth 1 --branch "$SERIES" "https://github.com/$repo.git" "deps/${repo#*/}"
+          done
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: odoo/requirements.txt
+
+      - name: Install Odoo requirements
+        # Binary psycopg2 (no libpq headers); python-ldap only serves auth_ldap.
+        run: |
+          sed -e 's/^psycopg2==/psycopg2-binary==/' -e '/^python-ldap/d' odoo/requirements.txt > requirements.txt
+          pip install --quiet -r requirements.txt
+
+      - name: Install the module and run its tests
+        run: |
+          path=odoo/addons,addons
+          for dir in deps/*; do
+            [ -d "$dir" ] && path=$path,$dir
+          done
+          rc=0
+          python odoo/odoo-bin --addons-path="$path" \
+            --db_host=localhost --db_port=5432 --db_user=odoo --db_password=odoo \
+            --database=test --init="$MODULE" \
+            --test-enable --test-tags="/$MODULE" \
+            --stop-after-init --log-level=test --workers=0 --max-cron-threads=0 \
+            > odoo.log 2>&1 || rc=$?
+          grep -E 'odoo\.tests\.(result|stats): ' odoo.log || true
+          fail=0
+          if grep -E '^[0-9-]+ [0-9:,]+ [0-9]+ (ERROR|CRITICAL) ' odoo.log; then
+            echo "::error::ERROR or CRITICAL lines in the Odoo log"
+            fail=1
+          fi
+          if ! grep -qE 'of [1-9][0-9]* tests when loading' odoo.log; then
+            echo "::error::no tests ran"
+            fail=1
+          fi
+          state=$(PGPASSWORD=odoo psql -h localhost -U odoo -d test -Atc \
+            "SELECT state FROM ir_module_module WHERE name = '$MODULE'" || true)
+          if [ "$state" != installed ]; then
+            echo "::error::$MODULE is not installed (${state:-absent})"
+            fail=1
+          fi
+          if [ "$rc" != 0 ]; then
+            echo "::error::odoo-bin exited with $rc"
+            fail=1
+          fi
+          exit "$fail"
+
+      - name: Keep the Odoo log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: odoo-log-${{ env.SERIES }}
+          path: odoo.log
+          retention-days: 7
