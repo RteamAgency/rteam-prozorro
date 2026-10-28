@@ -2,6 +2,20 @@
 
 All notable changes to `rteam_prozorro` are documented here.
 
+## [19.0.1.0.3] - 2026-10-28
+
+### Fixed
+- A sync started by the cron (the schedule, and `Sync now`, which queues a
+  cron trigger) stopped at its first chatter line with an `AssertionError`.
+  A cron job runs without a language in its context, so `_()` looked for a
+  database cursor in the caller's locals and took the local `cursor`, a
+  `prozorro.sync.cursor` record. The local is now `sync_cursor` in the four
+  methods that call `_()`.
+- Tests: they had never run on 19.0. `groups_id` is `group_ids` on 19.0;
+  the sync's own cursors now wrap the test cursor (registry test mode), so
+  they see the test's records and roll back with it. 23/23 on Odoo 19.0
+  community.
+
 ## [19.0.1.0.2] - 2026-05-10
 
 ### Fixed

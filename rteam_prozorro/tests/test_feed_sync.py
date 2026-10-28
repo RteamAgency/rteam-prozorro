@@ -65,7 +65,7 @@ class TestFeedSync(TransactionCase):
         employee_group = env.ref("base.group_user", raise_if_not_found=False)
         if leads_group and employee_group:
             employee_group.sudo().write({"implied_ids": [(4, leads_group.id)]})
-            env.user.sudo().write({"groups_id": [(4, leads_group.id)]})
+            env.user.sudo().write({"group_ids": [(4, leads_group.id)]})
 
     @classmethod
     def _disable_crm_leads(cls, env):
@@ -73,7 +73,20 @@ class TestFeedSync(TransactionCase):
         employee_group = env.ref("base.group_user", raise_if_not_found=False)
         if leads_group and employee_group:
             employee_group.sudo().write({"implied_ids": [(3, leads_group.id)]})
-            env.user.sudo().write({"groups_id": [(3, leads_group.id)]})
+            env.user.sudo().write({"group_ids": [(3, leads_group.id)]})
+
+    def setUp(self):
+        super().setUp()
+        # The sync writes progress and chatter through cursors of its own.
+        # In test mode they wrap this test's cursor: they see its records
+        # and roll back with it instead of committing to the database.
+        self.registry_enter_test_mode()
+
+    def _sync_cursor(self):
+        # The sync writes the cursor through a cursor of its own: drop what
+        # this environment cached before reading it.
+        self.env.invalidate_all()
+        return self.Cursor._get_singleton("main")
 
     def test_no_active_subscriptions_skips(self):
         # ensure no subscription is active
@@ -196,7 +209,7 @@ class TestFeedSync(TransactionCase):
         ):
             self.Tender._cron_sync_feed()
 
-        cursor = self.Cursor._get_singleton("main")
+        cursor = self._sync_cursor()
         self.assertEqual(cursor.offset, "OFFSET-NEXT")
         self.assertGreaterEqual(cursor.last_pulled, 1)
 
@@ -224,7 +237,7 @@ class TestFeedSync(TransactionCase):
             result = self.Tender._cron_sync_feed()
 
         self.assertTrue(result.get("skipped"))
-        cursor = self.Cursor._get_singleton("main")
+        cursor = self._sync_cursor()
         self.assertFalse(cursor.is_running)
         self.assertIn("Sync from date", cursor.last_error or "")
         # Restore for any tests that may run later in the same module.
@@ -271,7 +284,7 @@ class TestFeedSync(TransactionCase):
         ):
             self.Tender._cron_sync_feed()
 
-        cursor = self.Cursor._get_singleton("main")
+        cursor = self._sync_cursor()
         self.assertEqual(cursor.offset, "W1", "Watermark must advance after first run")
         self.assertTrue(self.Tender.search([("uuid", "=", "wm-t1")]))
 
@@ -283,7 +296,7 @@ class TestFeedSync(TransactionCase):
         with fake_urlopen({base_url + "?": feed_run2}):
             self.Tender._cron_sync_feed()
 
-        cursor = self.Cursor._get_singleton("main")
+        cursor = self._sync_cursor()
         self.assertEqual(
             cursor.offset, "W1", "Watermark must NOT change when API returns no new data"
         )
@@ -305,7 +318,7 @@ class TestFeedSync(TransactionCase):
         ):
             self.Tender._cron_sync_feed()
 
-        cursor = self.Cursor._get_singleton("main")
+        cursor = self._sync_cursor()
         self.assertEqual(cursor.offset, "W2", "Watermark must advance once a new tender appears")
         self.assertTrue(
             self.Tender.search([("uuid", "=", "wm-t2")]),
