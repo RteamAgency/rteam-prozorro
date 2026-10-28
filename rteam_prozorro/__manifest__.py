@@ -1,6 +1,6 @@
 {
     "name": "Prozorro Connector",
-    "version": "19.0.1.0.3",
+    "version": "20.0.1.0.3",
     "category": "Sales/CRM",
     "summary": "Monitor Ukrainian Prozorro tenders, match them to your CRM",
     "description": """
@@ -27,7 +27,7 @@ Features
 * Test wizard: paste a tender UUID, get a per-filter verdict
 * 8 languages: English, Russian, Ukrainian, German, Spanish, Romanian, Polish, Arabic
 
-Targeted at Odoo 19 (Community and Enterprise).
+Targeted at Odoo 20 (Community and Enterprise).
 """,
     "author": "Rteam",
     "website": "https://rteam.agency",
@@ -53,7 +53,7 @@ Targeted at Odoo 19 (Community and Enterprise).
         "views/crm_lead_views.xml",
         "views/res_config_settings_views.xml",
         "views/menus.xml",
-        'security/ir.access.csv',
+        "security/ir.access.csv",
     ],
     "images": ["static/description/banner.png"],
     "installable": True,

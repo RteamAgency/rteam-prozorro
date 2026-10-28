@@ -115,15 +115,11 @@ class ProzorroTender(models.Model):
     def _get_int_param(self, key, default):
         """Read an int ir.config_parameter, falling back to default on
         missing or non-numeric values."""
-        raw = self.env["ir.config_parameter"].sudo().get_param(key, default)
-        try:
-            return int(raw)
-        except (TypeError, ValueError):
-            return default
+        return self.env["ir.config_parameter"].sudo().get_int(key, default)
 
     @api.model
     def _get_api_base_url(self):
-        return self.env["ir.config_parameter"].sudo().get_param("prozorro.api_url", DEFAULT_API_URL)
+        return self.env["ir.config_parameter"].sudo().get_str("prozorro.api_url", DEFAULT_API_URL)
 
     @api.model
     def _get_pages_per_run(self):
@@ -148,7 +144,7 @@ class ProzorroTender(models.Model):
         and we never miss tenders, only potentially re-pull ones from a
         one-hour overlap on first run.
         """
-        start_date = self.env["ir.config_parameter"].sudo().get_param("prozorro.start_date")
+        start_date = self.env["ir.config_parameter"].sudo().get_str("prozorro.start_date")
         if not start_date:
             return ""
         # Accept both legacy "YYYY-MM-DD" (when the setting was a Date field
@@ -550,13 +546,9 @@ class ProzorroTender(models.Model):
         from odoo import sql_db
 
         Param = self.env["ir.config_parameter"].sudo()
-        enabled = Param.get_param("prozorro.auto_sync_enabled", "False") == "True"
-        if not enabled:
+        if not Param.get_bool("prozorro.auto_sync_enabled"):
             return
-        try:
-            hours = max(1, int(Param.get_param("prozorro.sync_interval_hours", "6") or "6"))
-        except ValueError:
-            hours = 6
+        hours = max(1, Param.get_int("prozorro.sync_interval_hours", 6))
         dbname = self.env.cr.dbname
         try:
             with sql_db.db_connect(dbname).cursor() as new_cr:

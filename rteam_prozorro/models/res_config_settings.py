@@ -106,11 +106,8 @@ class ResConfigSettings(models.TransientModel):
     @api.depends_context("uid")
     def _compute_prozorro_cron(self):
         Param = self.env["ir.config_parameter"].sudo()
-        enabled = Param.get_param("prozorro.auto_sync_enabled", "False") == "True"
-        try:
-            hours = int(Param.get_param("prozorro.sync_interval_hours", "6") or "6")
-        except ValueError:
-            hours = 6
+        enabled = Param.get_bool("prozorro.auto_sync_enabled")
+        hours = Param.get_int("prozorro.sync_interval_hours", 6)
         for rec in self:
             rec.prozorro_auto_sync_active = enabled
             rec.prozorro_sync_interval_hours = hours
@@ -118,10 +115,10 @@ class ResConfigSettings(models.TransientModel):
     def _inverse_prozorro_auto_sync_active(self):
         cron = self.env.ref("rteam_prozorro.ir_cron_prozorro_sync_feed", raise_if_not_found=False)
         Param = self.env["ir.config_parameter"].sudo()
-        prev_enabled = Param.get_param("prozorro.auto_sync_enabled", "False") == "True"
+        prev_enabled = Param.get_bool("prozorro.auto_sync_enabled")
         for rec in self:
             enabled = bool(rec.prozorro_auto_sync_active)
-            Param.set_param("prozorro.auto_sync_enabled", "True" if enabled else "False")
+            Param.set_bool("prozorro.auto_sync_enabled", enabled)
             if not cron:
                 continue
             if enabled and not prev_enabled:
@@ -141,10 +138,10 @@ class ResConfigSettings(models.TransientModel):
     def _inverse_prozorro_sync_interval_hours(self):
         cron = self.env.ref("rteam_prozorro.ir_cron_prozorro_sync_feed", raise_if_not_found=False)
         Param = self.env["ir.config_parameter"].sudo()
-        enabled = Param.get_param("prozorro.auto_sync_enabled", "False") == "True"
+        enabled = Param.get_bool("prozorro.auto_sync_enabled")
         for rec in self:
             hours = max(1, int(rec.prozorro_sync_interval_hours or 1))
-            Param.set_param("prozorro.sync_interval_hours", str(hours))
+            Param.set_int("prozorro.sync_interval_hours", hours)
             if cron and enabled:
                 # Replace any pending future trigger with one at the
                 # new interval, so the change takes effect immediately

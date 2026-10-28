@@ -41,7 +41,7 @@ Sync schedule      Off (cron is shipped inactive so you can sync manually first)
 Technical details
 -----------------
 
-* **Targets**: Odoo 19 Community and Enterprise
+* **Targets**: Odoo 20 Community and Enterprise
 * **Dependencies**: ``base``, ``mail``, ``crm`` only
 * **HTTP client**: Python stdlib ``urllib.request`` (no ``requests`` dependency)
 * **Security**: operational menus require ``base.group_user``; settings and force-stop require ``base.group_system``. No public HTTP endpoints

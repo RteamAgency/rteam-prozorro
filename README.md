@@ -2,7 +2,7 @@
 
 Free Odoo module that watches the Ukrainian Prozorro public-procurement feed, matches new tenders against your CPV / keyword / region rules, and auto-creates CRM opportunities.
 
-- **Target**: Odoo 17 / 18 / 19 (Community + Enterprise)
+- **Target**: Odoo 17 / 18 / 19 / 20 (Community + Enterprise)
 - **License**: LGPL-3 (free on apps.odoo.com)
 - **Module technical name**: `rteam_prozorro`
 - **Author**: [Rteam](https://rteam.agency)

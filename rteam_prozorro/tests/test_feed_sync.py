@@ -57,7 +57,7 @@ class TestFeedSync(TransactionCase):
         # backfill). Tests below reset the cursor between runs, so seed
         # a default here for all tests except the dedicated
         # "missing start_date is rejected" test.
-        cls.env["ir.config_parameter"].sudo().set_param("prozorro.start_date", "2026-04-01")
+        cls.env["ir.config_parameter"].sudo().set_str("prozorro.start_date", "2026-04-01")
 
     @classmethod
     def _enable_crm_leads(cls, env):
@@ -80,7 +80,7 @@ class TestFeedSync(TransactionCase):
         # The sync writes progress and chatter through cursors of its own.
         # In test mode they wrap this test's cursor: they see its records
         # and roll back with it instead of committing to the database.
-        self.registry_enter_test_mode()
+        self.enterContext(self.registry_test_mode())
 
     def _sync_cursor(self):
         # The sync writes the cursor through a cursor of its own: drop what
@@ -229,7 +229,7 @@ class TestFeedSync(TransactionCase):
         # Cursor is virgin in this test (TransactionCase rolls back so
         # the class-level seed of start_date persists across tests; we
         # explicitly clear both here).
-        self.env["ir.config_parameter"].sudo().set_param("prozorro.start_date", "")
+        self.env["ir.config_parameter"].sudo().set_str("prozorro.start_date", "")
         self.Cursor._get_singleton("main").sudo().write({"offset": False})
 
         # No HTTP call should be issued. Empty mock asserts that.
@@ -241,7 +241,7 @@ class TestFeedSync(TransactionCase):
         self.assertFalse(cursor.is_running)
         self.assertIn("Sync from date", cursor.last_error or "")
         # Restore for any tests that may run later in the same module.
-        self.env["ir.config_parameter"].sudo().set_param("prozorro.start_date", "2026-04-01")
+        self.env["ir.config_parameter"].sudo().set_str("prozorro.start_date", "2026-04-01")
 
     def test_sync_picks_up_new_tenders_after_exhaust(self):
         """Three sync runs, ascending watermark semantics:
